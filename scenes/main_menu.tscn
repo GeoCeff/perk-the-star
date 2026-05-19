@@ -1,0 +1,79 @@
+[gd_scene format=3 uid="uid://cdqloioshs0p2"]
+
+[ext_resource type="Script" uid="uid://cbos8pff64cu3" path="res://scripts/ui/main_menu.gd" id="1_l6cm7"]
+[ext_resource type="Texture2D" uid="uid://0q1dn5j8yos4" path="res://assets/sprites/backgrounds/main_menu_bg.png" id="2_ekxnf"]
+
+[node name="MainMenu" type="Node2D" unique_id=1745890239]
+
+[node name="main_menu" type="Control" parent="." unique_id=1785734080]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_l6cm7")
+
+[node name="background" type="TextureRect" parent="main_menu" unique_id=1611998608]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1031.0
+offset_top = -972.0
+offset_right = 969.0
+offset_bottom = 1028.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_ekxnf")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="menu_box" type="VBoxContainer" parent="main_menu" unique_id=2091086566]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -25.0
+offset_right = 20.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="title_label" type="Label" parent="main_menu/menu_box" unique_id=715245709]
+layout_mode = 2
+
+[node name="sub_label" type="Label" parent="main_menu/menu_box" unique_id=2090243063]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="main_menu/menu_box" unique_id=175348243]
+custom_minimum_size = Vector2(200, 8)
+layout_mode = 2
+
+[node name="btn_play" type="Button" parent="main_menu/menu_box" unique_id=470282513]
+layout_mode = 2
+
+[node name="btn_codex" type="Button" parent="main_menu/menu_box" unique_id=915298908]
+layout_mode = 2
+
+[node name="btn_settings" type="Button" parent="main_menu/menu_box" unique_id=2021492708]
+layout_mode = 2
+
+[node name="btn_exit" type="Button" parent="main_menu/menu_box" unique_id=1448773002]
+layout_mode = 2
+
+[node name="version_label" type="Label" parent="main_menu" unique_id=228617138]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0

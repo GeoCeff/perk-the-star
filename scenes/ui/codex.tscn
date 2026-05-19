@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://diu2fn8hhbhh1"]
+
+[ext_resource type="Script" uid="uid://dtjoc0x8y5c28" path="res://scenes/ui/codex.gd" id="1_63g6e"]
+
+[node name="Codex" type="Control" unique_id=525885548]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_63g6e")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=979280343]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=1049834356]
+layout_mode = 2
+
+[node name="title_label" type="Label" parent="PanelContainer/VBoxContainer" unique_id=67157362]
+layout_mode = 2
+
+[node name="close_button" type="Button" parent="PanelContainer/VBoxContainer" unique_id=928311131]
+layout_mode = 2

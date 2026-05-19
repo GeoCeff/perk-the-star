@@ -1,0 +1,14 @@
+config_version=5
+
+[application]
+
+config/name="Old"
+config/features=PackedStringArray("4.6", "Forward Plus")
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
+
+[rendering]
+
+rendering_device/driver.windows="d3d12"

@@ -1,0 +1,6 @@
+[configuration]
+entry_symbol = "perk_the_star_init"
+compatibility_minimum = "4.2"
+
+[libraries]
+windows.debug.x86_64 = "res://bin/perk_the_star.dll"
