@@ -1,0 +1,7 @@
+{
+    "wave": 1, "name": "First Contact",
+    "spawn_interval": 3.0,
+    "enemies": [{ "variant": "drifter", "count": 5 }],
+    "event": null, "reward_base": 20,
+    "tutorial_hint": "Click ring slots to place towers. Towers orbit and fire automatically."
+}

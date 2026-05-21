@@ -1,0 +1,7 @@
+{
+    "wave": 2, "name": "The Vanguard",
+    "spawn_interval": 2.5,
+    "enemies": [{ "variant": "drifter", "count": 8 }],
+    "event": null, "reward_base": 25,
+    "tutorial_hint": "Earn Sol Credits by defeating enemies. Spend them between waves."
+}

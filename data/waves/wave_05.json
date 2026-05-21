@@ -1,0 +1,10 @@
+{
+    "wave": 5, "name": "Invisible Hand",
+    "spawn_interval": 2.0,
+    "enemies": [
+        { "variant": "drifter", "count": 10 },
+        { "variant": "mimic", "count": 4 }
+    ],
+    "event": null, "reward_base": 50,
+    "tutorial_hint": "Photon Mimics are invisible to Photon Splitters. Bio-Lab and Cryo Probe detect them."
+}

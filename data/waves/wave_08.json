@@ -1,0 +1,11 @@
+{
+    "wave": 8, "name": "The Harvest",
+    "spawn_interval": 1.7,
+    "enemies": [
+        { "variant": "drifter", "count": 12 },
+        { "variant": "bloom", "count": 6 },
+        { "variant": "farmer", "count": 5 }
+    ],
+    "event": null, "reward_base": 80,
+    "tutorial_hint": "Solar Farmers GAIN HP and speed when hit by energy towers! Cryo-debuff them first."
+}

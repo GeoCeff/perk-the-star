@@ -1,0 +1,14 @@
+{
+    "wave": 12, "name": "Astrophage Prime",
+    "spawn_interval": 1.2,
+    "enemies": [
+        { "variant": "drifter", "count": 20 },
+        { "variant": "bloom", "count": 6 },
+        { "variant": "burrower", "count": 3 },
+        { "variant": "mimic", "count": 4 },
+        { "variant": "farmer", "count": 4 },
+        { "variant": "prime", "count": 1 }
+    ],
+    "event": null, "reward_base": 200,
+    "tutorial_hint": "Astrophage Prime: Shell phase immune (Bio-Lab breaks it). Active phase vulnerable. Frenzy spawns Drifters nonstop!"
+}

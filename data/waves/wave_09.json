@@ -1,0 +1,13 @@
+{
+    "wave": 9, "name": "Feeding Frenzy",
+    "spawn_interval": 1.5,
+    "enemies": [
+        { "variant": "drifter", "count": 15 },
+        { "variant": "bloom", "count": 6 },
+        { "variant": "burrower", "count": 3 },
+        { "variant": "mimic", "count": 3 },
+        { "variant": "farmer", "count": 4 }
+    ],
+    "event": null, "reward_base": 95,
+    "tutorial_hint": "All enemy types! Prime window for Magnetic Net + Helios Cannon combo."
+}

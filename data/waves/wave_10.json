@@ -1,0 +1,19 @@
+{
+    "wave": 10, "name": "Research Surge",
+    "spawn_interval": 1.5,
+    "enemies": [
+        { "variant": "drifter", "count": 14 },
+        { "variant": "bloom", "count": 8 },
+        { "variant": "burrower", "count": 4 },
+        { "variant": "mimic", "count": 4 },
+        { "variant": "farmer", "count": 5 }
+    ],
+    "event": {
+        "type": "bio_lab_boost",
+        "multiplier": 4,
+        "duration": 999,
+        "trigger_at_percent": 0.0
+    },
+    "reward_base": 110,
+    "tutorial_hint": "All Bio-Lab Stations run at 4× speed this wave!"
+}
