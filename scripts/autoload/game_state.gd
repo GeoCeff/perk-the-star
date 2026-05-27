@@ -11,6 +11,8 @@ var performance_score: int = 0
 var enemies_killed_total: int = 0
 var waves_cleared: int = 0
 var burrowers_active: int = 0        # track active burrowers for UI
+var music_enabled: bool = true
+var music_volume: float = 0.72
 
 # ─────────────────────────────────────────
 #  GAME PHASE
@@ -30,12 +32,14 @@ signal game_over_triggered(final_luminosity: float, killing_wave: int)
 signal victory_triggered(final_luminosity: float, rank: String)
 signal burrower_count_changed(count: int)
 signal phase_changed(new_phase: Phase)
+signal music_settings_changed(enabled: bool, volume: float)
 
 # ─────────────────────────────────────────
 #  INITIALIZATION
 # ─────────────────────────────────────────
 func _ready():
 	reset_state()
+	load_audio_settings()
 
 func reset_state():
 	luminosity = 1.0
@@ -48,6 +52,36 @@ func reset_state():
 	waves_cleared = 0
 	burrowers_active = 0
 	game_phase = Phase.MENU
+
+func load_audio_settings():
+	var config := ConfigFile.new()
+	var error := config.load("user://settings.cfg")
+	if error != OK:
+		return
+	music_enabled = bool(config.get_value("audio", "music_enabled", music_enabled))
+	music_volume = clamp(float(config.get_value("audio", "music_volume", music_volume)), 0.0, 1.0)
+	emit_signal("music_settings_changed", music_enabled, music_volume)
+
+func save_audio_settings():
+	var config := ConfigFile.new()
+	config.set_value("audio", "music_enabled", music_enabled)
+	config.set_value("audio", "music_volume", music_volume)
+	config.save("user://settings.cfg")
+
+func set_music_enabled(enabled: bool):
+	music_enabled = enabled
+	save_audio_settings()
+	emit_signal("music_settings_changed", music_enabled, music_volume)
+
+func set_music_volume(volume: float):
+	music_volume = clamp(volume, 0.0, 1.0)
+	save_audio_settings()
+	emit_signal("music_settings_changed", music_enabled, music_volume)
+
+func get_music_volume_db() -> float:
+	if not music_enabled or music_volume <= 0.0:
+		return -80.0
+	return linear_to_db(music_volume)
 
 # ─────────────────────────────────────────
 #  LUMINOSITY SYSTEM

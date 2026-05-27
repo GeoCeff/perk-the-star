@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cbos8pff64cu3" path="res://scripts/ui/main_menu.gd" id="1_l6cm7"]
 [ext_resource type="Texture2D" uid="uid://0q1dn5j8yos4" path="res://assets/sprites/backgrounds/main_menu_bg.png" id="2_ekxnf"]
+[ext_resource type="AudioStream" uid="uid://c7cku2s62tm5x" path="res://assets/audio/bgm/main_menu.ogg" id="3_bgxoy"]
 
 [node name="MainMenu" type="Control" unique_id=1745890239]
 layout_mode = 3
@@ -11,6 +12,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_l6cm7")
+
+[node name="MainMenuMusic" type="AudioStreamPlayer" parent="." unique_id=1204689574]
+stream = ExtResource("3_bgxoy")
+volume_db = -8.0
+autoplay = true
 
 [node name="background" type="TextureRect" parent="." unique_id=1611998608]
 layout_mode = 1
@@ -176,8 +182,62 @@ theme_override_font_sizes/font_size = 16
 text = "Based on godot.md: prerequisites, build settings, scene flow, workflow, and fixes."
 horizontal_alignment = 1
 
+[node name="audio_panel" type="PanelContainer" parent="settings_overlay/settings_panel/settings_margin/settings_box"]
+layout_mode = 2
+
+[node name="audio_margin" type="MarginContainer" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="audio_box" type="VBoxContainer" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="audio_title" type="Label" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin/audio_box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.36, 1)
+theme_override_font_sizes/font_size = 20
+text = "Audio"
+
+[node name="music_toggle" type="CheckButton" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin/audio_box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Music"
+button_pressed = true
+
+[node name="volume_row" type="HBoxContainer" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin/audio_box"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="volume_label" type="Label" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin/audio_box/volume_row"]
+custom_minimum_size = Vector2(92, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "Volume"
+vertical_alignment = 1
+
+[node name="music_volume_slider" type="HSlider" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin/audio_box/volume_row"]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 100.0
+step = 1.0
+value = 72.0
+
+[node name="music_volume_value" type="Label" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin/audio_box/volume_row"]
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "72%"
+vertical_alignment = 1
+
 [node name="settings_scroll" type="ScrollContainer" parent="settings_overlay/settings_panel/settings_margin/settings_box" unique_id=735500719]
-custom_minimum_size = Vector2(860, 480)
+custom_minimum_size = Vector2(860, 340)
 layout_mode = 2
 horizontal_scroll_mode = 0
 

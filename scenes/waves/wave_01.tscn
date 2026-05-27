@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://cas91rp3gqlnl"]
+
+[ext_resource type="Script" path="res://scripts/game/game.gd" id="1_wave_controller"]
+
+[node name="Wave01_FirstContact" type="Node2D"]
+script = ExtResource("1_wave_controller")
+playable_wave_limit = 12
+briefing_title = "SOL DEFENSE"

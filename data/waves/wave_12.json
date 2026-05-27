@@ -9,6 +9,12 @@
         { "variant": "farmer", "count": 4 },
         { "variant": "prime", "count": 1 }
     ],
-    "event": null, "reward_base": 200,
+    "event": {
+        "type": "prime_frenzy",
+        "trigger_at_percent": 0.95,
+        "interval": 1.8,
+        "max_active": 18
+    },
+    "reward_base": 200,
     "tutorial_hint": "Astrophage Prime: Shell phase immune (Bio-Lab breaks it). Active phase vulnerable. Frenzy spawns Drifters nonstop!"
 }
