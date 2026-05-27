@@ -1,10 +1,10 @@
 extends Control
 
-@onready var close_button = $panel/margin/root_box/content_box/nav_box/close_button
-@onready var section_title_label = $panel/margin/root_box/content_box/article_box/section_title_label
-@onready var body_scroll = $panel/margin/root_box/content_box/article_box/body_scroll
-@onready var body_label = $panel/margin/root_box/content_box/article_box/body_scroll/body_label
-@onready var nav_buttons := {
+@onready var close_button: Button = $panel/margin/root_box/content_box/nav_box/close_button
+@onready var section_title_label: Label = $panel/margin/root_box/content_box/article_box/section_title_label
+@onready var body_scroll: ScrollContainer = $panel/margin/root_box/content_box/article_box/body_scroll
+@onready var body_label: Label = $panel/margin/root_box/content_box/article_box/body_scroll/body_label
+@onready var nav_buttons: Dictionary = {
 	"briefing": $panel/margin/root_box/content_box/nav_box/btn_briefing,
 	"systems": $panel/margin/root_box/content_box/nav_box/btn_systems,
 	"towers": $panel/margin/root_box/content_box/nav_box/btn_towers,
@@ -13,9 +13,9 @@ extends Control
 	"endings": $panel/margin/root_box/content_box/nav_box/btn_endings,
 }
 
-var current_section := "briefing"
+var current_section: String = "briefing"
 
-var sections := {
+var sections: Dictionary = {
 	"briefing": {
 		"title": "Mission Briefing",
 		"body": """Perk the Star is a single-player, real-time orbital tower defense game. You command the Sol Defense Corps and protect the Sun from Astrophage: photosynthetic microorganisms feeding on stellar energy.
@@ -127,24 +127,26 @@ Every credit spent should buy time, coverage, or control. A beautiful orbit mean
 }
 
 
-func _ready():
+func _ready() -> void:
 	visible = true
 	close_button.pressed.connect(queue_free)
 	for key in nav_buttons.keys():
-		nav_buttons[key].toggle_mode = true
-		nav_buttons[key].pressed.connect(_show_section.bind(key))
-		nav_buttons[key].add_theme_font_size_override("font_size", 16)
+		var section_key: String = str(key)
+		var button: Button = nav_buttons[section_key]
+		button.toggle_mode = true
+		button.pressed.connect(_show_section.bind(section_key))
+		button.add_theme_font_size_override("font_size", 16)
 	_show_section("briefing")
 
 
-func show_standalone_mode():
+func show_standalone_mode() -> void:
 	visible = true
 	_show_section("briefing")
 
 
 func _show_section(section_key: String) -> void:
 	current_section = section_key
-	var section = sections.get(section_key, sections["briefing"])
+	var section: Dictionary = sections.get(section_key, sections["briefing"])
 	section_title_label.text = section["title"]
 	body_label.text = section["body"]
 	body_scroll.scroll_vertical = 0
@@ -153,5 +155,6 @@ func _show_section(section_key: String) -> void:
 
 func _update_nav_state() -> void:
 	for key in nav_buttons.keys():
-		var button: Button = nav_buttons[key]
-		button.button_pressed = key == current_section
+		var section_key: String = str(key)
+		var button: Button = nav_buttons[section_key]
+		button.button_pressed = section_key == current_section
