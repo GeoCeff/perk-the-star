@@ -2,6 +2,7 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
+#include <algorithm>
 #include <cmath>
 
 using namespace godot;
@@ -26,6 +27,8 @@ void Astrophage::_bind_methods() {
     ADD_SIGNAL(MethodInfo("reached_corona"));
     ADD_SIGNAL(MethodInfo("bloom_split",
         PropertyInfo(Variant::VECTOR2, "position")));
+    ADD_SIGNAL(MethodInfo("cluster_damage_request",
+        PropertyInfo(Variant::FLOAT, "damage")));
 
     BIND_ENUM_CONSTANT(DRIFTER);
     BIND_ENUM_CONSTANT(BLOOM);
@@ -143,4 +146,8 @@ void Astrophage::_share_cluster_damage(double damage) {
 
 void Astrophage::apply_slow(double slow_factor) {
     m_speed_modifier = 1.0 - slow_factor;
+}
+
+void Astrophage::set_clustered(bool value) {
+    m_is_clustered = value;
 }

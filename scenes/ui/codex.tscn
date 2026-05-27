@@ -11,16 +11,129 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_63g6e")
 
-[node name="PanelContainer" type="PanelContainer" parent="." unique_id=979280343]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="overlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.005, 0.008, 0.016, 0.88)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=1049834356]
-layout_mode = 2
+[node name="panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -560.0
+offset_top = -350.0
+offset_right = 560.0
+offset_bottom = 350.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="title_label" type="Label" parent="PanelContainer/VBoxContainer" unique_id=67157362]
+[node name="margin" type="MarginContainer" parent="panel"]
 layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
 
-[node name="close_button" type="Button" parent="PanelContainer/VBoxContainer" unique_id=928311131]
+[node name="root_box" type="VBoxContainer" parent="panel/margin"]
 layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="header_box" type="VBoxContainer" parent="panel/margin/root_box"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="title_label" type="Label" parent="panel/margin/root_box/header_box" unique_id=67157362]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.36, 1)
+theme_override_font_sizes/font_size = 34
+text = "MISSION CODEX"
+horizontal_alignment = 1
+
+[node name="subtitle_label" type="Label" parent="panel/margin/root_box/header_box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.84, 0.92, 1)
+theme_override_font_sizes/font_size = 16
+text = "Sol Defense Corps field dossier - based on godot.md"
+horizontal_alignment = 1
+
+[node name="content_box" type="HBoxContainer" parent="panel/margin/root_box"]
+custom_minimum_size = Vector2(1060, 510)
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="nav_box" type="VBoxContainer" parent="panel/margin/root_box/content_box"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="btn_briefing" type="Button" parent="panel/margin/root_box/content_box/nav_box"]
+custom_minimum_size = Vector2(250, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Briefing"
+
+[node name="btn_systems" type="Button" parent="panel/margin/root_box/content_box/nav_box"]
+custom_minimum_size = Vector2(250, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Core Systems"
+
+[node name="btn_towers" type="Button" parent="panel/margin/root_box/content_box/nav_box"]
+custom_minimum_size = Vector2(250, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Towers"
+
+[node name="btn_astrophage" type="Button" parent="panel/margin/root_box/content_box/nav_box"]
+custom_minimum_size = Vector2(250, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Astrophage"
+
+[node name="btn_rings" type="Button" parent="panel/margin/root_box/content_box/nav_box"]
+custom_minimum_size = Vector2(250, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Rings + Waves"
+
+[node name="btn_endings" type="Button" parent="panel/margin/root_box/content_box/nav_box"]
+custom_minimum_size = Vector2(250, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Endings"
+
+[node name="close_button" type="Button" parent="panel/margin/root_box/content_box/nav_box" unique_id=928311131]
+custom_minimum_size = Vector2(250, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Close"
+
+[node name="article_box" type="VBoxContainer" parent="panel/margin/root_box/content_box"]
+custom_minimum_size = Vector2(780, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="section_title_label" type="Label" parent="panel/margin/root_box/content_box/article_box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.36, 1)
+theme_override_font_sizes/font_size = 24
+text = "Mission Briefing"
+
+[node name="body_scroll" type="ScrollContainer" parent="panel/margin/root_box/content_box/article_box"]
+custom_minimum_size = Vector2(780, 460)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="body_label" type="Label" parent="panel/margin/root_box/content_box/article_box/body_scroll"]
+custom_minimum_size = Vector2(740, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 17
+text = "Perk the Star is a single-player, real-time orbital tower defense game. You command the Sol Defense Corps and protect the Sun from Astrophage: photosynthetic microorganisms feeding on stellar energy.\n\nObjective\n- Keep luminosity above zero.\n- Clear all 12 JSON-authored waves.\n- Spend Sol Credits on orbiting defense satellites.\n- Use Solar Flare pressure relief every 3 waves.\n\nCommand phrase\nDefend me, defend me! - Oa ka Perk!"
+autowrap_mode = 3

@@ -27,6 +27,7 @@ void OrbitalTower::_bind_methods() {
         PropertyInfo(Variant::FLOAT,  "damage"),
         PropertyInfo(Variant::STRING, "tower_type"),
         PropertyInfo(Variant::INT,    "chain_count")));
+    ADD_SIGNAL(MethodInfo("try_fire"));
 
     ADD_PROPERTY(PropertyInfo(Variant::STRING,  "tower_type"), "set_tower_type", "get_tower_type");
     ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "sun_pos"),    "set_sun_pos",    "get_sun_pos");

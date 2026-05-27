@@ -2,5 +2,9 @@
 .godot/
 /android/
 godot-cpp/
-.godot/
 *.tmp
+*.obj
+*.obj.import
+*.exp
+*.lib
+.sconsign.dblite

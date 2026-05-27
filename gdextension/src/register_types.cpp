@@ -24,9 +24,9 @@ void uninitialize_perk_module(ModuleInitializationLevel p_level) {
 }
 
 extern "C" {
-GDExtensionBool GDE_EXPORT perk_library_init(
+GDExtensionBool GDE_EXPORT perk_the_star_init(
     GDExtensionInterfaceGetProcAddress p_get_proc_address,
-    const GDExtensionClassLibraryPtr   p_library,
+    GDExtensionClassLibraryPtr         p_library,
     GDExtensionInitialization*         r_initialization)
 {
     GDExtensionBinding::InitObject init_obj(
