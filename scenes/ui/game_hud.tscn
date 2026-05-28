@@ -1,0 +1,331 @@
+[gd_scene load_steps=2 format=3 uid="uid://b15jp1xqi4ldg"]
+
+[ext_resource type="Script" uid="uid://ckhbpku0qq2s7" path="res://scripts/ui/game_hud.gd" id="1_hud"]
+
+[node name="GameHudLayer" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="Hud" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopPanel" type="PanelContainer" parent="Hud"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 24.0
+offset_top = 18.0
+offset_right = -24.0
+offset_bottom = 106.0
+grow_horizontal = 2
+
+[node name="TopRow" type="HBoxContainer" parent="Hud/TopPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="WaveBlock" type="VBoxContainer" parent="Hud/TopPanel/TopRow"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="WaveLabel" type="Label" parent="Hud/TopPanel/TopRow/WaveBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "SOL DEFENSE 1/12"
+
+[node name="BriefLabel" type="Label" parent="Hud/TopPanel/TopRow/WaveBlock"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.88, 0.96, 0.92)
+theme_override_font_sizes/font_size = 14
+text = "Place towers between waves. Towers orbit and fire automatically."
+autowrap_mode = 3
+clip_text = true
+
+[node name="StatsGrid" type="GridContainer" parent="Hud/TopPanel/TopRow"]
+custom_minimum_size = Vector2(398, 0)
+layout_mode = 2
+theme_override_constants/h_separation = 10
+columns = 4
+
+[node name="SolStat" type="VBoxContainer" parent="Hud/TopPanel/TopRow/StatsGrid"]
+custom_minimum_size = Vector2(88, 0)
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="SolTitle" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/SolStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.78, 0.9, 0.82)
+theme_override_font_sizes/font_size = 11
+text = "SOL"
+
+[node name="CreditsLabel" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/SolStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.98, 1, 0.98)
+theme_override_font_sizes/font_size = 20
+text = "50"
+
+[node name="ScoreStat" type="VBoxContainer" parent="Hud/TopPanel/TopRow/StatsGrid"]
+custom_minimum_size = Vector2(88, 0)
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="ScoreTitle" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/ScoreStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.78, 0.9, 0.82)
+theme_override_font_sizes/font_size = 11
+text = "SCORE"
+
+[node name="ScoreLabel" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/ScoreStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.98, 1, 0.98)
+theme_override_font_sizes/font_size = 20
+text = "0"
+
+[node name="KillsStat" type="VBoxContainer" parent="Hud/TopPanel/TopRow/StatsGrid"]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="KillsTitle" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/KillsStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.78, 0.9, 0.82)
+theme_override_font_sizes/font_size = 11
+text = "KILLS"
+
+[node name="KillsLabel" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/KillsStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.98, 1, 0.98)
+theme_override_font_sizes/font_size = 20
+text = "0"
+
+[node name="FlareStat" type="VBoxContainer" parent="Hud/TopPanel/TopRow/StatsGrid"]
+custom_minimum_size = Vector2(104, 0)
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="FlareTitle" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/FlareStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.78, 0.9, 0.82)
+theme_override_font_sizes/font_size = 11
+text = "FLARE"
+
+[node name="FlareLabel" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/FlareStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.98, 1, 0.98)
+theme_override_font_sizes/font_size = 20
+text = "Charging"
+
+[node name="LuminosityBox" type="VBoxContainer" parent="Hud/TopPanel/TopRow"]
+custom_minimum_size = Vector2(188, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="LuminosityTitle" type="Label" parent="Hud/TopPanel/TopRow/LuminosityBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.82, 0.94, 0.88)
+theme_override_font_sizes/font_size = 13
+text = "Luminosity"
+
+[node name="LuminosityBar" type="ProgressBar" parent="Hud/TopPanel/TopRow/LuminosityBox"]
+custom_minimum_size = Vector2(176, 20)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+show_percentage = true
+
+[node name="ActionRow" type="HBoxContainer" parent="Hud/TopPanel/TopRow"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="StartButton" type="Button" parent="Hud/TopPanel/TopRow/ActionRow"]
+custom_minimum_size = Vector2(142, 54)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Start Wave 1"
+
+[node name="MenuButton" type="Button" parent="Hud/TopPanel/TopRow/ActionRow"]
+custom_minimum_size = Vector2(74, 54)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Menu"
+
+[node name="WaveIntel" type="PanelContainer" parent="Hud"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -378.0
+offset_top = 124.0
+offset_right = -24.0
+offset_bottom = 336.0
+grow_horizontal = 0
+
+[node name="IntelBox" type="VBoxContainer" parent="Hud/WaveIntel"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="IntelTitle" type="Label" parent="Hud/WaveIntel/IntelBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Wave Intel"
+
+[node name="EnemyRow" type="HBoxContainer" parent="Hud/WaveIntel/IntelBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="EnemyPreview" type="TextureRect" parent="Hud/WaveIntel/IntelBox/EnemyRow"]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+clip_contents = true
+
+[node name="EnemyText" type="VBoxContainer" parent="Hud/WaveIntel/IntelBox/EnemyRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="EnemyLabel" type="Label" parent="Hud/WaveIntel/IntelBox/EnemyRow/EnemyText"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+autowrap_mode = 3
+clip_text = true
+
+[node name="ThreatLabel" type="Label" parent="Hud/WaveIntel/IntelBox/EnemyRow/EnemyText"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.88, 0.96, 0.92)
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 3
+
+[node name="RingLabel" type="Label" parent="Hud/WaveIntel/IntelBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.74, 0.82, 0.92, 0.86)
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 3
+
+[node name="BottomRow" type="HBoxContainer" parent="Hud"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -160.0
+offset_right = -24.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 16
+
+[node name="TowerPanel" type="PanelContainer" parent="Hud/BottomRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TowerRow" type="HBoxContainer" parent="Hud/BottomRow/TowerPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TowerLabel" type="Label" parent="Hud/BottomRow/TowerPanel/TowerRow"]
+custom_minimum_size = Vector2(52, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.83, 0.9, 0.98, 0.94)
+theme_override_font_sizes/font_size = 15
+text = "Build"
+vertical_alignment = 1
+
+[node name="TowerScroll" type="ScrollContainer" parent="Hud/BottomRow/TowerPanel/TowerRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_scroll_mode = 1
+vertical_scroll_mode = 0
+
+[node name="TowerButtons" type="HBoxContainer" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PhotonButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll/TowerButtons"]
+custom_minimum_size = Vector2(128, 62)
+layout_mode = 2
+focus_mode = 0
+toggle_mode = true
+theme_override_constants/h_separation = 4
+theme_override_font_sizes/font_size = 12
+text = "Photon
+25 Sol"
+expand_icon = true
+
+[node name="CryoButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll/TowerButtons"]
+custom_minimum_size = Vector2(128, 62)
+layout_mode = 2
+focus_mode = 0
+toggle_mode = true
+theme_override_constants/h_separation = 4
+theme_override_font_sizes/font_size = 12
+text = "Cryo
+30 Sol"
+expand_icon = true
+
+[node name="BioLabButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll/TowerButtons"]
+custom_minimum_size = Vector2(128, 62)
+layout_mode = 2
+focus_mode = 0
+toggle_mode = true
+theme_override_constants/h_separation = 4
+theme_override_font_sizes/font_size = 12
+text = "Bio-Lab
+50 Sol"
+expand_icon = true
+
+[node name="MagneticNetButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll/TowerButtons"]
+custom_minimum_size = Vector2(128, 62)
+layout_mode = 2
+focus_mode = 0
+toggle_mode = true
+theme_override_constants/h_separation = 4
+theme_override_font_sizes/font_size = 12
+text = "Mag Net
+45 Sol"
+expand_icon = true
+
+[node name="HeliosButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll/TowerButtons"]
+custom_minimum_size = Vector2(128, 62)
+layout_mode = 2
+focus_mode = 0
+toggle_mode = true
+theme_override_constants/h_separation = 4
+theme_override_font_sizes/font_size = 12
+text = "Helios
+80 Sol"
+expand_icon = true
+
+[node name="TardigradeButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll/TowerButtons"]
+custom_minimum_size = Vector2(128, 62)
+layout_mode = 2
+focus_mode = 0
+toggle_mode = true
+theme_override_constants/h_separation = 4
+theme_override_font_sizes/font_size = 12
+text = "Tardi
+70 Sol"
+expand_icon = true
+
+[node name="MessagePanel" type="PanelContainer" parent="Hud/BottomRow"]
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+
+[node name="MessageLabel" type="Label" parent="Hud/BottomRow/MessagePanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.92, 0.86, 0.96)
+theme_override_font_sizes/font_size = 14
+text = "Click a guide slot on an orbital ring, then start Wave 1."
+autowrap_mode = 3
+vertical_alignment = 1

@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://cke8v758n5m7r"]
+
+[ext_resource type="PackedScene" uid="uid://diu2fn8hhbhh1" path="res://scenes/ui/codex.tscn" id="1_codex"]
+
+[node name="MissionCodex" instance=ExtResource("1_codex")]

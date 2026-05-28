@@ -2,7 +2,10 @@
 
 [ext_resource type="Script" uid="uid://cbos8pff64cu3" path="res://scripts/ui/main_menu.gd" id="1_l6cm7"]
 [ext_resource type="Texture2D" uid="uid://0q1dn5j8yos4" path="res://assets/sprites/backgrounds/main_menu_bg.png" id="2_ekxnf"]
-[ext_resource type="AudioStream" uid="uid://c7cku2s62tm5x" path="res://assets/audio/bgm/main_menu.ogg" id="3_bgxoy"]
+[ext_resource type="Script" uid="uid://bhui8jry1oi4u" path="res://scripts/ui/main_menu_play_button.gd" id="4_play"]
+[ext_resource type="Script" uid="uid://ic6wsjqiseb5" path="res://scripts/ui/main_menu_codex_button.gd" id="5_codex"]
+[ext_resource type="Script" uid="uid://dp28jtyop8oji" path="res://scripts/ui/main_menu_settings_button.gd" id="6_settings"]
+[ext_resource type="Script" uid="uid://grb3584gy6mf" path="res://scripts/ui/main_menu_exit_button.gd" id="7_exit"]
 
 [node name="MainMenu" type="Control" unique_id=1745890239]
 layout_mode = 3
@@ -12,11 +15,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_l6cm7")
-
-[node name="MainMenuMusic" type="AudioStreamPlayer" parent="." unique_id=1204689574]
-stream = ExtResource("3_bgxoy")
-volume_db = -8.0
-autoplay = true
 
 [node name="background" type="TextureRect" parent="." unique_id=1611998608]
 layout_mode = 1
@@ -97,24 +95,31 @@ custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Start Defense"
+script = ExtResource("4_play")
+game_scene_path = "res://scenes/game.tscn"
 
 [node name="btn_codex" type="Button" parent="CenterContainer/menu_box/button_box" unique_id=915298908]
 custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Mission Codex"
+script = ExtResource("5_codex")
+codex_scene_path = "res://scenes/ui/mission_codex.tscn"
 
 [node name="btn_settings" type="Button" parent="CenterContainer/menu_box/button_box" unique_id=2021492708]
 custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Settings"
+script = ExtResource("6_settings")
+settings_scene_path = "res://scenes/ui/settings_overlay.tscn"
 
 [node name="btn_exit" type="Button" parent="CenterContainer/menu_box/button_box" unique_id=1448773002]
 custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Exit"
+script = ExtResource("7_exit")
 
 [node name="version_label" type="Label" parent="." unique_id=228617138]
 layout_mode = 1
@@ -132,159 +137,3 @@ theme_override_colors/font_color = Color(0.63, 0.72, 0.84, 1)
 theme_override_font_sizes/font_size = 14
 text = "CMSC 21 - Geo Ceff Gabaisen & Dexter Juevesano | C++ / Godot Engine 4.x / GDExtension"
 horizontal_alignment = 1
-
-[node name="settings_overlay" type="ColorRect" parent="." unique_id=1685061750]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.005, 0.008, 0.016, 0.86)
-
-[node name="settings_panel" type="PanelContainer" parent="settings_overlay" unique_id=627151734]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -470.0
-offset_top = -340.0
-offset_right = 470.0
-offset_bottom = 340.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="settings_margin" type="MarginContainer" parent="settings_overlay/settings_panel" unique_id=2144968576]
-layout_mode = 2
-theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 28
-theme_override_constants/margin_bottom = 24
-
-[node name="settings_box" type="VBoxContainer" parent="settings_overlay/settings_panel/settings_margin" unique_id=1363319443]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="settings_title" type="Label" parent="settings_overlay/settings_panel/settings_margin/settings_box" unique_id=746942531]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.88, 0.36, 1)
-theme_override_font_sizes/font_size = 30
-text = "Settings - Godot/C++ Developer Setup"
-horizontal_alignment = 1
-
-[node name="settings_subtitle" type="Label" parent="settings_overlay/settings_panel/settings_margin/settings_box" unique_id=1312080556]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.84, 0.92, 1)
-theme_override_font_sizes/font_size = 16
-text = "Based on godot.md: prerequisites, build settings, scene flow, workflow, and fixes."
-horizontal_alignment = 1
-
-[node name="audio_panel" type="PanelContainer" parent="settings_overlay/settings_panel/settings_margin/settings_box"]
-layout_mode = 2
-
-[node name="audio_margin" type="MarginContainer" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel"]
-layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 14
-
-[node name="audio_box" type="VBoxContainer" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="audio_title" type="Label" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin/audio_box"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.88, 0.36, 1)
-theme_override_font_sizes/font_size = 20
-text = "Audio"
-
-[node name="music_toggle" type="CheckButton" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin/audio_box"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Music"
-button_pressed = true
-
-[node name="volume_row" type="HBoxContainer" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin/audio_box"]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="volume_label" type="Label" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin/audio_box/volume_row"]
-custom_minimum_size = Vector2(92, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.94, 1, 1)
-theme_override_font_sizes/font_size = 16
-text = "Volume"
-vertical_alignment = 1
-
-[node name="music_volume_slider" type="HSlider" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin/audio_box/volume_row"]
-custom_minimum_size = Vector2(560, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-max_value = 100.0
-step = 1.0
-value = 72.0
-
-[node name="music_volume_value" type="Label" parent="settings_overlay/settings_panel/settings_margin/settings_box/audio_panel/audio_margin/audio_box/volume_row"]
-custom_minimum_size = Vector2(64, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.94, 1, 1)
-theme_override_font_sizes/font_size = 16
-text = "72%"
-vertical_alignment = 1
-
-[node name="settings_scroll" type="ScrollContainer" parent="settings_overlay/settings_panel/settings_margin/settings_box" unique_id=735500719]
-custom_minimum_size = Vector2(860, 340)
-layout_mode = 2
-horizontal_scroll_mode = 0
-
-[node name="settings_body" type="Label" parent="settings_overlay/settings_panel/settings_margin/settings_box/settings_scroll" unique_id=1038907882]
-custom_minimum_size = Vector2(820, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.94, 1, 1)
-theme_override_font_sizes/font_size = 16
-text = "Required Setup
-- Godot Engine 4.x Standard build, recommended Godot 4.3 stable.
-- C++ compiler: MinGW/MSYS2 or MSVC on Windows.
-- Python 3 plus SCons.
-- Git.
-- nlohmann/json at src/vendor/json.hpp.
-- godot-cpp cloned with the branch matching your Godot version.
-
-Build Settings
-- Debug: scons target=template_debug -j4
-- Release: scons target=template_release -j4
-- Windows explicit: scons platform=windows target=template_debug -j4
-- Rebuild every time C++ files change before launching Godot.
-
-Scene Flow
-- LoadingScreen.tscn is the intended boot scene.
-- TitleScreen.tscn is the main title/menu screen.
-- GameWorld.tscn contains Sun, WaveManager, SolarFlare, Towers, Enemies, and HUD.
-- PostMortem.tscn handles Sun Extinguished / Victory.
-
-Recommended Workflow
-1. Edit src/*.cpp and src/*.h.
-2. Run scons target=template_debug -j4.
-3. If the native library changed, reload the Godot project.
-4. Arrange nodes and exported properties in Godot.
-5. Press F5 to run.
-
-Common Fixes
-- Entry symbol not found: .gdextension and register_types.cpp must both use perk_the_star_init.
-- Failed to load GDExtension: rebuild and match the library path in game/bin/perk_the_star.gdextension.
-- gdextension_interface.h missing: run git submodule update --init inside godot-cpp.
-- json.hpp missing: place the single-header file at src/vendor/json.hpp.
-- Wave JSON issue: validate JSON and confirm res://data/waves/wave_01.json exists.
-- Crash on startup: godot-cpp branch probably does not match the Godot version."
-autowrap_mode = 3
-
-[node name="settings_close" type="Button" parent="settings_overlay/settings_panel/settings_margin/settings_box" unique_id=1498961077]
-custom_minimum_size = Vector2(220, 44)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 18
-text = "Close"

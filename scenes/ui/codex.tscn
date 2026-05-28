@@ -1,6 +1,7 @@
-[gd_scene format=3 uid="uid://diu2fn8hhbhh1"]
+[gd_scene load_steps=3 format=3 uid="uid://diu2fn8hhbhh1"]
 
 [ext_resource type="Script" uid="uid://dtjoc0x8y5c28" path="res://scenes/ui/codex.gd" id="1_63g6e"]
+[ext_resource type="Texture2D" uid="uid://0q1dn5j8yos4" path="res://assets/sprites/backgrounds/main_menu_bg.png" id="2_bg"]
 
 [node name="Codex" type="Control" unique_id=525885548]
 layout_mode = 3
@@ -11,14 +12,25 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_63g6e")
 
-[node name="overlay" type="ColorRect" parent="."]
+[node name="background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.005, 0.008, 0.016, 0.88)
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.005, 0.008, 0.016, 0.78)
 
 [node name="panel" type="PanelContainer" parent="."]
 layout_mode = 1
@@ -59,7 +71,7 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.84, 0.92, 1)
 theme_override_font_sizes/font_size = 16
-text = "Sol Defense Corps field dossier - based on godot.md"
+text = "Sol Defense Corps field dossier"
 horizontal_alignment = 1
 
 [node name="content_box" type="HBoxContainer" parent="panel/margin/root_box"]
@@ -112,7 +124,7 @@ text = "Endings"
 custom_minimum_size = Vector2(250, 46)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "Close"
+text = "Back"
 
 [node name="article_box" type="VBoxContainer" parent="panel/margin/root_box/content_box"]
 custom_minimum_size = Vector2(780, 0)

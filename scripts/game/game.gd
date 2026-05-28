@@ -5,10 +5,6 @@ const SUN_RADIUS: float = 58.0
 const SUN_DAMAGE_RADIUS: float = 62.0
 const ENEMY_SPAWN_PADDING: float = 260.0
 const SLOT_ANGLE_OFFSET: float = -PI / 2.0
-const HUD_MARGIN: float = 24.0
-const HUD_TOP_HEIGHT: float = 88.0
-const HUD_BOTTOM_HEIGHT: float = 96.0
-const HUD_BOTTOM_MARGIN: float = 64.0
 const FLARE_DAMAGE: float = 85.0
 const BURROWER_DIG_RADIUS: float = 74.0
 const BURROWER_EXCAVATION_HP: float = 52.0
@@ -20,6 +16,7 @@ const WAVE_BGM_PATHS: Array = [
 	"res://assets/audio/bgm/waves_2.ogg",
 ]
 const END_BGM_PATH: String = "res://assets/audio/bgm/end.ogg"
+const GAME_HUD_SCENE_PATH: String = "res://scenes/ui/game_hud.tscn"
 const WAVE_TRACK_SWAP_SECONDS: float = 55.0
 
 const SUN_ASSET_PATHS: Dictionary = {
@@ -110,7 +107,7 @@ var ring_blind_timers: Dictionary = {}
 var prime_frenzy_timer: float = 0.0
 var prime_frenzy_interval: float = 0.0
 var prime_frenzy_max_active: int = 18
-var ui: Dictionary = {}
+var game_hud: GameHud
 var textures: Dictionary = {
 	"sun": {},
 	"enemies": {},
@@ -120,6 +117,7 @@ var bgm_player: AudioStreamPlayer
 var wave_music_index: int = 0
 var wave_music_timer: float = 0.0
 var ending_music_started: bool = false
+var last_viewport_size: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -138,6 +136,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	var viewport_changed: bool = _refresh_viewport_cache()
 	if message_timer > 0.0:
 		message_timer -= delta
 		if message_timer <= 0.0:
@@ -157,7 +156,8 @@ func _process(delta: float) -> void:
 	_process_burrowers(delta)
 	_process_shots(delta)
 	_check_wave_clear()
-	queue_redraw()
+	if _needs_frame_redraw(viewport_changed):
+		queue_redraw()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -192,6 +192,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	})
 	_set_message("Placed %s on %s slot %d." % [_tower_config(selected_tower)["label"], slot["ring_name"], int(slot["slot_index"]) + 1], 2.0)
 	_update_ui()
+	queue_redraw()
 
 
 func _draw() -> void:
@@ -254,10 +255,14 @@ func _load_assets() -> void:
 	for key in TOWER_ASSET_PATHS.keys():
 		textures["towers"][key] = load(str(TOWER_ASSET_PATHS[key]))
 
-	bgm_player = AudioStreamPlayer.new()
-	bgm_player.name = "GameMusic"
+	bgm_player = get_node_or_null("Audio/GameMusic") as AudioStreamPlayer
+	if bgm_player == null:
+		bgm_player = get_node_or_null("GameMusic") as AudioStreamPlayer
+	if bgm_player == null:
+		bgm_player = AudioStreamPlayer.new()
+		bgm_player.name = "GameMusic"
+		add_child(bgm_player)
 	bgm_player.volume_db = GameState.get_music_volume_db()
-	add_child(bgm_player)
 
 
 func _play_wave_music() -> void:
@@ -324,6 +329,7 @@ func _set_audio_stream_loop(stream, loop_enabled: bool) -> void:
 func _generate_starfield() -> void:
 	stars.clear()
 	var viewport_size: Vector2 = get_viewport_rect().size
+	last_viewport_size = viewport_size
 	for _i in range(120):
 		stars.append({
 			"pos": Vector2(randf() * viewport_size.x, randf() * viewport_size.y),
@@ -332,275 +338,47 @@ func _generate_starfield() -> void:
 		})
 
 
+func _refresh_viewport_cache() -> bool:
+	var viewport_size: Vector2 = get_viewport_rect().size
+	if viewport_size == last_viewport_size:
+		return false
+	_generate_starfield()
+	return true
+
+
+func _needs_frame_redraw(viewport_changed: bool) -> bool:
+	if viewport_changed:
+		return true
+	if GameState.game_phase == GameState.Phase.WAVE_ACTIVE:
+		return true
+	if GameState.game_phase == GameState.Phase.GAME_OVER or GameState.game_phase == GameState.Phase.VICTORY:
+		return true
+	if not towers.is_empty() or not enemies.is_empty() or not shots.is_empty() or not burrowers.is_empty():
+		return true
+	if cryo_disruption_timer > 0.0 or bio_lab_boost_timer > 0.0 or not ring_blind_timers.is_empty():
+		return true
+	return false
+
+
 func _build_ui() -> void:
-	var layer: CanvasLayer = CanvasLayer.new()
-	layer.name = "GameHudLayer"
-	add_child(layer)
+	var layer: GameHud = get_node_or_null("GameHudLayer") as GameHud
+	if layer == null:
+		var hud_scene: PackedScene = load(GAME_HUD_SCENE_PATH) as PackedScene
+		if hud_scene != null:
+			layer = hud_scene.instantiate() as GameHud
+			add_child(layer)
 
-	var root: Control = Control.new()
-	root.name = "Hud"
-	root.anchor_right = 1.0
-	root.anchor_bottom = 1.0
-	root.mouse_filter = Control.MOUSE_FILTER_PASS
-	layer.add_child(root)
+	if layer == null:
+		push_error("Game: could not find or instantiate GameHudLayer.")
+		return
 
-	var top_panel: PanelContainer = PanelContainer.new()
-	top_panel.anchor_right = 1.0
-	top_panel.offset_left = HUD_MARGIN
-	top_panel.offset_top = 18.0
-	top_panel.offset_right = -HUD_MARGIN
-	top_panel.offset_bottom = 18.0 + HUD_TOP_HEIGHT
-	top_panel.add_theme_stylebox_override("panel", _panel_style(Color(0.020, 0.027, 0.040, 0.94), Color(0.28, 0.47, 0.68, 0.52), 5.0, 12.0, 8.0))
-	root.add_child(top_panel)
-
-	var top_row: HBoxContainer = HBoxContainer.new()
-	top_row.add_theme_constant_override("separation", 16)
-	top_panel.add_child(top_row)
-
-	var wave_block: VBoxContainer = VBoxContainer.new()
-	wave_block.custom_minimum_size = Vector2(520.0, 0.0)
-	wave_block.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	wave_block.add_theme_constant_override("separation", 3)
-	top_row.add_child(wave_block)
-
-	ui["wave_label"] = Label.new()
-	ui["wave_label"].add_theme_font_size_override("font_size", 22)
-	wave_block.add_child(ui["wave_label"])
-
-	ui["brief_label"] = Label.new()
-	ui["brief_label"].autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	ui["brief_label"].clip_text = true
-	ui["brief_label"].add_theme_color_override("font_color", Color(0.82, 0.88, 0.96, 0.92))
-	ui["brief_label"].add_theme_font_size_override("font_size", 14)
-	wave_block.add_child(ui["brief_label"])
-
-	var stats_grid: GridContainer = GridContainer.new()
-	stats_grid.columns = 4
-	stats_grid.custom_minimum_size = Vector2(398.0, 0.0)
-	stats_grid.add_theme_constant_override("h_separation", 10)
-	stats_grid.add_theme_constant_override("v_separation", 0)
-	top_row.add_child(stats_grid)
-
-	_add_stat(stats_grid, "credits_label", "Sol", 88.0)
-	_add_stat(stats_grid, "score_label", "Score", 88.0)
-	_add_stat(stats_grid, "kills_label", "Kills", 76.0)
-	_add_stat(stats_grid, "flare_label", "Flare", 104.0)
-
-	var lum_box: VBoxContainer = VBoxContainer.new()
-	lum_box.custom_minimum_size = Vector2(188.0, 0.0)
-	lum_box.add_theme_constant_override("separation", 6)
-	top_row.add_child(lum_box)
-
-	var lum_title: Label = Label.new()
-	lum_title.text = "Luminosity"
-	lum_title.add_theme_font_size_override("font_size", 13)
-	lum_title.add_theme_color_override("font_color", Color(0.72, 0.82, 0.94, 0.88))
-	lum_box.add_child(lum_title)
-
-	ui["luminosity_bar"] = ProgressBar.new()
-	ui["luminosity_bar"].min_value = 0.0
-	ui["luminosity_bar"].max_value = 100.0
-	ui["luminosity_bar"].show_percentage = true
-	ui["luminosity_bar"].custom_minimum_size = Vector2(176.0, 20.0)
-	ui["luminosity_bar"].add_theme_stylebox_override("background", _bar_style(Color(0.12, 0.15, 0.19, 0.95), 4.0))
-	ui["luminosity_bar"].add_theme_stylebox_override("fill", _bar_style(Color(0.94, 0.74, 0.32, 0.95), 4.0))
-	lum_box.add_child(ui["luminosity_bar"])
-
-	var action_row: HBoxContainer = HBoxContainer.new()
-	action_row.add_theme_constant_override("separation", 8)
-	top_row.add_child(action_row)
-
-	ui["start_button"] = Button.new()
-	ui["start_button"].custom_minimum_size = Vector2(142.0, 54.0)
-	ui["start_button"].add_theme_stylebox_override("normal", _button_style(Color(0.93, 0.66, 0.22, 0.96), Color(1.0, 0.82, 0.42, 0.55), 5.0))
-	ui["start_button"].add_theme_stylebox_override("hover", _button_style(Color(1.0, 0.74, 0.27, 1.0), Color(1.0, 0.88, 0.55, 0.75), 5.0))
-	ui["start_button"].add_theme_stylebox_override("pressed", _button_style(Color(0.78, 0.48, 0.14, 1.0), Color(1.0, 0.75, 0.32, 0.70), 5.0))
-	ui["start_button"].add_theme_color_override("font_color", Color(0.06, 0.07, 0.09))
-	ui["start_button"].pressed.connect(_on_start_wave_pressed)
-	action_row.add_child(ui["start_button"])
-
-	var menu_button: Button = Button.new()
-	menu_button.text = "Menu"
-	menu_button.custom_minimum_size = Vector2(74.0, 54.0)
-	menu_button.add_theme_stylebox_override("normal", _button_style(Color(0.08, 0.10, 0.14, 0.96), Color(0.32, 0.42, 0.54, 0.42), 5.0))
-	menu_button.add_theme_stylebox_override("hover", _button_style(Color(0.12, 0.15, 0.20, 0.98), Color(0.48, 0.62, 0.76, 0.56), 5.0))
-	menu_button.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/main_menu.tscn"))
-	action_row.add_child(menu_button)
-
-	var intel_panel: PanelContainer = PanelContainer.new()
-	intel_panel.anchor_left = 1.0
-	intel_panel.anchor_right = 1.0
-	intel_panel.offset_left = -378.0
-	intel_panel.offset_top = 124.0
-	intel_panel.offset_right = -HUD_MARGIN
-	intel_panel.offset_bottom = 336.0
-	intel_panel.clip_contents = true
-	intel_panel.add_theme_stylebox_override("panel", _panel_style(Color(0.020, 0.025, 0.035, 0.92), Color(0.48, 0.34, 0.68, 0.45), 5.0, 12.0, 10.0))
-	root.add_child(intel_panel)
-
-	var intel_box: VBoxContainer = VBoxContainer.new()
-	intel_box.add_theme_constant_override("separation", 7)
-	intel_panel.add_child(intel_box)
-
-	var intel_title: Label = Label.new()
-	intel_title.text = "Wave Intel"
-	intel_title.add_theme_font_size_override("font_size", 16)
-	intel_box.add_child(intel_title)
-
-	var enemy_row: HBoxContainer = HBoxContainer.new()
-	enemy_row.add_theme_constant_override("separation", 10)
-	intel_box.add_child(enemy_row)
-
-	ui["enemy_preview"] = TextureRect.new()
-	ui["enemy_preview"].custom_minimum_size = Vector2(44.0, 44.0)
-	ui["enemy_preview"].size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	ui["enemy_preview"].size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	ui["enemy_preview"].expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	ui["enemy_preview"].stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	ui["enemy_preview"].clip_contents = true
-	enemy_row.add_child(ui["enemy_preview"])
-
-	var enemy_text: VBoxContainer = VBoxContainer.new()
-	enemy_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	enemy_text.add_theme_constant_override("separation", 2)
-	enemy_row.add_child(enemy_text)
-
-	ui["enemy_label"] = Label.new()
-	ui["enemy_label"].autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	ui["enemy_label"].add_theme_font_size_override("font_size", 15)
-	ui["enemy_label"].clip_text = true
-	enemy_text.add_child(ui["enemy_label"])
-
-	ui["threat_label"] = Label.new()
-	ui["threat_label"].autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	ui["threat_label"].add_theme_color_override("font_color", Color(0.82, 0.88, 0.96, 0.92))
-	ui["threat_label"].add_theme_font_size_override("font_size", 13)
-	enemy_text.add_child(ui["threat_label"])
-
-	ui["ring_label"] = Label.new()
-	ui["ring_label"].autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	ui["ring_label"].add_theme_color_override("font_color", Color(0.74, 0.82, 0.92, 0.86))
-	ui["ring_label"].add_theme_font_size_override("font_size", 13)
-	intel_box.add_child(ui["ring_label"])
-
-	var bottom_row: HBoxContainer = HBoxContainer.new()
-	bottom_row.anchor_top = 1.0
-	bottom_row.anchor_right = 1.0
-	bottom_row.anchor_bottom = 1.0
-	bottom_row.offset_left = HUD_MARGIN
-	bottom_row.offset_top = -HUD_BOTTOM_HEIGHT - HUD_BOTTOM_MARGIN
-	bottom_row.offset_right = -HUD_MARGIN
-	bottom_row.offset_bottom = -HUD_BOTTOM_MARGIN
-	bottom_row.add_theme_constant_override("separation", 16)
-	root.add_child(bottom_row)
-
-	var tower_panel: PanelContainer = PanelContainer.new()
-	tower_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tower_panel.add_theme_stylebox_override("panel", _panel_style(Color(0.020, 0.027, 0.038, 0.93), Color(0.30, 0.56, 0.70, 0.46), 5.0, 12.0, 7.0))
-	bottom_row.add_child(tower_panel)
-
-	var tower_row: HBoxContainer = HBoxContainer.new()
-	tower_row.add_theme_constant_override("separation", 8)
-	tower_panel.add_child(tower_row)
-
-	var tower_label: Label = Label.new()
-	tower_label.text = "Build"
-	tower_label.custom_minimum_size = Vector2(52.0, 0.0)
-	tower_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	tower_label.add_theme_font_size_override("font_size", 15)
-	tower_label.add_theme_color_override("font_color", Color(0.83, 0.90, 0.98, 0.94))
-	tower_row.add_child(tower_label)
-
-	var tower_scroll: ScrollContainer = ScrollContainer.new()
-	tower_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tower_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	tower_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	tower_row.add_child(tower_scroll)
-
-	var tower_buttons_row: HBoxContainer = HBoxContainer.new()
-	tower_buttons_row.add_theme_constant_override("separation", 8)
-	tower_scroll.add_child(tower_buttons_row)
-
-	ui["tower_buttons"] = {}
-	for tower_type in TOWER_ORDER:
-		var button: Button = Button.new()
-		button.toggle_mode = true
-		button.focus_mode = Control.FOCUS_NONE
-		button.icon = _tower_texture(tower_type)
-		button.expand_icon = true
-		button.custom_minimum_size = Vector2(128.0, 62.0)
-		button.add_theme_font_size_override("font_size", 12)
-		button.add_theme_constant_override("h_separation", 4)
-		button.add_theme_stylebox_override("normal", _button_style(Color(0.06, 0.075, 0.095, 0.94), Color(0.26, 0.38, 0.50, 0.35), 4.0))
-		button.add_theme_stylebox_override("hover", _button_style(Color(0.09, 0.115, 0.145, 0.98), Color(0.40, 0.58, 0.72, 0.50), 4.0))
-		button.add_theme_stylebox_override("pressed", _button_style(Color(0.12, 0.18, 0.20, 1.0), Color(0.94, 0.72, 0.28, 0.78), 4.0))
-		button.pressed.connect(_select_tower.bind(tower_type))
-		ui["tower_buttons"][tower_type] = button
-		tower_buttons_row.add_child(button)
-
-	var message_panel: PanelContainer = PanelContainer.new()
-	message_panel.custom_minimum_size = Vector2(500.0, 0.0)
-	message_panel.add_theme_stylebox_override("panel", _panel_style(Color(0.032, 0.032, 0.038, 0.91), Color(0.72, 0.55, 0.20, 0.46), 5.0, 14.0, 8.0))
-	bottom_row.add_child(message_panel)
-
-	ui["message_label"] = Label.new()
-	ui["message_label"].autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	ui["message_label"].vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	ui["message_label"].add_theme_font_size_override("font_size", 14)
-	ui["message_label"].add_theme_color_override("font_color", Color(0.94, 0.92, 0.86, 0.96))
-	message_panel.add_child(ui["message_label"])
-
-
-func _add_stat(parent: Control, key: String, caption: String, width: float) -> void:
-	var box: VBoxContainer = VBoxContainer.new()
-	box.custom_minimum_size = Vector2(width, 0.0)
-	box.add_theme_constant_override("separation", 1)
-	parent.add_child(box)
-
-	var title: Label = Label.new()
-	title.text = caption.to_upper()
-	title.add_theme_font_size_override("font_size", 11)
-	title.add_theme_color_override("font_color", Color(0.68, 0.78, 0.90, 0.82))
-	box.add_child(title)
-
-	var value: Label = Label.new()
-	value.add_theme_font_size_override("font_size", 20)
-	value.add_theme_color_override("font_color", Color(0.96, 0.98, 1.0, 0.98))
-	box.add_child(value)
-	ui[key] = value
-
-
-func _panel_style(bg_color: Color, border_color: Color, radius: float = 6.0, horizontal_margin: float = 14.0, vertical_margin: float = 10.0) -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = bg_color
-	style.border_color = border_color
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(int(radius))
-	style.content_margin_left = horizontal_margin
-	style.content_margin_right = horizontal_margin
-	style.content_margin_top = vertical_margin
-	style.content_margin_bottom = vertical_margin
-	return style
-
-
-func _bar_style(bg_color: Color, radius: float) -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = bg_color
-	style.set_corner_radius_all(int(radius))
-	return style
-
-
-func _button_style(bg_color: Color, border_color: Color, radius: float) -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = bg_color
-	style.border_color = border_color
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(int(radius))
-	style.content_margin_left = 8.0
-	style.content_margin_right = 8.0
-	style.content_margin_top = 6.0
-	style.content_margin_bottom = 6.0
-	return style
+	game_hud = layer
+	if not game_hud.start_wave_requested.is_connected(_on_start_wave_pressed):
+		game_hud.start_wave_requested.connect(_on_start_wave_pressed)
+	if not game_hud.menu_requested.is_connected(_on_menu_pressed):
+		game_hud.menu_requested.connect(_on_menu_pressed)
+	if not game_hud.tower_selected.is_connected(_select_tower):
+		game_hud.tower_selected.connect(_select_tower)
 
 
 func _on_start_wave_pressed() -> void:
@@ -631,6 +409,10 @@ func _on_start_wave_pressed() -> void:
 		bgm_player.play()
 	_set_message(str(current_wave_data.get("tutorial_hint", "Wave incoming.")), 5.0)
 	_update_ui()
+
+
+func _on_menu_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
 
 func _select_tower(tower_type: String) -> void:
@@ -977,16 +759,18 @@ func _find_target_for_tower(tower: Dictionary) -> int:
 	var tower_pos: Vector2 = _tower_position(tower)
 	var sun: Vector2 = _sun_pos()
 	var cfg: Dictionary = _tower_config(str(tower["type"]))
+	var range: float = float(cfg["range"])
+	var range_squared: float = range * range
 	var best_index: int = -1
-	var best_sun_dist: float = INF
+	var best_sun_dist_squared: float = INF
 
 	for i in range(enemies.size()):
 		var enemy: Dictionary = enemies[i]
-		var tower_dist: float = tower_pos.distance_to(enemy["pos"])
-		var sun_dist: float = sun.distance_to(enemy["pos"])
-		if tower_dist <= float(cfg["range"]) and sun_dist < best_sun_dist:
+		var tower_dist_squared: float = tower_pos.distance_squared_to(enemy["pos"])
+		var sun_dist_squared: float = sun.distance_squared_to(enemy["pos"])
+		if tower_dist_squared <= range_squared and sun_dist_squared < best_sun_dist_squared:
 			best_index = i
-			best_sun_dist = sun_dist
+			best_sun_dist_squared = sun_dist_squared
 
 	return best_index
 
@@ -1028,11 +812,13 @@ func _find_burrower_target_for_tower(tower: Dictionary) -> int:
 
 	var tower_pos: Vector2 = _tower_position(tower)
 	var cfg: Dictionary = _tower_config(str(tower["type"]))
+	var range: float = float(cfg["range"])
+	var range_squared: float = range * range
 	var best_index: int = -1
 	var best_hp: float = INF
 	for i in range(burrowers.size()):
 		var burrower_pos: Vector2 = _burrower_position(burrowers[i])
-		if tower_pos.distance_to(burrower_pos) <= float(cfg["range"]) and float(burrowers[i]["hp"]) < best_hp:
+		if tower_pos.distance_squared_to(burrower_pos) <= range_squared and float(burrowers[i]["hp"]) < best_hp:
 			best_index = i
 			best_hp = float(burrowers[i]["hp"])
 	return best_index
@@ -1416,8 +1202,23 @@ func _set_message(text: String, duration: float = 0.0) -> void:
 	_update_ui()
 
 
+func _tower_button_view_data() -> Dictionary:
+	var button_states: Dictionary = {}
+	for tower_type in TOWER_ORDER:
+		var cost: int = GameState.get_tower_cost(tower_type)
+		var cfg: Dictionary = _tower_config(tower_type)
+		button_states[tower_type] = {
+			"text": "%s\n%d Sol" % [_tower_short_label(tower_type), cost],
+			"tooltip": "%s | Cost: %d Sol Credits" % [cfg["label"], cost],
+			"pressed": tower_type == selected_tower,
+			"disabled": GameState.game_phase != GameState.Phase.BETWEEN_WAVE or not GameState.can_afford(cost),
+			"icon": _tower_texture(tower_type),
+		}
+	return button_states
+
+
 func _update_ui() -> void:
-	if ui.is_empty():
+	if game_hud == null:
 		return
 
 	var wave_data: Dictionary = current_wave_data if GameState.game_phase == GameState.Phase.WAVE_ACTIVE else next_wave_preview
@@ -1429,31 +1230,22 @@ func _update_ui() -> void:
 		if briefing_title.strip_edges().to_lower() != wave_name.strip_edges().to_lower():
 			title_text += " - %s" % wave_name
 
-	ui["wave_label"].text = title_text
-	ui["brief_label"].text = _clean_wave_hint(str(wave_data.get("tutorial_hint", "Defend the Sun.")), wave_name)
-	ui["credits_label"].text = str(GameState.sol_credits)
-	ui["score_label"].text = str(GameState.performance_score)
-	ui["kills_label"].text = str(GameState.enemies_killed_total)
-	ui["flare_label"].text = "Ready" if GameState.flare_charge > 0 else "Charging"
-	ui["luminosity_bar"].value = GameState.get_luminosity_percent()
-
 	var reward: int = int(wave_data.get("credit_reward", 0))
-	ui["enemy_preview"].texture = _enemy_texture(_primary_wave_variant(wave_data))
-	ui["enemy_label"].text = _wave_spawn_summary(wave_data)
-	ui["threat_label"].text = "Active %d | Burrowed %d | Queue %d | Reward %d Sol%s" % [enemies.size(), burrowers.size(), spawn_queue.size(), reward, _active_modifier_summary()]
-	ui["ring_label"].text = _ring_summary()
-
 	var next_wave: int = min(GameState.current_wave + 1, MAX_WAVES)
-	ui["start_button"].text = "Start Wave %d" % next_wave
-	ui["start_button"].disabled = GameState.game_phase != GameState.Phase.BETWEEN_WAVE or next_wave > playable_wave_limit
-
-	for tower_type in TOWER_ORDER:
-		var button: Button = ui["tower_buttons"][tower_type]
-		var cost: int = GameState.get_tower_cost(tower_type)
-		var cfg: Dictionary = _tower_config(tower_type)
-		button.text = "%s\n%d Sol" % [_tower_short_label(tower_type), cost]
-		button.tooltip_text = "%s | Cost: %d Sol Credits" % [cfg["label"], cost]
-		button.set_pressed_no_signal(tower_type == selected_tower)
-		button.disabled = GameState.game_phase != GameState.Phase.BETWEEN_WAVE or not GameState.can_afford(cost)
-
-	ui["message_label"].text = message_text
+	game_hud.update_view({
+		"wave_title": title_text,
+		"brief": _clean_wave_hint(str(wave_data.get("tutorial_hint", "Defend the Sun.")), wave_name),
+		"credits": str(GameState.sol_credits),
+		"score": str(GameState.performance_score),
+		"kills": str(GameState.enemies_killed_total),
+		"flare": "Ready" if GameState.flare_charge > 0 else "Charging",
+		"luminosity": float(GameState.get_luminosity_percent()),
+		"enemy_texture": _enemy_texture(_primary_wave_variant(wave_data)),
+		"enemy_summary": _wave_spawn_summary(wave_data),
+		"threat": "Active %d | Burrowed %d | Queue %d | Reward %d Sol%s" % [enemies.size(), burrowers.size(), spawn_queue.size(), reward, _active_modifier_summary()],
+		"rings": _ring_summary(),
+		"start_text": "Start Wave %d" % next_wave,
+		"start_disabled": GameState.game_phase != GameState.Phase.BETWEEN_WAVE or next_wave > playable_wave_limit,
+		"message": message_text,
+		"tower_buttons": _tower_button_view_data(),
+	})

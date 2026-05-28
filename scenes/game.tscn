@@ -1,6 +1,32 @@
-[gd_scene format=3 uid="uid://b7yr0rke7idwq"]
+[gd_scene load_steps=3 format=3 uid="uid://b7yr0rke7idwq"]
 
-[ext_resource type="Script" path="res://scripts/game/game.gd" id="1_game"]
+[ext_resource type="Script" uid="uid://c33r13ekn42tf" path="res://scripts/game/game.gd" id="1_game"]
+[ext_resource type="PackedScene" uid="uid://b15jp1xqi4ldg" path="res://scenes/ui/game_hud.tscn" id="2_hud"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_game")
+playable_wave_limit = 12
+briefing_title = "SOL DEFENSE"
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Starfield" type="Node2D" parent="World"]
+
+[node name="OrbitRings" type="Node2D" parent="World"]
+
+[node name="TowerSlots" type="Node2D" parent="World"]
+
+[node name="Towers" type="Node2D" parent="World"]
+
+[node name="Enemies" type="Node2D" parent="World"]
+
+[node name="Projectiles" type="Node2D" parent="World"]
+
+[node name="Effects" type="Node2D" parent="World"]
+
+[node name="Audio" type="Node" parent="."]
+
+[node name="GameMusic" type="AudioStreamPlayer" parent="Audio"]
+volume_db = -8.0
+
+[node name="GameHudLayer" parent="." instance=ExtResource("2_hud")]

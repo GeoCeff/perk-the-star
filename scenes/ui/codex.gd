@@ -1,5 +1,8 @@
 extends Control
 
+@export_file("*.tscn") var return_scene_path: String = "res://scenes/main_menu.tscn"
+@export var close_returns_to_scene: bool = true
+
 @onready var close_button: Button = $panel/margin/root_box/content_box/nav_box/close_button
 @onready var section_title_label: Label = $panel/margin/root_box/content_box/article_box/section_title_label
 @onready var body_scroll: ScrollContainer = $panel/margin/root_box/content_box/article_box/body_scroll
@@ -129,7 +132,8 @@ Every credit spent should buy time, coverage, or control. A beautiful orbit mean
 
 func _ready() -> void:
 	visible = true
-	close_button.pressed.connect(queue_free)
+	MusicManager.play_menu_music()
+	close_button.pressed.connect(_on_close_pressed)
 	for key in nav_buttons.keys():
 		var section_key: String = str(key)
 		var button: Button = nav_buttons[section_key]
@@ -140,8 +144,16 @@ func _ready() -> void:
 
 
 func show_standalone_mode() -> void:
+	close_returns_to_scene = false
 	visible = true
 	_show_section("briefing")
+
+
+func _on_close_pressed() -> void:
+	if close_returns_to_scene:
+		get_tree().change_scene_to_file(return_scene_path)
+	else:
+		queue_free()
 
 
 func _show_section(section_key: String) -> void:
