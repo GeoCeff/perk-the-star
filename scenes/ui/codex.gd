@@ -1,12 +1,16 @@
 extends Control
 
+const SpaceTheme = preload("res://scripts/ui/space_theme.gd")
+
 @export_file("*.tscn") var return_scene_path: String = "res://scenes/main_menu.tscn"
 @export var close_returns_to_scene: bool = true
+@export var play_menu_music_on_ready: bool = true
 
 @onready var close_button: Button = $panel/margin/root_box/content_box/nav_box/close_button
+@onready var panel: PanelContainer = $panel
 @onready var section_title_label: Label = $panel/margin/root_box/content_box/article_box/section_title_label
 @onready var body_scroll: ScrollContainer = $panel/margin/root_box/content_box/article_box/body_scroll
-@onready var body_label: Label = $panel/margin/root_box/content_box/article_box/body_scroll/body_label
+@onready var body_label: RichTextLabel = $panel/margin/root_box/content_box/article_box/body_scroll/body_label
 @onready var nav_buttons: Dictionary = {
 	"briefing": $panel/margin/root_box/content_box/nav_box/btn_briefing,
 	"systems": $panel/margin/root_box/content_box/nav_box/btn_systems,
@@ -132,14 +136,18 @@ Every credit spent should buy time, coverage, or control. A beautiful orbit mean
 
 func _ready() -> void:
 	visible = true
-	MusicManager.play_menu_music()
+	if play_menu_music_on_ready:
+		MusicManager.play_menu_music()
+	_apply_style()
 	close_button.pressed.connect(_on_close_pressed)
 	for key in nav_buttons.keys():
 		var section_key: String = str(key)
 		var button: Button = nav_buttons[section_key]
 		button.toggle_mode = true
 		button.pressed.connect(_show_section.bind(section_key))
+		SpaceTheme.apply_secondary_button(button)
 		button.add_theme_font_size_override("font_size", 16)
+	SpaceTheme.apply_secondary_button(close_button, SpaceTheme.ICON_BACK_PATH)
 	_show_section("briefing")
 
 
@@ -160,7 +168,7 @@ func _show_section(section_key: String) -> void:
 	current_section = section_key
 	var section: Dictionary = sections.get(section_key, sections["briefing"])
 	section_title_label.text = section["title"]
-	body_label.text = section["body"]
+	body_label.text = SpaceTheme.format_readout_text(section["body"])
 	body_scroll.scroll_vertical = 0
 	_update_nav_state()
 
@@ -170,3 +178,16 @@ func _update_nav_state() -> void:
 		var section_key: String = str(key)
 		var button: Button = nav_buttons[section_key]
 		button.button_pressed = section_key == current_section
+		if button.button_pressed:
+			SpaceTheme.apply_primary_button(button)
+		else:
+			SpaceTheme.apply_secondary_button(button)
+		button.add_theme_font_size_override("font_size", 16)
+
+
+func _apply_style() -> void:
+	SpaceTheme.apply_cursor()
+	SpaceTheme.apply_fonts(self)
+	SpaceTheme.apply_deep_panel(panel, SpaceTheme.COLOR_CYAN)
+	SpaceTheme.apply_scroll_container(body_scroll)
+	SpaceTheme.apply_rich_text_body(body_label, 17)

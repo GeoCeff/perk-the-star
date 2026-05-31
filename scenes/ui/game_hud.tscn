@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://b15jp1xqi4ldg"]
+[gd_scene load_steps=3 format=3 uid="uid://b15jp1xqi4ldg"]
 
 [ext_resource type="Script" uid="uid://ckhbpku0qq2s7" path="res://scripts/ui/game_hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://scripts/ui/hud_panel_fx.gd" id="2_fx"]
 
 [node name="GameHudLayer" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -16,144 +17,178 @@ mouse_filter = 2
 
 [node name="TopPanel" type="PanelContainer" parent="Hud"]
 layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 24.0
+offset_left = 28.0
 offset_top = 18.0
-offset_right = -24.0
-offset_bottom = 106.0
-grow_horizontal = 2
+offset_right = 820.0
+offset_bottom = 124.0
 
-[node name="TopRow" type="HBoxContainer" parent="Hud/TopPanel"]
+[node name="WaveBlock" type="VBoxContainer" parent="Hud/TopPanel"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 4
 
-[node name="WaveBlock" type="VBoxContainer" parent="Hud/TopPanel/TopRow"]
-custom_minimum_size = Vector2(520, 0)
+[node name="WaveKicker" type="Label" parent="Hud/TopPanel/WaveBlock"]
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 3
+theme_override_font_sizes/font_size = 10
+text = "MISSION"
 
-[node name="WaveLabel" type="Label" parent="Hud/TopPanel/TopRow/WaveBlock"]
+[node name="WaveLabel" type="Label" parent="Hud/TopPanel/WaveBlock"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "SOL DEFENSE 1/12"
-
-[node name="BriefLabel" type="Label" parent="Hud/TopPanel/TopRow/WaveBlock"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.88, 0.96, 0.92)
-theme_override_font_sizes/font_size = 14
-text = "Place towers between waves. Towers orbit and fire automatically."
-autowrap_mode = 3
+theme_override_font_sizes/font_size = 21
+text = "SOL DEFENSE 01/12 | FIRST CONTACT"
 clip_text = true
 
-[node name="StatsGrid" type="GridContainer" parent="Hud/TopPanel/TopRow"]
-custom_minimum_size = Vector2(398, 0)
+[node name="BriefLabel" type="Label" parent="Hud/TopPanel/WaveBlock"]
 layout_mode = 2
-theme_override_constants/h_separation = 10
+theme_override_colors/font_color = Color(0.82, 0.88, 0.96, 0.92)
+theme_override_font_sizes/font_size = 11
+text = "Place towers between waves. Towers orbit and fire automatically."
+autowrap_mode = 3
+
+[node name="StatusPanel" type="PanelContainer" parent="Hud"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -946.0
+offset_top = 18.0
+offset_right = -314.0
+offset_bottom = 124.0
+grow_horizontal = 0
+
+[node name="StatusRow" type="HBoxContainer" parent="Hud/StatusPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="StatsGrid" type="GridContainer" parent="Hud/StatusPanel/StatusRow"]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 3
 columns = 4
 
-[node name="SolStat" type="VBoxContainer" parent="Hud/TopPanel/TopRow/StatsGrid"]
-custom_minimum_size = Vector2(88, 0)
+[node name="SolStat" type="VBoxContainer" parent="Hud/StatusPanel/StatusRow/StatsGrid"]
+custom_minimum_size = Vector2(78, 0)
 layout_mode = 2
-theme_override_constants/separation = 1
+theme_override_constants/separation = 0
 
-[node name="SolTitle" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/SolStat"]
+[node name="SolTitle" type="Label" parent="Hud/StatusPanel/StatusRow/StatsGrid/SolStat"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.68, 0.78, 0.9, 0.82)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 text = "SOL"
+horizontal_alignment = 1
 
-[node name="CreditsLabel" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/SolStat"]
+[node name="CreditsLabel" type="Label" parent="Hud/StatusPanel/StatusRow/StatsGrid/SolStat"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.96, 0.98, 1, 0.98)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 19
 text = "50"
+horizontal_alignment = 1
 
-[node name="ScoreStat" type="VBoxContainer" parent="Hud/TopPanel/TopRow/StatsGrid"]
-custom_minimum_size = Vector2(88, 0)
+[node name="ScoreStat" type="VBoxContainer" parent="Hud/StatusPanel/StatusRow/StatsGrid"]
+custom_minimum_size = Vector2(82, 0)
 layout_mode = 2
-theme_override_constants/separation = 1
+theme_override_constants/separation = 0
 
-[node name="ScoreTitle" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/ScoreStat"]
+[node name="ScoreTitle" type="Label" parent="Hud/StatusPanel/StatusRow/StatsGrid/ScoreStat"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.68, 0.78, 0.9, 0.82)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 text = "SCORE"
+horizontal_alignment = 1
 
-[node name="ScoreLabel" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/ScoreStat"]
+[node name="ScoreLabel" type="Label" parent="Hud/StatusPanel/StatusRow/StatsGrid/ScoreStat"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.96, 0.98, 1, 0.98)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 19
 text = "0"
+horizontal_alignment = 1
 
-[node name="KillsStat" type="VBoxContainer" parent="Hud/TopPanel/TopRow/StatsGrid"]
-custom_minimum_size = Vector2(76, 0)
+[node name="KillsStat" type="VBoxContainer" parent="Hud/StatusPanel/StatusRow/StatsGrid"]
+custom_minimum_size = Vector2(74, 0)
 layout_mode = 2
-theme_override_constants/separation = 1
+theme_override_constants/separation = 0
 
-[node name="KillsTitle" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/KillsStat"]
+[node name="KillsTitle" type="Label" parent="Hud/StatusPanel/StatusRow/StatsGrid/KillsStat"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.68, 0.78, 0.9, 0.82)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 text = "KILLS"
+horizontal_alignment = 1
 
-[node name="KillsLabel" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/KillsStat"]
+[node name="KillsLabel" type="Label" parent="Hud/StatusPanel/StatusRow/StatsGrid/KillsStat"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.96, 0.98, 1, 0.98)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 19
 text = "0"
+horizontal_alignment = 1
 
-[node name="FlareStat" type="VBoxContainer" parent="Hud/TopPanel/TopRow/StatsGrid"]
-custom_minimum_size = Vector2(104, 0)
+[node name="FlareStat" type="VBoxContainer" parent="Hud/StatusPanel/StatusRow/StatsGrid"]
+custom_minimum_size = Vector2(116, 0)
 layout_mode = 2
-theme_override_constants/separation = 1
+theme_override_constants/separation = 0
 
-[node name="FlareTitle" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/FlareStat"]
+[node name="FlareTitle" type="Label" parent="Hud/StatusPanel/StatusRow/StatsGrid/FlareStat"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.68, 0.78, 0.9, 0.82)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 text = "FLARE"
+horizontal_alignment = 1
 
-[node name="FlareLabel" type="Label" parent="Hud/TopPanel/TopRow/StatsGrid/FlareStat"]
+[node name="FlareLabel" type="Label" parent="Hud/StatusPanel/StatusRow/StatsGrid/FlareStat"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.96, 0.98, 1, 0.98)
-theme_override_font_sizes/font_size = 20
-text = "Charging"
+theme_override_font_sizes/font_size = 15
+text = "CHARGING"
+horizontal_alignment = 1
+clip_text = true
 
-[node name="LuminosityBox" type="VBoxContainer" parent="Hud/TopPanel/TopRow"]
-custom_minimum_size = Vector2(188, 0)
+[node name="LuminosityBox" type="VBoxContainer" parent="Hud/StatusPanel/StatusRow"]
+custom_minimum_size = Vector2(182, 0)
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 5
 
-[node name="LuminosityTitle" type="Label" parent="Hud/TopPanel/TopRow/LuminosityBox"]
+[node name="LuminosityTitle" type="Label" parent="Hud/StatusPanel/StatusRow/LuminosityBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.82, 0.94, 0.88)
-theme_override_font_sizes/font_size = 13
-text = "Luminosity"
+theme_override_font_sizes/font_size = 10
+text = "LUMINOSITY"
 
-[node name="LuminosityBar" type="ProgressBar" parent="Hud/TopPanel/TopRow/LuminosityBox"]
-custom_minimum_size = Vector2(176, 20)
+[node name="LuminosityBar" type="ProgressBar" parent="Hud/StatusPanel/StatusRow/LuminosityBox"]
+custom_minimum_size = Vector2(182, 18)
 layout_mode = 2
 max_value = 100.0
 value = 100.0
 show_percentage = true
 
-[node name="ActionRow" type="HBoxContainer" parent="Hud/TopPanel/TopRow"]
+[node name="ActionsPanel" type="PanelContainer" parent="Hud"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -296.0
+offset_top = 18.0
+offset_right = -28.0
+offset_bottom = 124.0
+grow_horizontal = 0
+
+[node name="ActionRow" type="HBoxContainer" parent="Hud/ActionsPanel"]
 layout_mode = 2
 theme_override_constants/separation = 8
+alignment = 1
 
-[node name="StartButton" type="Button" parent="Hud/TopPanel/TopRow/ActionRow"]
-custom_minimum_size = Vector2(142, 54)
+[node name="StartButton" type="Button" parent="Hud/ActionsPanel/ActionRow"]
+custom_minimum_size = Vector2(154, 46)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Start Wave 1"
+theme_override_font_sizes/font_size = 13
+text = "START WAVE 1"
 
-[node name="MenuButton" type="Button" parent="Hud/TopPanel/TopRow/ActionRow"]
-custom_minimum_size = Vector2(74, 54)
+[node name="MenuButton" type="Button" parent="Hud/ActionsPanel/ActionRow"]
+custom_minimum_size = Vector2(80, 46)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Menu"
+theme_override_font_sizes/font_size = 13
+text = "MENU"
 
 [node name="WaveIntel" type="PanelContainer" parent="Hud"]
 clip_contents = true
@@ -161,27 +196,37 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -378.0
-offset_top = 124.0
-offset_right = -24.0
-offset_bottom = 336.0
+offset_left = -390.0
+offset_top = 146.0
+offset_right = -28.0
+offset_bottom = 368.0
 grow_horizontal = 0
 
 [node name="IntelBox" type="VBoxContainer" parent="Hud/WaveIntel"]
 layout_mode = 2
 theme_override_constants/separation = 7
 
-[node name="IntelTitle" type="Label" parent="Hud/WaveIntel/IntelBox"]
+[node name="IntelHeader" type="HBoxContainer" parent="Hud/WaveIntel/IntelBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Wave Intel"
+
+[node name="IntelTitle" type="Label" parent="Hud/WaveIntel/IntelBox/IntelHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 15
+text = "WAVE INTEL"
+
+[node name="IntelStatus" type="Label" parent="Hud/WaveIntel/IntelBox/IntelHeader"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "NEXT"
+horizontal_alignment = 2
 
 [node name="EnemyRow" type="HBoxContainer" parent="Hud/WaveIntel/IntelBox"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="EnemyPreview" type="TextureRect" parent="Hud/WaveIntel/IntelBox/EnemyRow"]
-custom_minimum_size = Vector2(44, 44)
+custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -190,142 +235,203 @@ stretch_mode = 5
 clip_contents = true
 
 [node name="EnemyText" type="VBoxContainer" parent="Hud/WaveIntel/IntelBox/EnemyRow"]
+custom_minimum_size = Vector2(250, 68)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 2
+theme_override_constants/separation = 4
 
 [node name="EnemyLabel" type="Label" parent="Hud/WaveIntel/IntelBox/EnemyRow/EnemyText"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 13
 autowrap_mode = 3
-clip_text = true
 
 [node name="ThreatLabel" type="Label" parent="Hud/WaveIntel/IntelBox/EnemyRow/EnemyText"]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.82, 0.88, 0.96, 0.92)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 11
 autowrap_mode = 3
 
 [node name="RingLabel" type="Label" parent="Hud/WaveIntel/IntelBox"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.74, 0.82, 0.92, 0.86)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 10
+text = "RINGS"
 autowrap_mode = 3
 
-[node name="BottomRow" type="HBoxContainer" parent="Hud"]
+[node name="BottomRow" type="Control" parent="Hud"]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = -160.0
-offset_right = -24.0
-offset_bottom = -64.0
+offset_left = 28.0
+offset_top = -208.0
+offset_right = -28.0
+offset_bottom = -76.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_constants/separation = 16
+mouse_filter = 2
 
 [node name="TowerPanel" type="PanelContainer" parent="Hud/BottomRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -526.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TowerBox" type="VBoxContainer" parent="Hud/BottomRow/TowerPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TowerHeader" type="HBoxContainer" parent="Hud/BottomRow/TowerPanel/TowerBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TowerLabel" type="Label" parent="Hud/BottomRow/TowerPanel/TowerBox/TowerHeader"]
+custom_minimum_size = Vector2(92, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.83, 0.9, 0.98, 0.94)
+theme_override_font_sizes/font_size = 11
+text = "TOWER BAY"
+
+[node name="SelectedTowerLabel" type="Label" parent="Hud/BottomRow/TowerPanel/TowerBox/TowerHeader"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 10
+text = "PHOTON SPLITTER READY"
+horizontal_alignment = 2
+clip_text = true
 
-[node name="TowerRow" type="HBoxContainer" parent="Hud/BottomRow/TowerPanel"]
+[node name="TowerRow" type="HBoxContainer" parent="Hud/BottomRow/TowerPanel/TowerBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="TowerLabel" type="Label" parent="Hud/BottomRow/TowerPanel/TowerRow"]
-custom_minimum_size = Vector2(52, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.9, 0.98, 0.94)
-theme_override_font_sizes/font_size = 15
-text = "Build"
-vertical_alignment = 1
-
-[node name="TowerScroll" type="ScrollContainer" parent="Hud/BottomRow/TowerPanel/TowerRow"]
+[node name="TowerScroll" type="ScrollContainer" parent="Hud/BottomRow/TowerPanel/TowerBox/TowerRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 horizontal_scroll_mode = 1
 vertical_scroll_mode = 0
 
-[node name="TowerButtons" type="HBoxContainer" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll"]
+[node name="TowerButtons" type="HBoxContainer" parent="Hud/BottomRow/TowerPanel/TowerBox/TowerRow/TowerScroll"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 7
 
-[node name="PhotonButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll/TowerButtons"]
-custom_minimum_size = Vector2(128, 62)
+[node name="PhotonButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerBox/TowerRow/TowerScroll/TowerButtons"]
+custom_minimum_size = Vector2(112, 58)
 layout_mode = 2
 focus_mode = 0
 toggle_mode = true
-theme_override_constants/h_separation = 4
-theme_override_font_sizes/font_size = 12
-text = "Photon
-25 Sol"
+theme_override_constants/h_separation = 5
+theme_override_font_sizes/font_size = 11
+text = "PHOTON
+25 SOL"
 expand_icon = true
 
-[node name="CryoButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll/TowerButtons"]
-custom_minimum_size = Vector2(128, 62)
+[node name="CryoButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerBox/TowerRow/TowerScroll/TowerButtons"]
+custom_minimum_size = Vector2(112, 58)
 layout_mode = 2
 focus_mode = 0
 toggle_mode = true
-theme_override_constants/h_separation = 4
-theme_override_font_sizes/font_size = 12
-text = "Cryo
-30 Sol"
+theme_override_constants/h_separation = 5
+theme_override_font_sizes/font_size = 11
+text = "CRYO
+30 SOL"
 expand_icon = true
 
-[node name="BioLabButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll/TowerButtons"]
-custom_minimum_size = Vector2(128, 62)
+[node name="BioLabButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerBox/TowerRow/TowerScroll/TowerButtons"]
+custom_minimum_size = Vector2(112, 58)
 layout_mode = 2
 focus_mode = 0
 toggle_mode = true
-theme_override_constants/h_separation = 4
-theme_override_font_sizes/font_size = 12
-text = "Bio-Lab
-50 Sol"
+theme_override_constants/h_separation = 5
+theme_override_font_sizes/font_size = 11
+text = "BIO-LAB
+50 SOL"
 expand_icon = true
 
-[node name="MagneticNetButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll/TowerButtons"]
-custom_minimum_size = Vector2(128, 62)
+[node name="MagneticNetButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerBox/TowerRow/TowerScroll/TowerButtons"]
+custom_minimum_size = Vector2(112, 58)
 layout_mode = 2
 focus_mode = 0
 toggle_mode = true
-theme_override_constants/h_separation = 4
-theme_override_font_sizes/font_size = 12
-text = "Mag Net
-45 Sol"
+theme_override_constants/h_separation = 5
+theme_override_font_sizes/font_size = 11
+text = "MAG NET
+45 SOL"
 expand_icon = true
 
-[node name="HeliosButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll/TowerButtons"]
-custom_minimum_size = Vector2(128, 62)
+[node name="HeliosButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerBox/TowerRow/TowerScroll/TowerButtons"]
+custom_minimum_size = Vector2(112, 58)
 layout_mode = 2
 focus_mode = 0
 toggle_mode = true
-theme_override_constants/h_separation = 4
-theme_override_font_sizes/font_size = 12
-text = "Helios
-80 Sol"
+theme_override_constants/h_separation = 5
+theme_override_font_sizes/font_size = 11
+text = "HELIOS
+80 SOL"
 expand_icon = true
 
-[node name="TardigradeButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerRow/TowerScroll/TowerButtons"]
-custom_minimum_size = Vector2(128, 62)
+[node name="TardigradeButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerBox/TowerRow/TowerScroll/TowerButtons"]
+custom_minimum_size = Vector2(112, 58)
 layout_mode = 2
 focus_mode = 0
 toggle_mode = true
-theme_override_constants/h_separation = 4
-theme_override_font_sizes/font_size = 12
-text = "Tardi
-70 Sol"
+theme_override_constants/h_separation = 5
+theme_override_font_sizes/font_size = 11
+text = "TARDI
+70 SOL"
 expand_icon = true
+
+[node name="CenterViewButton" type="Button" parent="Hud/BottomRow/TowerPanel/TowerBox/TowerRow"]
+custom_minimum_size = Vector2(96, 58)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 10
+text = "CENTER
+SUN"
 
 [node name="MessagePanel" type="PanelContainer" parent="Hud/BottomRow"]
-custom_minimum_size = Vector2(500, 0)
-layout_mode = 2
+custom_minimum_size = Vector2(496, 0)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -496.0
+offset_top = -112.0
+offset_bottom = 0.0
+grow_horizontal = 0
+grow_vertical = 0
 
-[node name="MessageLabel" type="Label" parent="Hud/BottomRow/MessagePanel"]
+[node name="MessageBox" type="HBoxContainer" parent="Hud/BottomRow/MessagePanel"]
 layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MessageAccent" type="ColorRect" parent="Hud/BottomRow/MessagePanel/MessageBox"]
+custom_minimum_size = Vector2(4, 0)
+layout_mode = 2
+color = Color(1, 0.78, 0.26, 0.92)
+
+[node name="MessageLabel" type="Label" parent="Hud/BottomRow/MessagePanel/MessageBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.94, 0.92, 0.86, 0.96)
-theme_override_font_sizes/font_size = 14
-text = "Click a guide slot on an orbital ring, then start Wave 1."
+theme_override_font_sizes/font_size = 13
+text = "Select an orbital slot, then start Wave 1."
 autowrap_mode = 3
 vertical_alignment = 1
+
+[node name="HudFrameOrnaments" type="Control" parent="Hud"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_fx")

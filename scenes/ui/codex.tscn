@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://diu2fn8hhbhh1"]
+[gd_scene load_steps=5 format=3 uid="uid://diu2fn8hhbhh1"]
 
 [ext_resource type="Script" uid="uid://dtjoc0x8y5c28" path="res://scenes/ui/codex.gd" id="1_63g6e"]
-[ext_resource type="Texture2D" uid="uid://0q1dn5j8yos4" path="res://assets/sprites/backgrounds/main_menu_bg.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/backgrounds/menu_nebula.png" id="2_bg"]
+[ext_resource type="Script" path="res://scripts/ui/main_menu_fx.gd" id="3_fx"]
+[ext_resource type="Script" path="res://scripts/ui/animated_space_background.gd" id="4_bgfx"]
 
 [node name="Codex" type="Control" unique_id=525885548]
 layout_mode = 3
@@ -22,6 +24,7 @@ grow_vertical = 2
 texture = ExtResource("2_bg")
 expand_mode = 1
 stretch_mode = 6
+script = ExtResource("4_bgfx")
 
 [node name="shade" type="ColorRect" parent="."]
 layout_mode = 1
@@ -30,7 +33,17 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.005, 0.008, 0.016, 0.78)
+color = Color(0.005, 0.008, 0.016, 0.72)
+
+[node name="SpaceLifeLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_fx")
 
 [node name="panel" type="PanelContainer" parent="."]
 layout_mode = 1
@@ -142,10 +155,23 @@ custom_minimum_size = Vector2(780, 460)
 layout_mode = 2
 horizontal_scroll_mode = 0
 
-[node name="body_label" type="Label" parent="panel/margin/root_box/content_box/article_box/body_scroll"]
+[node name="body_label" type="RichTextLabel" parent="panel/margin/root_box/content_box/article_box/body_scroll"]
 custom_minimum_size = Vector2(740, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.94, 1, 1)
-theme_override_font_sizes/font_size = 17
-text = "Perk the Star is a single-player, real-time orbital tower defense game. You command the Sol Defense Corps and protect the Sun from Astrophage: photosynthetic microorganisms feeding on stellar energy.\n\nObjective\n- Keep luminosity above zero.\n- Clear all 12 JSON-authored waves.\n- Spend Sol Credits on orbiting defense satellites.\n- Use Solar Flare pressure relief every 3 waves.\n\nCommand phrase\nDefend me, defend me! - Oa ka Perk!"
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
 autowrap_mode = 3
+
+[node name="FrameOrnaments" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_fx")
+draw_drift = false
+draw_frame = true
+frame_target_path = NodePath("../panel")

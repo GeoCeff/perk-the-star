@@ -1,10 +1,12 @@
-[gd_scene load_steps=6 format=3 uid="uid://cicrgf64sxa6b"]
+[gd_scene load_steps=8 format=3 uid="uid://cicrgf64sxa6b"]
 
 [ext_resource type="Script" uid="uid://b31xthdyco4vm" path="res://scripts/ui/settings_overlay.gd" id="1_settings"]
 [ext_resource type="Script" uid="uid://dpojx4cmnlqh5" path="res://scripts/ui/main_menu_music_toggle.gd" id="2_music_toggle"]
 [ext_resource type="Script" uid="uid://b43b2tdsky7bc" path="res://scripts/ui/main_menu_music_volume_slider.gd" id="3_music_slider"]
 [ext_resource type="Script" uid="uid://c2vvtiafs7dj8" path="res://scripts/ui/settings_overlay_close_button.gd" id="4_close"]
-[ext_resource type="Texture2D" uid="uid://0q1dn5j8yos4" path="res://assets/sprites/backgrounds/main_menu_bg.png" id="5_bg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/backgrounds/menu_nebula.png" id="5_bg"]
+[ext_resource type="Script" path="res://scripts/ui/main_menu_fx.gd" id="6_fx"]
+[ext_resource type="Script" path="res://scripts/ui/animated_space_background.gd" id="7_bgfx"]
 
 [node name="SettingsOverlay" type="Control"]
 layout_mode = 3
@@ -25,6 +27,7 @@ grow_vertical = 2
 texture = ExtResource("5_bg")
 expand_mode = 1
 stretch_mode = 6
+script = ExtResource("7_bgfx")
 
 [node name="shade" type="ColorRect" parent="."]
 layout_mode = 1
@@ -33,7 +36,17 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.005, 0.008, 0.016, 0.78)
+color = Color(0.005, 0.008, 0.016, 0.72)
+
+[node name="SpaceLifeLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_fx")
 
 [node name="settings_panel" type="PanelContainer" parent="."]
 layout_mode = 1
@@ -136,39 +149,12 @@ custom_minimum_size = Vector2(860, 340)
 layout_mode = 2
 horizontal_scroll_mode = 0
 
-[node name="settings_body" type="Label" parent="settings_panel/settings_margin/settings_box/settings_scroll"]
+[node name="settings_body" type="RichTextLabel" parent="settings_panel/settings_margin/settings_box/settings_scroll"]
 custom_minimum_size = Vector2(820, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.94, 1, 1)
-theme_override_font_sizes/font_size = 16
-text = "Required Setup
-- Open the repository root in Godot 4.6, not the nested game/ folder.
-- Run project.godot from the repository root.
-- The main menu launches res://scenes/game.tscn.
-- Gameplay HUD lives in res://scenes/ui/game_hud.tscn.
-- Wave data lives in res://data/waves/wave_01.json through wave_12.json.
-
-Audio
-- Use this settings panel to toggle music or change music volume.
-- Main menu, wave, and ending music all read the same saved music setting.
-
-Native Extension
-- GDExtension source lives in gdextension/src.
-- Debug rebuild: scons platform=windows target=template_debug arch=x86_64
-- Output library: game/bin/perk_the_star.dll
-- Entry symbol must stay perk_the_star_init.
-
-Recommended Workflow
-1. Edit scenes and scripts from the root project.
-2. Validate wave JSON when changing data/waves.
-3. Rebuild the native extension only after C++ changes.
-4. Run the main menu, then Start Defense to enter the current game scene.
-
-Common Fixes
-- Failed to load GDExtension: rebuild and confirm game/bin/perk_the_star.gdextension points to the DLL.
-- gdextension_interface.h missing: install or update godot-cpp before building.
-- Wave JSON issue: validate the matching file in data/waves.
-- Missing music: confirm assets/audio/bgm contains main_menu.ogg, waves_1.ogg, waves_2.ogg, and end.ogg."
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
 autowrap_mode = 3
 
 [node name="settings_close" type="Button" parent="settings_panel/settings_margin/settings_box"]
@@ -178,3 +164,16 @@ size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
 text = "Close"
 script = ExtResource("4_close")
+
+[node name="FrameOrnaments" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_fx")
+draw_drift = false
+draw_frame = true
+frame_target_path = NodePath("../settings_panel")

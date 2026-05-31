@@ -1,11 +1,13 @@
 [gd_scene format=3 uid="uid://cdqloioshs0p2"]
 
 [ext_resource type="Script" uid="uid://cbos8pff64cu3" path="res://scripts/ui/main_menu.gd" id="1_l6cm7"]
-[ext_resource type="Texture2D" uid="uid://0q1dn5j8yos4" path="res://assets/sprites/backgrounds/main_menu_bg.png" id="2_ekxnf"]
+[ext_resource type="Texture2D" uid="uid://c70g8b74fpkwt" path="res://assets/sprites/backgrounds/menu_nebula.png" id="2_ekxnf"]
 [ext_resource type="Script" uid="uid://bhui8jry1oi4u" path="res://scripts/ui/main_menu_play_button.gd" id="4_play"]
 [ext_resource type="Script" uid="uid://ic6wsjqiseb5" path="res://scripts/ui/main_menu_codex_button.gd" id="5_codex"]
 [ext_resource type="Script" uid="uid://dp28jtyop8oji" path="res://scripts/ui/main_menu_settings_button.gd" id="6_settings"]
 [ext_resource type="Script" uid="uid://grb3584gy6mf" path="res://scripts/ui/main_menu_exit_button.gd" id="7_exit"]
+[ext_resource type="Script" uid="uid://c1htnov1edgt4" path="res://scripts/ui/main_menu_fx.gd" id="8_fx"]
+[ext_resource type="Script" uid="uid://grt1vhv12ii2" path="res://scripts/ui/animated_space_background.gd" id="9_bgfx"]
 
 [node name="MainMenu" type="Control" unique_id=1745890239]
 layout_mode = 3
@@ -26,6 +28,7 @@ grow_vertical = 2
 texture = ExtResource("2_ekxnf")
 expand_mode = 1
 stretch_mode = 6
+script = ExtResource("9_bgfx")
 
 [node name="shade" type="ColorRect" parent="." unique_id=1129382354]
 layout_mode = 1
@@ -34,7 +37,32 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.018, 0.024, 0.04, 0.72)
+color = Color(0.006, 0.012, 0.024, 0.68)
+
+[node name="SpaceLifeLayer" type="Control" parent="." unique_id=1226320939]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("8_fx")
+
+[node name="menu_frame" type="PanelContainer" parent="." unique_id=191122492]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -430.0
+offset_top = -330.0
+offset_right = 430.0
+offset_bottom = 330.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="CenterContainer" type="CenterContainer" parent="." unique_id=1974992223]
 layout_mode = 1
@@ -96,7 +124,6 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Start Defense"
 script = ExtResource("4_play")
-game_scene_path = "res://scenes/game.tscn"
 
 [node name="btn_codex" type="Button" parent="CenterContainer/menu_box/button_box" unique_id=915298908]
 custom_minimum_size = Vector2(420, 52)
@@ -104,7 +131,6 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Mission Codex"
 script = ExtResource("5_codex")
-codex_scene_path = "res://scenes/ui/mission_codex.tscn"
 
 [node name="btn_settings" type="Button" parent="CenterContainer/menu_box/button_box" unique_id=2021492708]
 custom_minimum_size = Vector2(420, 52)
@@ -112,7 +138,6 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Settings"
 script = ExtResource("6_settings")
-settings_scene_path = "res://scenes/ui/settings_overlay.tscn"
 
 [node name="btn_exit" type="Button" parent="CenterContainer/menu_box/button_box" unique_id=1448773002]
 custom_minimum_size = Vector2(420, 52)
@@ -121,19 +146,57 @@ theme_override_font_sizes/font_size = 20
 text = "Exit"
 script = ExtResource("7_exit")
 
+[node name="FrameOrnaments" type="Control" parent="." unique_id=2030709623]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("8_fx")
+draw_drift = false
+draw_frame = true
+frame_target_path = NodePath("../menu_frame")
+
 [node name="version_label" type="Label" parent="." unique_id=228617138]
 layout_mode = 1
-anchors_preset = 12
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -116.0
+offset_right = 760.0
+offset_bottom = -88.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.82, 0.94, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
+theme_override_colors/font_outline_color = Color(0.02, 0.12, 0.18, 0.95)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 2
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 16
+text = "CMSC 21 | C++ / Godot Engine 4.x / GDExtension"
+
+[node name="author_label" type="Label" parent="." unique_id=260142711]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 120.0
-offset_top = -54.0
-offset_right = -120.0
-offset_bottom = -22.0
-grow_horizontal = 2
+offset_left = -660.0
+offset_top = -116.0
+offset_right = -40.0
+offset_bottom = -88.0
+grow_horizontal = 0
 grow_vertical = 0
-theme_override_colors/font_color = Color(0.63, 0.72, 0.84, 1)
-theme_override_font_sizes/font_size = 14
-text = "CMSC 21 - Geo Ceff Gabaisen & Dexter Juevesano | C++ / Godot Engine 4.x / GDExtension"
-horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.68, 0.94, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
+theme_override_colors/font_outline_color = Color(0.02, 0.12, 0.18, 0.95)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 2
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 16
+text = "Geo Ceff Gabaisen & Dexter Juevesano"
+horizontal_alignment = 2
