@@ -19,8 +19,7 @@ env.Append(CPPPATH=[
     f"{godot_cpp_dir}/include",
     f"{godot_cpp_dir}/gen/include",
     f"{godot_cpp_dir}/godot-headers",
-    "gdextension/src",
-    "src"
+    "gdextension/src"
 ])
 
 env.Append(LIBPATH=[f"{godot_cpp_dir}/bin"])

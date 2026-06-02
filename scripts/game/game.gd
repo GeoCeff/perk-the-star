@@ -30,13 +30,6 @@ const VIEW_EDGE_PAN_MARGIN: float = 34.0
 const VIEW_EDGE_PAN_BOTTOM_MARGIN: float = 92.0
 const VIEW_EDGE_PAN_SPEED: float = 560.0
 
-const SUN_ASSET_PATHS: Dictionary = {
-	"happy": "res://assets/sprites/sun/Sun_Happy_Placeholder.png",
-	"concerned": "res://assets/sprites/sun/Sun_Concerned_Placeholder.png",
-	"distressed": "res://assets/sprites/sun/Sun_Distressed_Placeholder.png",
-	"critical": "res://assets/sprites/sun/Sun_Crit_Placeholder.png",
-}
-
 const ENEMY_ASSET_PATHS: Dictionary = {
 	"drifter": "res://assets/sprites/enemies/Drifter.png",
 	"bloom": "res://assets/sprites/enemies/Bloom.png",
@@ -153,7 +146,6 @@ var prime_frenzy_interval: float = 0.0
 var prime_frenzy_max_active: int = 18
 var game_hud: GameHud
 var textures: Dictionary = {
-	"sun": {},
 	"enemies": {},
 	"towers": {},
 }
@@ -425,8 +417,6 @@ func _draw_orbit_rings(sun: Vector2) -> void:
 
 func _load_assets() -> void:
 	battle_background_texture = load(BATTLE_BACKGROUND_PATH) as Texture2D
-	for key in SUN_ASSET_PATHS.keys():
-		textures["sun"][key] = load(str(SUN_ASSET_PATHS[key]))
 	for key in ENEMY_ASSET_PATHS.keys():
 		textures["enemies"][key] = load(str(ENEMY_ASSET_PATHS[key]))
 	for key in TOWER_ASSET_PATHS.keys():
