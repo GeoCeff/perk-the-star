@@ -2,6 +2,10 @@
 .godot/
 /android/
 godot-cpp/
+
+# Godot/Windows can leave a temporary DLL beside the active extension.
+game/bin/~*.dll
+
 *.tmp
 *.obj
 *.obj.import

@@ -1,0 +1,102 @@
+extends RefCounted
+
+# Static gameplay data lives here so game.gd can focus on runtime flow.
+
+const MAX_WAVES: int = 12
+const SUN_RADIUS: float = 58.0
+const SUN_DAMAGE_RADIUS: float = 62.0
+const RING_RADIUS_SCALE: float = 1.5
+const ENEMY_SPAWN_PADDING: float = 260.0
+const SLOT_ANGLE_OFFSET: float = -PI / 2.0
+const FLARE_DAMAGE: float = 85.0
+const BURROWER_DIG_RADIUS: float = 74.0
+const BURROWER_EXCAVATION_HP: float = 52.0
+const BURROWER_DRAIN_INTERVAL: float = 1.0
+const BURROWER_DRAIN_DAMAGE: float = 0.012
+
+const ENEMY_ASSET_PATHS: Dictionary = {
+	"drifter": "res://assets/sprites/enemies/Drifter.png",
+	"bloom": "res://assets/sprites/enemies/Bloom.png",
+	"burrower": "res://assets/sprites/enemies/Coronal Burrower.png",
+	"mimic": "res://assets/sprites/enemies/Photon Mimic.png",
+	"farmer": "res://assets/sprites/enemies/Solar Farmer.png",
+	"prime": "res://assets/sprites/enemies/ASTROPHAGE PRIME.png",
+}
+
+const TOWER_ASSET_PATHS: Dictionary = {
+	"photon_splitter": "res://assets/sprites/clean/towers/photon_splitter.png",
+	"cryo_probe": "res://assets/sprites/clean/towers/cryo_probe.png",
+	"bio_lab": "res://assets/sprites/clean/towers/bio_lab.png",
+	"magnetic_net": "res://assets/sprites/clean/towers/magnetic_net.png",
+	"helios_cannon": "res://assets/sprites/clean/towers/helios_cannon.png",
+	"tardigrade_bomb": "res://assets/sprites/clean/towers/tardigrade_bomb.png",
+}
+
+const RINGS: Array = [
+	{"id": 1, "name": "Corona Belt", "radius": 80.0, "period": 6.0, "slots": 4, "best": "Photon Splitter, Helios Cannon"},
+	{"id": 2, "name": "Chromosphere Band", "radius": 140.0, "period": 11.0, "slots": 6, "best": "Cryo Probe, Tardigrade Bomb"},
+	{"id": 3, "name": "Photosphere Arc", "radius": 210.0, "period": 17.0, "slots": 8, "best": "Bio-Lab Station, Magnetic Net"},
+	{"id": 4, "name": "Outer Veil", "radius": 290.0, "period": 26.0, "slots": 10, "best": "Early intercept"},
+]
+
+const VARIANT_KEYS: Array = ["drifter", "bloom", "burrower", "mimic", "farmer", "prime"]
+
+const TOWER_ORDER: Array = [
+	"photon_splitter",
+	"cryo_probe",
+	"bio_lab",
+	"magnetic_net",
+	"helios_cannon",
+	"tardigrade_bomb",
+]
+
+const TOWER_CONFIGS: Dictionary = {
+	"photon_splitter": {"label": "Photon Splitter", "damage": 16.0, "rate": 0.9, "range": 225.0, "color": Color(1.0, 0.86, 0.28)},
+	"cryo_probe": {"label": "Cryo Probe", "damage": 5.0, "rate": 0.55, "range": 230.0, "color": Color(0.34, 0.86, 1.0)},
+	"bio_lab": {"label": "Bio-Lab Station", "damage": 10.0, "rate": 0.55, "range": 245.0, "color": Color(0.46, 1.0, 0.52)},
+	"magnetic_net": {"label": "Magnetic Net", "damage": 4.0, "rate": 0.42, "range": 270.0, "color": Color(0.76, 0.62, 1.0)},
+	"helios_cannon": {"label": "Helios Cannon", "damage": 76.0, "rate": 0.14, "range": 280.0, "color": Color(1.0, 0.43, 0.22)},
+	"tardigrade_bomb": {"label": "Tardigrade Bomb", "damage": 20.0, "rate": 0.38, "range": 240.0, "color": Color(1.0, 0.58, 0.76)},
+}
+
+const TOWER_INFO: Dictionary = {
+	"photon_splitter": {
+		"role": "STEADY BEAM  |  EARLY INTERCEPT",
+		"body": "Fast, reliable single-target damage for thinning the first Astrophage lines.",
+		"note": "Caution: Photon Mimics ignore it and Solar Farmers feed on photon fire.",
+	},
+	"cryo_probe": {
+		"role": "CONTROL  |  SLOW FIELD",
+		"body": "Low damage, but every hit chills targets and cuts their speed for a short window.",
+		"note": "Can be forced offline by solar storm events.",
+	},
+	"bio_lab": {
+		"role": "SUPPORT  |  EXCAVATION",
+		"body": "Analyzes weak points, clears Coronal Burrowers, and can crack Prime's shell.",
+		"note": "Research surge events can temporarily multiply Bio-Lab fire rate.",
+	},
+	"magnetic_net": {
+		"role": "CONTROL  |  LONG RANGE",
+		"body": "Wide reach and slow effects make it strong at keeping enemies inside kill zones.",
+		"note": "Pair with high-damage towers to capitalize on slowed targets.",
+	},
+	"helios_cannon": {
+		"role": "BURST  |  HEAVY ORDNANCE",
+		"body": "Slow-firing cannon with high impact damage and excellent range.",
+		"note": "Caution: Solar Farmers absorb Helios fire and accelerate.",
+	},
+	"tardigrade_bomb": {
+		"role": "HEAVY SHOT  |  FINISHER",
+		"body": "Delivers chunky damage at a measured pace for tougher enemies that survive the net.",
+		"note": "Best after Cryo or Magnetic Net has slowed the lane.",
+	},
+}
+
+const ENEMY_CONFIGS: Dictionary = {
+	"drifter": {"variant_id": 0, "label": "Drifter", "hp": 30.0, "speed": 48.0, "damage": 0.05, "reward": 5, "radius": 15.0, "draw_size": 46.0, "color": Color(0.96, 0.42, 0.48)},
+	"bloom": {"variant_id": 1, "label": "Bloom", "hp": 62.0, "speed": 44.0, "damage": 0.05, "reward": 10, "radius": 18.0, "draw_size": 54.0, "color": Color(1.0, 0.62, 0.36)},
+	"burrower": {"variant_id": 2, "label": "Coronal Burrower", "hp": 115.0, "speed": 32.0, "damage": 0.08, "reward": 20, "radius": 19.0, "draw_size": 58.0, "color": Color(0.76, 0.50, 0.30)},
+	"mimic": {"variant_id": 3, "label": "Photon Mimic", "hp": 52.0, "speed": 50.0, "damage": 0.05, "reward": 15, "radius": 16.0, "draw_size": 48.0, "color": Color(0.70, 0.62, 0.98)},
+	"farmer": {"variant_id": 4, "label": "Solar Farmer", "hp": 44.0, "speed": 46.0, "damage": 0.05, "reward": 12, "radius": 17.0, "draw_size": 50.0, "color": Color(0.55, 0.92, 0.45)},
+	"prime": {"variant_id": 5, "label": "Astrophage Prime", "hp": 520.0, "speed": 24.0, "damage": 0.12, "reward": 100, "radius": 34.0, "draw_size": 84.0, "color": Color(1.0, 0.18, 0.15)},
+}
