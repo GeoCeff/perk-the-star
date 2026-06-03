@@ -7,15 +7,57 @@ extends Control
 @export var draw_frame: bool = false
 @export var frame_target_path: NodePath
 
-const DRIFT_ASSETS: Array[String] = [
-	"res://assets/sprites/enemies/Drifter.png",
-	"res://assets/sprites/enemies/Bloom.png",
-	"res://assets/sprites/enemies/Photon Mimic.png",
-	"res://assets/sprites/enemies/Solar Farmer.png",
-	"res://assets/sprites/enemies/Coronal Burrower.png",
+const DRIFT_ANIMATION_SETS: Array = [
+	{
+		"base_angle": 0.0,
+		"fps": 6.0,
+		"frames": [
+			"res://assets/sprites/clean/enemies_optimized/drifter_move_1.png",
+			"res://assets/sprites/clean/enemies_optimized/drifter_move_2.png",
+			"res://assets/sprites/clean/enemies_optimized/drifter_move_3.png",
+		],
+	},
+	{
+		"base_angle": 0.0,
+		"fps": 6.0,
+		"frames": [
+			"res://assets/sprites/clean/enemies_optimized/bloom_move_1.png",
+			"res://assets/sprites/clean/enemies_optimized/bloom_move_2.png",
+			"res://assets/sprites/clean/enemies_optimized/bloom_move_3.png",
+		],
+	},
+	{
+		"base_angle": -PI * 0.25,
+		"fps": 6.0,
+		"frames": [
+			"res://assets/sprites/clean/enemies_optimized/solar_move_1.png",
+			"res://assets/sprites/clean/enemies_optimized/solar_move_2.png",
+			"res://assets/sprites/clean/enemies_optimized/solar_move_3.png",
+		],
+	},
+	{
+		"base_angle": -PI * 0.5,
+		"fps": 7.0,
+		"frames": [
+			"res://assets/sprites/clean/enemies_optimized/coronal_move_1.png",
+			"res://assets/sprites/clean/enemies_optimized/coronal_move_2.png",
+			"res://assets/sprites/clean/enemies_optimized/coronal_move_3.png",
+			"res://assets/sprites/clean/enemies_optimized/coronal_move_4.png",
+		],
+	},
+	{
+		"base_angle": 0.0,
+		"fps": 5.0,
+		"frames": [
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_1.png",
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_2.png",
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_3.png",
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_4.png",
+		],
+	},
 ]
 
-var drift_textures: Array[Texture2D] = []
+var drift_animation_sets: Array = []
 var drifters: Array[Dictionary] = []
 
 
@@ -39,28 +81,36 @@ func _draw() -> void:
 
 
 func _load_textures() -> void:
-	drift_textures.clear()
-	for path in DRIFT_ASSETS:
-		var texture: Texture2D = load(path) as Texture2D
-		if texture != null:
-			drift_textures.append(texture)
+	drift_animation_sets.clear()
+	for spec in DRIFT_ANIMATION_SETS:
+		var frames: Array[Texture2D] = []
+		for path in spec.get("frames", []):
+			var texture: Texture2D = load(str(path)) as Texture2D
+			if texture != null:
+				frames.append(texture)
+		if not frames.is_empty():
+			drift_animation_sets.append({
+				"frames": frames,
+				"base_angle": float(spec.get("base_angle", 0.0)),
+				"fps": float(spec.get("fps", 6.0)),
+			})
 
 
 func _build_drifters() -> void:
 	drifters = [
-		{"uv": Vector2(0.10, 0.18), "speed": Vector2(10.0, 3.0), "scale": 0.044, "alpha": 0.18, "phase": 0.2},
-		{"uv": Vector2(0.86, 0.20), "speed": Vector2(-8.0, 4.0), "scale": 0.040, "alpha": 0.16, "phase": 1.4},
-		{"uv": Vector2(0.22, 0.76), "speed": Vector2(6.0, -2.0), "scale": 0.036, "alpha": 0.14, "phase": 2.2},
-		{"uv": Vector2(0.78, 0.72), "speed": Vector2(-7.0, -2.0), "scale": 0.042, "alpha": 0.16, "phase": 3.1},
-		{"uv": Vector2(0.47, 0.14), "speed": Vector2(4.0, 2.0), "scale": 0.032, "alpha": 0.13, "phase": 4.0},
-		{"uv": Vector2(0.56, 0.86), "speed": Vector2(-5.0, -3.0), "scale": 0.034, "alpha": 0.14, "phase": 5.2},
-		{"uv": Vector2(0.04, 0.54), "speed": Vector2(8.0, 1.0), "scale": 0.032, "alpha": 0.12, "phase": 2.8},
-		{"uv": Vector2(0.95, 0.52), "speed": Vector2(-9.0, 1.0), "scale": 0.032, "alpha": 0.12, "phase": 0.9},
+		{"uv": Vector2(0.10, 0.18), "speed": Vector2(10.0, 3.0), "scale": 0.40, "alpha": 0.18, "phase": 0.2},
+		{"uv": Vector2(0.86, 0.20), "speed": Vector2(-8.0, 4.0), "scale": 0.38, "alpha": 0.16, "phase": 1.4},
+		{"uv": Vector2(0.22, 0.76), "speed": Vector2(6.0, -2.0), "scale": 0.34, "alpha": 0.14, "phase": 2.2},
+		{"uv": Vector2(0.78, 0.72), "speed": Vector2(-7.0, -2.0), "scale": 0.40, "alpha": 0.16, "phase": 3.1},
+		{"uv": Vector2(0.47, 0.14), "speed": Vector2(4.0, 2.0), "scale": 0.32, "alpha": 0.13, "phase": 4.0},
+		{"uv": Vector2(0.56, 0.86), "speed": Vector2(-5.0, -3.0), "scale": 0.36, "alpha": 0.14, "phase": 5.2},
+		{"uv": Vector2(0.04, 0.54), "speed": Vector2(8.0, 1.0), "scale": 0.32, "alpha": 0.12, "phase": 2.8},
+		{"uv": Vector2(0.95, 0.52), "speed": Vector2(-9.0, 1.0), "scale": 0.34, "alpha": 0.12, "phase": 0.9},
 	]
 
 
 func _draw_drift(time_seconds: float) -> void:
-	if drift_textures.is_empty():
+	if drift_animation_sets.is_empty():
 		return
 
 	var viewport_size: Vector2 = get_rect().size
@@ -68,18 +118,25 @@ func _draw_drift(time_seconds: float) -> void:
 
 	for i in range(drifters.size()):
 		var item: Dictionary = drifters[i]
-		var texture: Texture2D = drift_textures[i % drift_textures.size()]
+		var animation_set: Dictionary = drift_animation_sets[i % drift_animation_sets.size()]
+		var frames: Array = animation_set.get("frames", [])
+		if frames.is_empty():
+			continue
 		var uv: Vector2 = item["uv"]
 		var speed: Vector2 = item["speed"]
 		var phase: float = float(item["phase"])
+		var fps: float = float(animation_set.get("fps", 6.0))
+		var frame_index: int = int(floor((time_seconds + phase) * fps)) % frames.size()
+		var texture: Texture2D = frames[frame_index]
 		var alpha: float = float(item["alpha"]) * (0.72 + sin(time_seconds * 0.9 + phase) * 0.18)
 		var pos: Vector2 = Vector2(
-			wrapf(viewport_size.x * uv.x + time_seconds * speed.x, -96.0, viewport_size.x + 96.0),
-			wrapf(viewport_size.y * uv.y + time_seconds * speed.y + sin(time_seconds * 0.8 + phase) * 18.0, -96.0, viewport_size.y + 96.0)
+			wrapf(viewport_size.x * uv.x + time_seconds * speed.x, -140.0, viewport_size.x + 140.0),
+			wrapf(viewport_size.y * uv.y + time_seconds * speed.y + sin(time_seconds * 0.8 + phase) * 18.0, -140.0, viewport_size.y + 140.0)
 		)
 		var sprite_size: Vector2 = texture.get_size() * float(item["scale"])
-		var rotation: float = sin(time_seconds * 0.35 + phase) * 0.22
-		draw_set_transform(pos, rotation, Vector2.ONE)
+		var travel_angle: float = speed.angle() if speed.length_squared() > 0.001 else 0.0
+		var drift_rotation: float = travel_angle - float(animation_set.get("base_angle", 0.0)) + sin(time_seconds * 0.35 + phase) * 0.12
+		draw_set_transform(pos, drift_rotation, Vector2.ONE)
 		draw_texture_rect(texture, Rect2(sprite_size * -0.5, sprite_size), false, Color(0.70, 0.92, 1.0, alpha))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 

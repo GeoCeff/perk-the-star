@@ -1,32 +1,31 @@
-[gd_scene load_steps=3 format=3 uid="uid://b7yr0rke7idwq"]
+[gd_scene format=3 uid="uid://b7yr0rke7idwq"]
 
 [ext_resource type="Script" uid="uid://c33r13ekn42tf" path="res://scripts/game/game.gd" id="1_game"]
 [ext_resource type="PackedScene" uid="uid://b15jp1xqi4ldg" path="res://scenes/ui/game_hud.tscn" id="2_hud"]
 
-[node name="Game" type="Node2D"]
+[node name="Game" type="Node2D" unique_id=1431967662]
 script = ExtResource("1_game")
-playable_wave_limit = 12
 briefing_title = "SOL DEFENSE"
 
-[node name="World" type="Node2D" parent="."]
+[node name="World" type="Node2D" parent="." unique_id=32898660]
 
-[node name="Starfield" type="Node2D" parent="World"]
+[node name="Starfield" type="Node2D" parent="World" unique_id=697877361]
 
-[node name="OrbitRings" type="Node2D" parent="World"]
+[node name="OrbitRings" type="Node2D" parent="World" unique_id=441847850]
 
-[node name="TowerSlots" type="Node2D" parent="World"]
+[node name="TowerSlots" type="Node2D" parent="World" unique_id=1605875172]
 
-[node name="Towers" type="Node2D" parent="World"]
+[node name="Towers" type="Node2D" parent="World" unique_id=1260616523]
 
-[node name="Enemies" type="Node2D" parent="World"]
+[node name="Enemies" type="Node2D" parent="World" unique_id=1686819447]
 
-[node name="Projectiles" type="Node2D" parent="World"]
+[node name="Projectiles" type="Node2D" parent="World" unique_id=2050066553]
 
-[node name="Effects" type="Node2D" parent="World"]
+[node name="Effects" type="Node2D" parent="World" unique_id=1147130766]
 
-[node name="Audio" type="Node" parent="."]
+[node name="Audio" type="Node" parent="." unique_id=1584885674]
 
-[node name="GameMusic" type="AudioStreamPlayer" parent="Audio"]
+[node name="GameMusic" type="AudioStreamPlayer" parent="Audio" unique_id=365360786]
 volume_db = -8.0
 
-[node name="GameHudLayer" parent="." instance=ExtResource("2_hud")]
+[node name="GameHudLayer" parent="." unique_id=672647236 instance=ExtResource("2_hud")]

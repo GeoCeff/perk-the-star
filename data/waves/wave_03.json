@@ -1,10 +1,20 @@
 {
-    "wave": 3, "name": "Splitting Point",
-    "spawn_interval": 2.4,
+    "wave": 3,
+    "name": "Splitting Point",
+    "wave_type": "formation",
+    "spawn_interval": 2.8,
     "enemies": [
-        { "variant": "drifter", "count": 8 },
-        { "variant": "bloom", "count": 4 }
+        { "variant": "drifter", "count": 14 },
+        { "variant": "bloom", "count": 6 }
     ],
-    "event": null, "reward_base": 45,
-    "tutorial_hint": "Blooms split into 3 Drifters on direct damage. Use Cryo Probe first!"
+    "formation": {
+        "type": "v_shape",
+        "variants": ["drifter"],
+        "count": 9,
+        "spread_angle_deg": 60
+    },
+    "event": null,
+    "reward_base": 38,
+    "escalation_threshold_seconds": null,
+    "tutorial_hint": "Blooms split into 3 Drifters on direct damage. Use AoE or Cryo first!"
 }

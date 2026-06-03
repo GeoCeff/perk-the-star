@@ -112,6 +112,8 @@ static func managed_view_data(tower: Dictionary, rings: Array) -> Dictionary:
 		float(current_stats["rate"]),
 		float(current_stats["range"]),
 	]
+	if tower_type == "helios_cannon" and tower_level >= 2:
+		stats_text += "\nRIGHT-CLICK TOWER  |  SLINGSHOT SHOT 50 SOL"
 	if can_upgrade:
 		stats_text += "\nNEXT  DMG +%.0f  |  RATE +%.2f/S  |  RANGE +%.0f" % [
 			float(next_stats["damage"]) - float(current_stats["damage"]),

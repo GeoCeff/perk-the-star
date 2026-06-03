@@ -21,6 +21,9 @@ void OrbitalTower::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_upgrade_level"),      &OrbitalTower::get_upgrade_level);
     ClassDB::bind_method(D_METHOD("get_engagement_arc_deg"), &OrbitalTower::get_engagement_arc_deg);
     ClassDB::bind_method(D_METHOD("set_bio_analyzed", "id"), &OrbitalTower::set_bio_analyzed);
+    ClassDB::bind_method(D_METHOD("get_slingshot_ready"), &OrbitalTower::get_slingshot_ready);
+    ClassDB::bind_method(D_METHOD("set_slingshot_mode", "value"), &OrbitalTower::set_slingshot_mode);
+    ClassDB::bind_method(D_METHOD("compute_physics_launch_velocity", "target_pos", "base_speed"), &OrbitalTower::compute_physics_launch_velocity);
 
     ADD_SIGNAL(MethodInfo("fire_at_target",
         PropertyInfo(Variant::OBJECT, "target_node"),
@@ -42,7 +45,7 @@ OrbitalTower::OrbitalTower()
       m_damage(10.0), m_fire_rate(0.3), m_fire_timer(0.0),
       m_slow_amount(0.0), m_chain_count(0), m_upgrade_level(1),
       m_analyzed_variant(-1), m_bio_multiplier(1.0), m_bio_timer(0.0),
-      m_cooldown_timer(0.0)
+      m_cooldown_timer(0.0), m_slingshot_mode(false), m_slingshot_charge(1.0)
 {}
 
 OrbitalTower::~OrbitalTower() {}
@@ -97,6 +100,22 @@ void OrbitalTower::try_fire() {
     // Emit signal — GDScript handles finding the actual target node
     // This keeps C++ clean and lets GDScript manage the node tree
     emit_signal("try_fire");
+}
+
+Vector2 OrbitalTower::compute_physics_launch_velocity(const Vector2& target_pos, double base_speed) const {
+    Vector2 to_target = target_pos - get_global_position();
+    if (to_target.length_squared() <= 0.0001f) {
+        to_target = m_sun_pos - get_global_position();
+    }
+    to_target = to_target.normalized();
+
+    Vector2 tangent(
+        static_cast<float>(-std::sin(m_angle)),
+        static_cast<float>( std::cos(m_angle))
+    );
+    double orbital_contribution = m_angular_velocity * m_ring_radius * 0.6;
+    return to_target * static_cast<float>(base_speed)
+         + tangent * static_cast<float>(orbital_contribution);
 }
 
 void OrbitalTower::upgrade() {

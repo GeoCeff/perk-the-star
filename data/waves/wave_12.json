@@ -1,20 +1,64 @@
 {
-    "wave": 12, "name": "Astrophage Prime",
-    "spawn_interval": 1.2,
+    "wave": 12,
+    "name": "Astrophage Prime",
+    "wave_type": "boss",
+    "spawn_interval": 0.5,
     "enemies": [
-        { "variant": "drifter", "count": 20 },
-        { "variant": "bloom", "count": 6 },
-        { "variant": "burrower", "count": 3 },
-        { "variant": "mimic", "count": 4 },
-        { "variant": "farmer", "count": 4 },
+        { "variant": "drifter", "count": 40 },
+        { "variant": "bloom", "count": 22 },
+        { "variant": "burrower", "count": 10 },
+        { "variant": "mimic", "count": 15 },
+        { "variant": "farmer", "count": 20 },
         { "variant": "prime", "count": 1 }
     ],
-    "event": {
-        "type": "prime_frenzy",
-        "trigger_at_percent": 0.95,
-        "interval": 1.8,
-        "max_active": 18
-    },
-    "reward_base": 220,
-    "tutorial_hint": "Astrophage Prime: SHELL is immune until Bio-Lab breaks it, then OPEN is vulnerable. Frenzy spawns Drifters nonstop!"
+    "clash_groups": [
+        {
+            "variants": [
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "bloom", "bloom", "bloom", "bloom", "bloom",
+                "bloom", "bloom", "bloom", "bloom", "bloom"
+            ],
+            "spawn_pattern": "ring",
+            "delay_before": 0.0
+        },
+        {
+            "variants": [
+                "burrower", "burrower", "burrower", "burrower", "burrower",
+                "burrower", "burrower", "burrower", "burrower", "burrower",
+                "mimic", "mimic", "mimic", "mimic", "mimic",
+                "mimic", "mimic", "mimic", "mimic", "mimic"
+            ],
+            "spawn_pattern": "v_shape",
+            "delay_before": 10.0
+        },
+        {
+            "variants": [
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "farmer", "farmer", "farmer", "farmer", "farmer",
+                "farmer", "farmer", "farmer", "farmer", "farmer",
+                "farmer", "farmer", "farmer", "farmer", "farmer",
+                "farmer", "farmer", "farmer", "farmer", "farmer",
+                "bloom", "bloom", "bloom", "bloom", "bloom",
+                "bloom", "bloom", "bloom", "bloom", "bloom", "bloom", "bloom",
+                "mimic", "mimic", "mimic", "mimic", "mimic"
+            ],
+            "spawn_pattern": "ring",
+            "delay_before": 20.0
+        },
+        {
+            "variants": ["prime"],
+            "spawn_pattern": "center_top",
+            "delay_before": 35.0
+        }
+    ],
+    "event": null,
+    "reward_base": 250,
+    "escalation_threshold_seconds": null,
+    "tutorial_hint": "Astrophage Prime arrives after its horde. Shell -> Active -> Frenzy. Bio-Lab breaks the shell!"
 }

@@ -41,7 +41,7 @@ func add_visual(kind: String, pos: Vector2, color: Color, duration: float, radiu
 	})
 
 
-func add_enemy_death(enemy: Dictionary, texture, draw_size: float) -> void:
+func add_enemy_death(enemy: Dictionary, texture, draw_size: float, rotates_sprite: bool = false) -> void:
 	var variant: String = str(enemy["variant"])
 	var radius: float = float(enemy.get("radius", 18.0))
 	var duration: float = 0.88 if variant == "prime" else 0.58
@@ -55,6 +55,8 @@ func add_enemy_death(enemy: Dictionary, texture, draw_size: float) -> void:
 		"radius": radius + 20.0,
 		"texture": texture,
 		"draw_size": draw_size,
+		"sprite_angle": float(enemy.get("sprite_angle", enemy.get("move_angle", 0.0))),
+		"rotates_sprite": rotates_sprite,
 	})
 
 

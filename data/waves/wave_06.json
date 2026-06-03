@@ -1,10 +1,40 @@
 {
-    "wave": 6, "name": "Solar Storm",
+    "wave": 6,
+    "name": "Solar Storm",
+    "wave_type": "clash",
     "spawn_interval": 2.0,
     "enemies": [
-        { "variant": "drifter", "count": 12 },
-        { "variant": "bloom", "count": 4 },
-        { "variant": "mimic", "count": 4 }
+        { "variant": "drifter", "count": 20 },
+        { "variant": "bloom", "count": 8 },
+        { "variant": "mimic", "count": 5 }
+    ],
+    "clash_groups": [
+        {
+            "variants": [
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter"
+            ],
+            "spawn_pattern": "ring",
+            "delay_before": 0.0
+        },
+        {
+            "variants": [
+                "bloom", "bloom", "bloom", "bloom",
+                "mimic", "mimic", "mimic"
+            ],
+            "spawn_pattern": "random",
+            "delay_before": 5.0
+        },
+        {
+            "variants": [
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "bloom", "bloom", "bloom", "bloom",
+                "mimic", "mimic"
+            ],
+            "spawn_pattern": "ring",
+            "delay_before": 14.0
+        }
     ],
     "event": {
         "type": "mid_wave_autoflare",
@@ -12,5 +42,6 @@
         "cryo_disruption_seconds": 8
     },
     "reward_base": 75,
-    "tutorial_hint": "A mid-wave solar storm fires automatically. Cryo Probes disrupted for 8 seconds!"
+    "escalation_threshold_seconds": 35,
+    "tutorial_hint": "MASSIVE WAVE - enemies arrive in rings! A mid-wave solar storm fires automatically."
 }

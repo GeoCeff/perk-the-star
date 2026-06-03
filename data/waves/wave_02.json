@@ -1,7 +1,13 @@
 {
-    "wave": 2, "name": "The Vanguard",
-    "spawn_interval": 2.6,
-    "enemies": [{ "variant": "drifter", "count": 8 }],
-    "event": null, "reward_base": 35,
-    "tutorial_hint": "Earn Sol Credits by defeating enemies. Spend them anytime to reinforce the orbit."
+    "wave": 2,
+    "name": "The Vanguard",
+    "wave_type": "normal",
+    "spawn_interval": 3.0,
+    "enemies": [
+        { "variant": "drifter", "count": 14 }
+    ],
+    "event": null,
+    "reward_base": 28,
+    "escalation_threshold_seconds": null,
+    "tutorial_hint": "Earn Sol Credits by defeating enemies. Spend them between waves."
 }

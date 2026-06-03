@@ -25,6 +25,94 @@ const ENEMY_ASSET_PATHS: Dictionary = {
 	"prime": "res://assets/sprites/enemies/ASTROPHAGE PRIME.png",
 }
 
+# Clean enemy sprites are animation frames. Photon Mimic's pulled frames are
+# transparent, so it keeps using ENEMY_ASSET_PATHS until usable frames arrive.
+const ENEMY_ANIMATION_PATHS: Dictionary = {
+	"drifter": {
+		"idle": [
+			"res://assets/sprites/clean/enemies_optimized/drifter_idle_1.png",
+			"res://assets/sprites/clean/enemies_optimized/drifter_idle_2.png",
+		],
+		"move": [
+			"res://assets/sprites/clean/enemies_optimized/drifter_move_1.png",
+			"res://assets/sprites/clean/enemies_optimized/drifter_move_2.png",
+			"res://assets/sprites/clean/enemies_optimized/drifter_move_3.png",
+		],
+	},
+	"bloom": {
+		"idle": [
+			"res://assets/sprites/clean/enemies_optimized/bloom_idle_1.png",
+			"res://assets/sprites/clean/enemies_optimized/bloom_idle_2.png",
+		],
+		"move": [
+			"res://assets/sprites/clean/enemies_optimized/bloom_move_1.png",
+			"res://assets/sprites/clean/enemies_optimized/bloom_move_2.png",
+			"res://assets/sprites/clean/enemies_optimized/bloom_move_3.png",
+		],
+	},
+	"burrower": {
+		"idle": [
+			"res://assets/sprites/clean/enemies_optimized/coronal_idle_1.png",
+			"res://assets/sprites/clean/enemies_optimized/coronal_idle_2.png",
+		],
+		"move": [
+			"res://assets/sprites/clean/enemies_optimized/coronal_move_1.png",
+			"res://assets/sprites/clean/enemies_optimized/coronal_move_2.png",
+			"res://assets/sprites/clean/enemies_optimized/coronal_move_3.png",
+			"res://assets/sprites/clean/enemies_optimized/coronal_move_4.png",
+		],
+	},
+	"farmer": {
+		"idle": [
+			"res://assets/sprites/clean/enemies_optimized/solar_idle_1.png",
+			"res://assets/sprites/clean/enemies_optimized/solar_idle_2.png",
+		],
+		"move": [
+			"res://assets/sprites/clean/enemies_optimized/solar_move_1.png",
+			"res://assets/sprites/clean/enemies_optimized/solar_move_2.png",
+			"res://assets/sprites/clean/enemies_optimized/solar_move_3.png",
+		],
+	},
+	"prime": {
+		"idle": [
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_idle_1.png",
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_idle_2.png",
+		],
+		"move": [
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_1.png",
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_2.png",
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_3.png",
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_4.png",
+		],
+	},
+}
+
+const ENEMY_ANIMATION_BASE_ANGLES: Dictionary = {
+	"drifter": 0.0,
+	"bloom": 0.0,
+	"burrower": -PI * 0.5,
+	"farmer": -PI * 0.25,
+	"prime": 0.0,
+}
+
+const ENEMY_MASSES: Dictionary = {
+	"drifter": 1.0,
+	"bloom": 1.5,
+	"burrower": 3.0,
+	"mimic": 0.8,
+	"farmer": 1.2,
+	"prime": 8.0,
+}
+
+const ENEMY_GRAVITY_CONST: float = 5200000.0
+const ENEMY_GRAVITY_ACCEL_CAP: float = 360.0
+const PHYSICS_PROJECTILE_GRAVITY_CONST: float = 1450000.0
+const PHYSICS_PROJECTILE_DAMAGE_RING_MULT: float = 1.15
+const PHYSICS_PROJECTILE_OUTWARD_DEFLECT: float = 0.12
+const PHYSICS_PROJECTILE_MAX_LIFETIME: float = 4.0
+const PHYSICS_PROJECTILE_HIT_RADIUS: float = 18.0
+const SLINGSHOT_COST: int = 50
+
 # Active tower sprites use the clean generated set. Older sprite folders are
 # still kept in assets for comparison and future cleanup.
 const TOWER_ASSET_PATHS: Dictionary = {

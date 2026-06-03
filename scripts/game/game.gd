@@ -45,6 +45,17 @@ const HEALTH_BAR_HEIGHT: float = 6.0
 const AUTO_START_DELAY: float = 3.0
 
 const ENEMY_ASSET_PATHS: Dictionary = GameCatalog.ENEMY_ASSET_PATHS
+const ENEMY_ANIMATION_PATHS: Dictionary = GameCatalog.ENEMY_ANIMATION_PATHS
+const ENEMY_ANIMATION_BASE_ANGLES: Dictionary = GameCatalog.ENEMY_ANIMATION_BASE_ANGLES
+const ENEMY_MASSES: Dictionary = GameCatalog.ENEMY_MASSES
+const ENEMY_GRAVITY_CONST: float = GameCatalog.ENEMY_GRAVITY_CONST
+const ENEMY_GRAVITY_ACCEL_CAP: float = GameCatalog.ENEMY_GRAVITY_ACCEL_CAP
+const PHYSICS_PROJECTILE_GRAVITY_CONST: float = GameCatalog.PHYSICS_PROJECTILE_GRAVITY_CONST
+const PHYSICS_PROJECTILE_DAMAGE_RING_MULT: float = GameCatalog.PHYSICS_PROJECTILE_DAMAGE_RING_MULT
+const PHYSICS_PROJECTILE_OUTWARD_DEFLECT: float = GameCatalog.PHYSICS_PROJECTILE_OUTWARD_DEFLECT
+const PHYSICS_PROJECTILE_MAX_LIFETIME: float = GameCatalog.PHYSICS_PROJECTILE_MAX_LIFETIME
+const PHYSICS_PROJECTILE_HIT_RADIUS: float = GameCatalog.PHYSICS_PROJECTILE_HIT_RADIUS
+const SLINGSHOT_COST: int = GameCatalog.SLINGSHOT_COST
 const TOWER_ASSET_PATHS: Dictionary = GameCatalog.TOWER_ASSET_PATHS
 const RINGS: Array = GameCatalog.RINGS
 const ENEMY_CONFIGS: Dictionary = GameCatalog.ENEMY_CONFIGS
@@ -56,14 +67,25 @@ const ENEMY_CONFIGS: Dictionary = GameCatalog.ENEMY_CONFIGS
 var current_wave_data: Dictionary = {}
 var next_wave_preview: Dictionary = {}
 var spawn_queue: Array = []
+var clash_schedule: Array = []
+var wave_preview_points: Array = []
+var physics_projectiles: Array = []
+var ring_flash_timers: Dictionary = {}
 var spawn_timer: float = 0.0
 var spawned_wave_count: int = 0
 var total_wave_spawn_count: int = 0
 var wave_active: bool = false
+var wave_start_time: float = 0.0
+var escalation_checked: bool = false
+var counter_attack_active: bool = false
 var auto_start_timer: float = 0.0
 var auto_start_countdown_second: int = -1
 var message_text: String = "Select an orbital slot, then start Wave 1."
 var message_timer: float = 0.0
+var wave_banner_text: String = ""
+var wave_banner_subtitle: String = ""
+var wave_banner_timer: float = 0.0
+var wave_banner_accent: Color = Color(1.0, 0.82, 0.24)
 
 # Wave modifier state
 var wave_event: Dictionary = {}
@@ -92,6 +114,7 @@ var tutorial_layer: CanvasLayer
 var tutorial_overlay: TutorialOverlay
 var textures: Dictionary = {
 	"enemies": {},
+	"enemy_animations": {},
 	"towers": {},
 }
 var end_title_font: Font
@@ -103,18 +126,23 @@ var battle_background_texture: Texture2D
 var current_bgm_path: String = ""
 var ending_music_started: bool = false
 var sfx_bus: GameSfxBus
+var gameplay_math: RefCounted
 
 # Camera/effect state
 var view_controller: GameViewController
 var sun_hit_timer: float = 0.0
 var screen_shake_timer: float = 0.0
 var screen_shake_strength: float = 0.0
+var board_draw_translation: Vector2 = Vector2.ZERO
+var board_draw_zoom: float = 1.0
 
 
 func _ready() -> void:
 	randomize()
 	effect_store = GameEffectStoreScript.new() as GameEffectStore
 	view_controller = GameViewControllerScript.new() as GameViewController
+	if ClassDB.class_exists("V2GameplayMath"):
+		gameplay_math = ClassDB.instantiate("V2GameplayMath") as RefCounted
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	SpaceTheme.apply_cursor()
 	GameState.reset_state()
@@ -146,6 +174,7 @@ func _process(delta: float) -> void:
 		if message_timer <= 0.0:
 			message_text = "Build anytime. Towers orbit and fire automatically."
 			_update_ui()
+	_process_wave_banner(delta)
 
 	_process_music(delta)
 
@@ -159,6 +188,7 @@ func _process(delta: float) -> void:
 	_process_enemies(delta)
 	_process_burrowers(delta)
 	_process_shots(delta)
+	call("_process_physics_projectiles", delta)
 	_process_visual_feedback(delta)
 	_check_wave_clear()
 	_process_auto_start(delta)
@@ -192,7 +222,14 @@ func _unhandled_input(event: InputEvent) -> void:
 					_set_view_zoom(view_controller.zoom / GameViewControllerScript.ZOOM_STEP, mouse_button.position)
 					get_viewport().set_input_as_handled()
 				return
-			MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT:
+			MOUSE_BUTTON_RIGHT:
+				if mouse_button.pressed and _try_slingshot_from_screen_position(mouse_button.position):
+					get_viewport().set_input_as_handled()
+					return
+				view_controller.panning = mouse_button.pressed
+				get_viewport().set_input_as_handled()
+				return
+			MOUSE_BUTTON_MIDDLE:
 				view_controller.panning = mouse_button.pressed
 				get_viewport().set_input_as_handled()
 				return
@@ -256,6 +293,31 @@ func _place_tower_from_screen_position(screen_position: Vector2) -> void:
 	_set_message("Placed %s on %s slot %d." % [_tower_config(selected_tower)["label"], slot["ring_name"], int(slot["slot_index"]) + 1], 2.0)
 	_update_ui()
 	queue_redraw()
+
+
+func _try_slingshot_from_screen_position(screen_position: Vector2) -> bool:
+	if game_hud != null and game_hud.is_screen_position_over_hud(screen_position):
+		return false
+	var tower_index: int = _tower_index_at_world_position(_screen_to_world(screen_position))
+	if tower_index == -1:
+		return false
+	var tower: Dictionary = towers[tower_index]
+	if str(tower.get("type", "")) != "helios_cannon" or GameTowerLibraryScript.level(tower) < 2:
+		return false
+	if not GameState.spend_credits(SLINGSHOT_COST):
+		_set_message("Need %d Sol Credits for Helios Slingshot Shot." % SLINGSHOT_COST, 2.0)
+		_update_ui()
+		return true
+
+	var tower_pos: Vector2 = _tower_position(tower)
+	_spawn_physics_projectile(tower, _sun_pos(), 160.0, "helios_cannon", true)
+	_add_visual_effect("flare", tower_pos, Color(1.0, 0.58, 0.22), 0.42, 34.0)
+	_add_text_effect("SLINGSHOT  -%d SOL" % SLINGSHOT_COST, tower_pos + Vector2(0.0, -42.0), Color(1.0, 0.84, 0.34, 0.98), 0.86)
+	_play_sfx("slingshot_fire", 0.4)
+	_set_message("Helios Slingshot fired. Gravity will bend it back inward.", 2.4)
+	_update_ui()
+	queue_redraw()
+	return true
 
 
 func _handle_keyboard_shortcut(keycode: int) -> bool:
@@ -328,13 +390,17 @@ func _draw() -> void:
 		draw_circle(star_pos, float(star["radius"]), star_color)
 
 	# Everything below this transform is part of the zoomable board.
-	draw_set_transform(_view_translation(viewport_size) + _screen_shake_offset(), 0.0, Vector2(view_controller.zoom, view_controller.zoom))
+	board_draw_translation = _view_translation(viewport_size) + _screen_shake_offset()
+	board_draw_zoom = view_controller.zoom
+	draw_set_transform(board_draw_translation, 0.0, Vector2(board_draw_zoom, board_draw_zoom))
 	_draw_orbit_rings(sun)
+	_draw_wave_preview_paths(sun)
 	_draw_build_preview()
 	_draw_sun(sun)
 
 	for shot in effect_store.shots:
 		_draw_shot(shot)
+	_draw_physics_projectiles()
 
 	for tower in towers:
 		_draw_tower(tower)
@@ -348,6 +414,7 @@ func _draw() -> void:
 	_draw_visual_effects()
 
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	_draw_wave_banner(viewport_size)
 	if GameState.game_phase == GameState.Phase.GAME_OVER:
 		draw_rect(Rect2(Vector2.ZERO, viewport_size), Color(0.0, 0.0, 0.0, 0.58), true)
 		_draw_end_state_overlay(viewport_size)
@@ -368,8 +435,8 @@ func _draw_battle_background(viewport_size: Vector2) -> void:
 
 	var time_seconds: float = Time.get_ticks_msec() / 1000.0
 	var breath: float = 1.0 + sin(time_seconds * 0.18) * 0.010
-	var scale: float = max(viewport_size.x / texture_size.x, viewport_size.y / texture_size.y) * 1.025 * breath
-	var draw_size: Vector2 = texture_size * scale
+	var background_scale: float = max(viewport_size.x / texture_size.x, viewport_size.y / texture_size.y) * 1.025 * breath
+	var draw_size: Vector2 = texture_size * background_scale
 	var drift: Vector2 = Vector2(sin(time_seconds * 0.08) * 14.0, cos(time_seconds * 0.06) * 11.0)
 	var parallax: Vector2 = view_controller.offset * 0.08
 	var draw_origin: Vector2 = (viewport_size - draw_size) * 0.5 + drift + parallax
@@ -408,6 +475,11 @@ func _draw_orbit_rings(sun: Vector2) -> void:
 			glow_color = Color(0.10, 0.12, 0.16, 0.09)
 			tick_color = Color(0.38, 0.44, 0.52, 0.18)
 			accent_color = Color(0.50, 0.46, 0.34, 0.12)
+		var flash: float = clampf(float(ring_flash_timers.get(i, 0.0)) / 0.42, 0.0, 1.0)
+		if flash > 0.0:
+			lane_color = lane_color.lerp(Color(1.0, 0.82, 0.24, 0.78), flash)
+			glow_color = glow_color.lerp(Color(1.0, 0.72, 0.18, 0.28), flash)
+			accent_color = accent_color.lerp(Color(1.0, 0.92, 0.44, 0.68), flash)
 
 		draw_arc(sun, ring_radius - 3.0, 0.0, TAU, 288, glow_color, 3.0, true)
 		draw_arc(sun, ring_radius, 0.0, TAU, 288, lane_color, 1.15, true)
@@ -454,12 +526,94 @@ func _draw_orbit_rings(sun: Vector2) -> void:
 			draw_circle(slot_pos, 2.8 if occupied else 1.8, core_color)
 
 
+func _draw_wave_preview_paths(sun: Vector2) -> void:
+	if wave_preview_points.is_empty() or GameState.game_phase != GameState.Phase.BETWEEN_WAVE:
+		return
+
+	var time_seconds: float = Time.get_ticks_msec() / 1000.0
+	var pulse: float = 0.55 + sin(time_seconds * 2.2) * 0.18
+	for i in range(wave_preview_points.size()):
+		var spawn_pos: Vector2 = wave_preview_points[i]
+		var alpha: float = clampf((0.16 + float(i % 4) * 0.018) * pulse, 0.08, 0.32)
+		var color: Color = Color(1.0, 0.36, 0.16, alpha)
+		draw_line(spawn_pos, sun, Color(0.0, 0.0, 0.0, alpha * 0.62), 3.4)
+		draw_line(spawn_pos, sun, color, 1.4)
+		draw_circle(spawn_pos, 5.4, Color(1.0, 0.52, 0.22, alpha * 1.25))
+		var marker: Vector2 = spawn_pos.lerp(sun, 0.12 + fmod(time_seconds * 0.12 + float(i) * 0.07, 0.22))
+		draw_circle(marker, 2.4, Color(1.0, 0.88, 0.42, alpha * 1.35))
+
+
+func _draw_physics_projectiles() -> void:
+	for projectile in physics_projectiles:
+		var pos: Vector2 = projectile.get("pos", Vector2.ZERO)
+		var velocity: Vector2 = projectile.get("velocity", Vector2.ZERO)
+		var color: Color = projectile.get("color", Color(1.0, 0.58, 0.24))
+		var trail: Array = projectile.get("trail", [])
+		for i in range(max(0, trail.size() - 1)):
+			var t: float = float(i + 1) / float(max(1, trail.size()))
+			var a: float = 0.08 + t * 0.22
+			draw_line(trail[i], trail[i + 1], Color(color.r, color.g, color.b, a), 2.0 + t * 1.8)
+		var angle: float = velocity.angle() if velocity.length_squared() > 0.001 else 0.0
+		var nose: Vector2 = pos + Vector2(cos(angle), sin(angle)) * 9.0
+		var side_a: Vector2 = pos + Vector2(cos(angle + 2.45), sin(angle + 2.45)) * 7.0
+		var side_b: Vector2 = pos + Vector2(cos(angle - 2.45), sin(angle - 2.45)) * 7.0
+		draw_circle(pos, 10.5, Color(0.0, 0.0, 0.0, 0.42))
+		draw_circle(pos, 7.4, Color(color.r, color.g, color.b, 0.28))
+		draw_polygon(PackedVector2Array([nose, side_a, side_b]), PackedColorArray([
+			Color(1.0, 0.94, 0.64, 0.96),
+			Color(color.r, color.g, color.b, 0.78),
+			Color(color.r, color.g, color.b, 0.72),
+		]))
+
+
+func _draw_wave_banner(viewport_size: Vector2) -> void:
+	if wave_banner_timer <= 0.0 or wave_banner_text == "":
+		return
+
+	var appear: float = clampf(wave_banner_timer / 0.35, 0.0, 1.0)
+	var alpha: float = clampf(appear, 0.0, 1.0)
+	var width: float = minf(viewport_size.x - 48.0, 640.0)
+	var height: float = 72.0
+	var hud_clearance: float = 146.0 if viewport_size.x >= 1280.0 else 320.0
+	var safe_bottom: float = maxf(72.0, viewport_size.y - 236.0)
+	var banner_y: float = minf(maxf(hud_clearance, viewport_size.y * 0.16), safe_bottom)
+	var rect: Rect2 = Rect2(Vector2((viewport_size.x - width) * 0.5, banner_y), Vector2(width, height))
+	var accent: Color = wave_banner_accent
+
+	draw_rect(rect.grow(4.0), Color(0.0, 0.0, 0.0, 0.38 * alpha), true)
+	draw_rect(rect, Color(0.004, 0.012, 0.022, 0.88 * alpha), true)
+	draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.78 * alpha), false, 2.0)
+	draw_line(rect.position + Vector2(18.0, rect.size.y - 8.0), rect.position + Vector2(rect.size.x - 18.0, rect.size.y - 8.0), Color(accent.r, accent.g, accent.b, 0.34 * alpha), 1.4)
+
+	if end_title_font != null:
+		draw_string(
+			end_title_font,
+			rect.position + Vector2(0.0, 30.0),
+			wave_banner_text.to_upper(),
+			HORIZONTAL_ALIGNMENT_CENTER,
+			rect.size.x,
+			19,
+			Color(accent.r, accent.g, accent.b, alpha)
+		)
+	if end_body_font != null and wave_banner_subtitle != "":
+		draw_string(
+			end_body_font,
+			rect.position + Vector2(0.0, 52.0),
+			wave_banner_subtitle,
+			HORIZONTAL_ALIGNMENT_CENTER,
+			rect.size.x,
+			13,
+			Color(0.90, 0.96, 1.0, 0.90 * alpha)
+		)
+
+
 func _load_assets() -> void:
 	battle_background_texture = load(BATTLE_BACKGROUND_PATH) as Texture2D
 	end_title_font = load(END_TITLE_FONT_PATH) as Font
 	end_body_font = load(END_BODY_FONT_PATH) as Font
 	for key in ENEMY_ASSET_PATHS.keys():
-		textures["enemies"][key] = load(str(ENEMY_ASSET_PATHS[key]))
+		textures["enemies"][key] = _load_png_texture(str(ENEMY_ASSET_PATHS[key]))
+	_load_enemy_animation_assets()
 	for key in TOWER_ASSET_PATHS.keys():
 		textures["towers"][key] = load(str(TOWER_ASSET_PATHS[key]))
 
@@ -474,6 +628,39 @@ func _load_assets() -> void:
 	bgm_player.bus = "Master"
 	bgm_player.volume_db = GameState.get_music_volume_db()
 	_build_sfx_bus()
+
+
+func _load_enemy_animation_assets() -> void:
+	var animation_store: Dictionary = textures.get("enemy_animations", {})
+	animation_store.clear()
+
+	for variant_key in ENEMY_ANIMATION_PATHS.keys():
+		var state_paths: Dictionary = ENEMY_ANIMATION_PATHS[variant_key]
+		var state_frames: Dictionary = {}
+		for state_key in state_paths.keys():
+			var frames: Array = []
+			for path in state_paths[state_key]:
+				var frame_texture = _load_png_texture(str(path))
+				if frame_texture:
+					frames.append(frame_texture)
+			if not frames.is_empty():
+				state_frames[state_key] = frames
+		if not state_frames.is_empty():
+			animation_store[variant_key] = state_frames
+
+	textures["enemy_animations"] = animation_store
+
+
+func _load_png_texture(path: String):
+	var resource = load(path)
+	if resource is Texture2D:
+		return resource
+
+	var image := Image.new()
+	var error: int = image.load(path)
+	if error == OK and not image.is_empty():
+		return ImageTexture.create_from_image(image)
+	return null
 
 
 func _play_wave_music(wave_number: int = 0) -> void:
@@ -502,6 +689,12 @@ func _process_music(_delta: float) -> void:
 		return
 	if bgm_player.stream and not bgm_player.playing:
 		bgm_player.play()
+
+
+func _process_wave_banner(delta: float) -> void:
+	if wave_banner_timer <= 0.0:
+		return
+	wave_banner_timer = maxf(wave_banner_timer - delta, 0.0)
 
 
 func _play_ending_music() -> void:
@@ -614,6 +807,10 @@ func _needs_frame_redraw(viewport_changed: bool) -> bool:
 	if GameState.game_phase == GameState.Phase.GAME_OVER or GameState.game_phase == GameState.Phase.VICTORY:
 		return true
 	if not towers.is_empty() or not enemies.is_empty() or not effect_store.shots.is_empty() or not burrowers.is_empty():
+		return true
+	if not physics_projectiles.is_empty() or not wave_preview_points.is_empty() or not ring_flash_timers.is_empty():
+		return true
+	if wave_banner_timer > 0.0:
 		return true
 	if not effect_store.visual_effects.is_empty() or sun_hit_timer > 0.0 or screen_shake_timer > 0.0:
 		return true
@@ -762,11 +959,12 @@ func _on_start_wave_pressed() -> void:
 
 	GameState.current_wave = wave_number
 	GameState.set_phase(GameState.Phase.WAVE_ACTIVE)
-	spawn_queue = GameWaveLibraryScript.build_spawn_queue(current_wave_data)
-	total_wave_spawn_count = spawn_queue.size()
-	spawned_wave_count = 0
-	spawn_timer = 0.35
+	_clear_wave_preview()
+	_start_wave_spawning(current_wave_data)
 	wave_active = true
+	wave_start_time = Time.get_ticks_msec() / 1000.0
+	escalation_checked = false
+	counter_attack_active = false
 	_begin_wave_event(current_wave_data)
 	_play_sfx("wave_start", 0.35)
 	_play_wave_music(wave_number)
@@ -959,18 +1157,29 @@ func _process_wave_modifiers(delta: float) -> void:
 
 
 func _process_prime_frenzy(delta: float) -> void:
-	if prime_frenzy_interval <= 0.0 or not _is_prime_alive():
+	if prime_frenzy_interval <= 0.0:
 		return
 	if enemies.size() >= prime_frenzy_max_active:
 		return
 
-	prime_frenzy_timer -= delta
-	if prime_frenzy_timer > 0.0:
-		return
-
-	_spawn_enemy("drifter")
-	prime_frenzy_timer = prime_frenzy_interval
-	_update_ui()
+	var spawned: bool = false
+	for i in range(enemies.size()):
+		var enemy: Dictionary = enemies[i]
+		if str(enemy.get("variant", "")) != "prime" or int(enemy.get("prime_phase", 0)) < 2:
+			continue
+		enemy["frenzy_timer"] = float(enemy.get("frenzy_timer", prime_frenzy_interval)) - delta
+		if float(enemy["frenzy_timer"]) <= 0.0:
+			enemy["frenzy_timer"] = prime_frenzy_interval
+			var pos: Vector2 = enemy.get("pos", _sun_pos())
+			for _offset_index in range(2):
+				if enemies.size() >= prime_frenzy_max_active:
+					break
+				var offset: Vector2 = Vector2.RIGHT.rotated(randf() * TAU) * randf_range(24.0, 48.0)
+				_spawn_enemy("drifter", pos + offset)
+			spawned = true
+		enemies[i] = enemy
+	if spawned:
+		_update_ui()
 
 
 func _wave_progress_ratio() -> float:
@@ -1006,9 +1215,62 @@ func _trigger_solar_flare() -> void:
 		_damage_enemy(i, FLARE_DAMAGE, "solar_flare")
 
 
-func _process_spawning(delta: float) -> void:
-	if spawn_queue.is_empty():
+func _start_wave_spawning(wave_data: Dictionary) -> void:
+	spawn_queue.clear()
+	clash_schedule.clear()
+	spawned_wave_count = 0
+	total_wave_spawn_count = GameWaveLibraryScript.total_spawn_count(wave_data)
+	spawn_timer = 0.35
+
+	match str(wave_data.get("wave_type", "normal")):
+		"clash", "boss":
+			_schedule_clash_groups(wave_data.get("clash_groups", []))
+			var accent: Color = Color(1.0, 0.30, 0.12) if str(wave_data.get("wave_type", "normal")) == "clash" else Color(1.0, 0.14, 0.12)
+			_show_wave_banner(GameWaveLibraryScript.preview_label(wave_data), str(wave_data.get("name", "Wave incoming")), accent, 4.2)
+			_play_sfx("clash_incoming", 1.0)
+		"formation":
+			spawn_queue = GameWaveLibraryScript.build_spawn_queue(wave_data)
+			_schedule_formation_group(wave_data.get("formation", {}))
+			_show_wave_banner(GameWaveLibraryScript.preview_label(wave_data), str(wave_data.get("name", "Wave incoming")), Color(0.42, 0.90, 1.0), 3.4)
+		_:
+			spawn_queue = GameWaveLibraryScript.build_spawn_queue(wave_data)
+
+
+func _schedule_clash_groups(groups) -> void:
+	for raw_group in GameWaveLibraryScript._array_value(groups):
+		if not (raw_group is Dictionary):
+			continue
+		var variants: Array = GameWaveLibraryScript._array_value(raw_group.get("variants", []))
+		if variants.is_empty():
+			continue
+		clash_schedule.append({
+			"timer": maxf(float(raw_group.get("delay_before", 0.0)), 0.0),
+			"variants": variants.duplicate(),
+			"pattern": str(raw_group.get("spawn_pattern", "random")),
+			"options": raw_group,
+		})
+
+
+func _schedule_formation_group(formation) -> void:
+	if not (formation is Dictionary) or formation.is_empty():
 		return
+	var count: int = max(0, int(formation.get("count", 0)))
+	var variants_source: Array = GameWaveLibraryScript._array_value(formation.get("variants", ["drifter"]))
+	if count <= 0 or variants_source.is_empty():
+		return
+	var variants: Array = []
+	for i in range(count):
+		variants.append(str(variants_source[i % variants_source.size()]))
+	clash_schedule.append({
+		"timer": 2.0,
+		"variants": variants,
+		"pattern": str(formation.get("type", "ring")),
+		"options": formation,
+	})
+
+
+func _process_spawning(delta: float) -> void:
+	_process_clash_schedule(delta)
 
 	spawn_timer -= delta
 	while spawn_timer <= 0.0 and not spawn_queue.is_empty():
@@ -1017,6 +1279,72 @@ func _process_spawning(delta: float) -> void:
 		_spawn_enemy(str(spawn_info.get("variant", "drifter")))
 		spawn_timer += float(spawn_info.get("interval", 2.0))
 		_update_ui()
+
+
+func _process_clash_schedule(delta: float) -> void:
+	if clash_schedule.is_empty():
+		return
+
+	var pending: Array = []
+	for raw_group in clash_schedule:
+		var group: Dictionary = raw_group
+		group["timer"] = float(group.get("timer", 0.0)) - delta
+		if float(group["timer"]) <= 0.0:
+			_spawn_clash_group(
+				GameWaveLibraryScript._array_value(group.get("variants", [])),
+				str(group.get("pattern", "random")),
+				group.get("options", {})
+			)
+		else:
+			pending.append(group)
+	clash_schedule = pending
+
+
+func _spawn_clash_group(variants: Array, pattern: String, options = {}) -> void:
+	if variants.is_empty():
+		return
+	var group_options: Dictionary = options if options is Dictionary else {}
+	for i in range(variants.size()):
+		var spawn_pos: Vector2 = _spawn_position_for_pattern(pattern, i, variants.size(), group_options)
+		_spawn_enemy(str(variants[i]), spawn_pos)
+	spawned_wave_count += variants.size()
+	_play_sfx("clash_incoming", 0.8)
+	_update_ui()
+
+
+func _spawn_position_for_pattern(pattern: String, index: int, count: int, options: Dictionary = {}) -> Vector2:
+	var sun: Vector2 = _sun_pos()
+	var spawn_radius: float = _outer_ring_radius() + ENEMY_SPAWN_PADDING
+	if gameplay_math != null:
+		var cpp_pos = gameplay_math.call("spawn_position_for_pattern", pattern, index, count, sun, spawn_radius, options)
+		if cpp_pos is Vector2:
+			return cpp_pos
+	var safe_count: int = max(1, count)
+	var normalized_pattern: String = pattern.strip_edges().to_lower()
+
+	match normalized_pattern:
+		"ring":
+			var angle: float = (float(index) / float(safe_count)) * TAU
+			return sun + Vector2(cos(angle), sin(angle)) * spawn_radius
+		"v_shape":
+			var half: int = max(1, int(ceil(float(safe_count) * 0.5)))
+			var side: float = 1.0 if index < half else -1.0
+			var local_index: int = index if index < half else index - half
+			var spread: float = deg_to_rad(float(options.get("spread_angle_deg", 60.0)))
+			var angle: float = -PI * 0.5 + side * (float(local_index + 1) / float(half + 1)) * spread
+			return sun + Vector2(cos(angle), sin(angle)) * spawn_radius
+		"spiral":
+			var arms: int = max(1, int(options.get("spiral_arms", 1)))
+			var arm_offset: float = TAU * float(index % arms) / float(arms)
+			var turns: float = 1.5 + float(arms) * 0.35
+			var angle: float = arm_offset + (float(index) / float(safe_count)) * TAU * turns
+			var radius: float = spawn_radius * (0.72 + 0.28 * float(index + 1) / float(safe_count))
+			return sun + Vector2(cos(angle), sin(angle)) * radius
+		"center_top":
+			return sun + Vector2(0.0, -spawn_radius)
+		_:
+			var angle: float = randf() * TAU
+			return sun + Vector2(cos(angle), sin(angle)) * spawn_radius
 
 
 func _process_towers(delta: float) -> void:
@@ -1076,7 +1404,40 @@ func _process_enemies(delta: float) -> void:
 		enemy["hit_timer"] = maxf(float(enemy.get("hit_timer", 0.0)) - delta, 0.0)
 		enemy["heal_timer"] = maxf(float(enemy.get("heal_timer", 0.0)) - delta, 0.0)
 		if dist > 0.0:
-			enemy["pos"] = pos + to_sun.normalized() * float(enemy["speed"]) * speed_multiplier * delta
+			var move_direction: Vector2 = to_sun.normalized()
+			var move_angle: float = move_direction.angle()
+			var current_angle: float = float(enemy.get("sprite_angle", move_angle))
+			var velocity: Vector2 = enemy.get("velocity", move_direction * float(enemy["speed"]))
+			var mass: float = maxf(float(enemy.get("mass", ENEMY_MASSES.get(str(enemy["variant"]), 1.0))), 0.2)
+			if gameplay_math != null:
+				var step = gameplay_math.call(
+					"integrate_enemy_gravity",
+					pos,
+					velocity,
+					sun,
+					float(enemy["speed"]),
+					float(enemy.get("max_speed", float(enemy["speed"]) * 2.25)),
+					mass,
+					delta,
+					speed_multiplier
+				)
+				if step is Dictionary:
+					velocity = step.get("velocity", velocity)
+					pos = step.get("pos", pos)
+					move_angle = float(step.get("move_angle", move_angle))
+			else:
+				var accel_mag: float = minf(ENEMY_GRAVITY_CONST / maxf(dist * dist * mass, 1200.0), ENEMY_GRAVITY_ACCEL_CAP)
+				velocity += move_direction * accel_mag * delta
+				velocity += move_direction * float(enemy["speed"]) * 0.18 * delta
+				var terminal_speed: float = float(enemy.get("max_speed", float(enemy["speed"]) * 2.25)) * speed_multiplier
+				var velocity_speed: float = velocity.length()
+				if velocity_speed > terminal_speed and velocity_speed > 0.001:
+					velocity = velocity / velocity_speed * terminal_speed
+				pos += velocity * delta
+			enemy["move_angle"] = move_angle
+			enemy["sprite_angle"] = lerp_angle(current_angle, move_angle, clampf(delta * 12.0, 0.0, 1.0))
+			enemy["velocity"] = velocity
+			enemy["pos"] = pos
 		survivors.append(enemy)
 
 	enemies = survivors
@@ -1121,11 +1482,103 @@ func _process_shots(delta: float) -> void:
 	effect_store.process_shots(delta)
 
 
+func _process_physics_projectiles(delta: float) -> void:
+	if physics_projectiles.is_empty():
+		return
+
+	var active_projectiles: Array = []
+	var ring_radii: Array = []
+	for i in range(RINGS.size()):
+		ring_radii.append(_ring_radius(i))
+
+	for projectile in physics_projectiles:
+		var p: Dictionary = projectile
+		p["lifetime"] = float(p.get("lifetime", 0.0)) + delta
+		if float(p["lifetime"]) > PHYSICS_PROJECTILE_MAX_LIFETIME:
+			continue
+
+		var pos: Vector2 = p.get("pos", Vector2.ZERO)
+		var velocity: Vector2 = p.get("velocity", Vector2.ZERO)
+		var damage: float = float(p.get("damage", 0.0))
+		var last_dist: float = float(p.get("last_dist", pos.distance_to(_sun_pos())))
+		if gameplay_math != null:
+			var step = gameplay_math.call("integrate_projectile", pos, velocity, _sun_pos(), damage, last_dist, ring_radii, delta)
+			if step is Dictionary:
+				pos = step.get("pos", pos)
+				velocity = step.get("velocity", velocity)
+				damage = float(step.get("damage", damage))
+				last_dist = float(step.get("last_dist", pos.distance_to(_sun_pos())))
+				var crossed_ring: int = int(step.get("crossed_ring", -1))
+				if crossed_ring >= 0:
+					ring_flash_timers[crossed_ring] = 0.42
+		else:
+			var to_sun: Vector2 = _sun_pos() - pos
+			var dist: float = maxf(to_sun.length(), 0.001)
+			var accel: float = minf(PHYSICS_PROJECTILE_GRAVITY_CONST / maxf(dist * dist, 100.0), 620.0)
+			velocity += to_sun.normalized() * accel * delta
+			for ring_index in range(ring_radii.size()):
+				var radius: float = float(ring_radii[ring_index])
+				if last_dist > radius and dist <= radius:
+					damage *= PHYSICS_PROJECTILE_DAMAGE_RING_MULT
+					ring_flash_timers[ring_index] = 0.42
+				elif last_dist < radius and dist >= radius and velocity.length_squared() > 0.001:
+					velocity += Vector2(-velocity.y, velocity.x).normalized() * velocity.length() * PHYSICS_PROJECTILE_OUTWARD_DEFLECT
+			last_dist = dist
+			pos += velocity * delta
+
+		if pos.distance_to(_sun_pos()) <= SUN_DAMAGE_RADIUS * 0.7:
+			_add_visual_effect("shield", pos, p.get("color", Color(1.0, 0.58, 0.24)), 0.24, 18.0)
+			continue
+
+		var hit_index: int = _physics_projectile_hit_index(pos)
+		if hit_index != -1:
+			_add_visual_effect("hit", pos, p.get("color", Color(1.0, 0.58, 0.24)), 0.22, 22.0)
+			_damage_enemy(hit_index, damage, str(p.get("tower_type", "helios_cannon")))
+			continue
+
+		p["pos"] = pos
+		p["velocity"] = velocity
+		p["damage"] = damage
+		p["last_dist"] = last_dist
+		var trail: Array = p.get("trail", [])
+		trail.append(pos)
+		while trail.size() > 12:
+			trail.pop_front()
+		p["trail"] = trail
+		active_projectiles.append(p)
+
+	physics_projectiles = active_projectiles
+
+
+func _physics_projectile_hit_index(pos: Vector2) -> int:
+	var best_index: int = -1
+	var best_dist_squared: float = PHYSICS_PROJECTILE_HIT_RADIUS * PHYSICS_PROJECTILE_HIT_RADIUS
+	for i in range(enemies.size()):
+		var enemy: Dictionary = enemies[i]
+		var radius: float = float(enemy.get("radius", PHYSICS_PROJECTILE_HIT_RADIUS))
+		var hit_radius: float = maxf(PHYSICS_PROJECTILE_HIT_RADIUS, radius * 0.72)
+		var dist_squared: float = pos.distance_squared_to(enemy.get("pos", Vector2.ZERO))
+		if dist_squared <= hit_radius * hit_radius and dist_squared < best_dist_squared:
+			best_index = i
+			best_dist_squared = dist_squared
+	return best_index
+
+
 func _process_visual_feedback(delta: float) -> void:
 	sun_hit_timer = maxf(sun_hit_timer - delta, 0.0)
 	screen_shake_timer = maxf(screen_shake_timer - delta, 0.0)
 	if screen_shake_timer <= 0.0:
 		screen_shake_strength = 0.0
+
+	var expired_rings: Array = []
+	for ring_index in ring_flash_timers.keys():
+		var remaining: float = float(ring_flash_timers[ring_index]) - delta
+		if remaining <= 0.0:
+			expired_rings.append(ring_index)
+		else:
+			ring_flash_timers[ring_index] = remaining
+	for ring_index in expired_rings:
+		ring_flash_timers.erase(ring_index)
 
 	effect_store.process_visual_effects(delta)
 
@@ -1178,10 +1631,13 @@ func _check_wave_clear() -> void:
 		return
 	if GameState.game_phase != GameState.Phase.WAVE_ACTIVE:
 		return
-	if not spawn_queue.is_empty() or not enemies.is_empty() or not burrowers.is_empty():
+	if not spawn_queue.is_empty() or not clash_schedule.is_empty() or not enemies.is_empty() or not burrowers.is_empty():
+		return
+	if _try_launch_counter_attack():
 		return
 
 	wave_active = false
+	counter_attack_active = false
 	_end_wave_event()
 	var reward: int = int(current_wave_data.get("credit_reward", 0))
 	GameState.add_credits(reward)
@@ -1193,6 +1649,7 @@ func _check_wave_clear() -> void:
 		_play_sfx("wave_clear")
 		GameState.set_phase(GameState.Phase.BETWEEN_WAVE)
 		_refresh_next_wave_preview()
+		_show_next_wave_banner()
 		_set_message("Wave %d cleared. Additional waves are locked for this scene." % GameState.current_wave, 999.0)
 	elif GameState.current_wave >= MAX_WAVES:
 		GameState.trigger_victory()
@@ -1203,8 +1660,82 @@ func _check_wave_clear() -> void:
 		_play_sfx("wave_clear")
 		GameState.set_phase(GameState.Phase.BETWEEN_WAVE)
 		_refresh_next_wave_preview()
+		_show_next_wave_banner()
 		_set_message("Wave %d cleared. Corps reward: %d Sol Credits." % [GameState.current_wave, reward], 4.0)
 	_update_ui()
+
+
+func _try_launch_counter_attack() -> bool:
+	if counter_attack_active or escalation_checked:
+		return false
+	escalation_checked = true
+
+	var threshold_value = current_wave_data.get("escalation_threshold_seconds", null)
+	if threshold_value == null:
+		return false
+	var threshold: float = float(threshold_value)
+	if threshold <= 0.0:
+		return false
+
+	var elapsed: float = Time.get_ticks_msec() / 1000.0 - wave_start_time
+	if elapsed >= threshold:
+		return false
+
+	var retaliation_type: String = "drifter"
+	var highest_count: int = 0
+	for entry in current_wave_data.get("spawns", []):
+		if not (entry is Dictionary):
+			continue
+		var variant: String = GameWaveLibraryScript.variant_key(entry.get("variant", "drifter"))
+		var count: int = int(entry.get("count", 0))
+		if variant != "drifter" and count > highest_count:
+			retaliation_type = variant
+			highest_count = count
+
+	var counter_variants: Array = [
+		"drifter", "drifter", "drifter", "drifter", "drifter", "drifter",
+		retaliation_type, retaliation_type,
+	]
+	counter_attack_active = true
+	wave_active = true
+	total_wave_spawn_count += counter_variants.size()
+	clash_schedule.append({
+		"timer": 1.2,
+		"variants": counter_variants,
+		"pattern": "ring",
+		"options": {},
+	})
+	_show_wave_banner("Counter-attack!", "Too fast - the swarm retaliates.", Color(1.0, 0.40, 0.05), 3.0)
+	_play_sfx("counter_attack", 1.0)
+	_set_message("Fast clear detected. Counter-attack incoming.", 3.0)
+	_update_ui()
+	return true
+
+
+func _show_next_wave_banner() -> void:
+	var next_wave: int = GameState.current_wave + 1
+	if next_wave > MAX_WAVES or next_wave > playable_wave_limit:
+		return
+	var next_data: Dictionary = GameWaveLibraryScript.load_wave(next_wave)
+	if next_data.is_empty():
+		return
+	var accent: Color = Color(1.0, 0.86, 0.34)
+	match str(next_data.get("wave_type", "normal")):
+		"clash":
+			accent = Color(1.0, 0.32, 0.12)
+		"boss":
+			accent = Color(1.0, 0.12, 0.12)
+		"formation":
+			accent = Color(0.42, 0.90, 1.0)
+	_show_wave_banner(GameWaveLibraryScript.preview_label(next_data), str(next_data.get("name", "Next Wave")), accent, 4.0)
+
+
+func _show_wave_banner(title: String, subtitle: String, accent: Color, duration: float = 4.0) -> void:
+	wave_banner_text = title
+	wave_banner_subtitle = subtitle
+	wave_banner_accent = accent
+	wave_banner_timer = duration
+	queue_redraw()
 
 
 func _spawn_enemy(variant: String, spawn_pos = null) -> void:
@@ -1216,6 +1747,12 @@ func _spawn_enemy(variant: String, spawn_pos = null) -> void:
 	var pos: Vector2 = sun + Vector2(cos(angle), sin(angle)) * distance
 	if spawn_pos is Vector2:
 		pos = spawn_pos
+	var move_angle: float = (sun - pos).angle()
+	var initial_direction: Vector2 = (sun - pos).normalized() if sun.distance_squared_to(pos) > 0.001 else Vector2.ZERO
+	var mass: float = float(ENEMY_MASSES.get(key, 1.0))
+	if gameplay_math != null:
+		mass = float(gameplay_math.call("get_enemy_mass", key))
+	var base_speed: float = float(cfg["speed"])
 
 	# Runtime enemies are small dictionaries so wave files only need to choose
 	# a variant; all stats still come from GameCatalog.
@@ -1226,7 +1763,10 @@ func _spawn_enemy(variant: String, spawn_pos = null) -> void:
 		"pos": pos,
 		"hp": cfg["hp"],
 		"max_hp": cfg["hp"],
-		"speed": cfg["speed"],
+		"speed": base_speed,
+		"velocity": initial_direction * base_speed * 0.62,
+		"mass": mass,
+		"max_speed": base_speed * (2.25 if key != "prime" else 1.65),
 		"damage": cfg["damage"],
 		"reward": cfg["reward"],
 		"radius": cfg["radius"],
@@ -1235,6 +1775,10 @@ func _spawn_enemy(variant: String, spawn_pos = null) -> void:
 		"slow_timer": 0.0,
 		"hit_timer": 0.0,
 		"heal_timer": 0.0,
+		"anim_offset": randf() * 10.0,
+		"move_angle": move_angle,
+		"sprite_angle": move_angle,
+		"frenzy_timer": 1.5,
 		"prime_phase": 0,
 	})
 
@@ -1243,8 +1787,8 @@ func _find_target_for_tower(tower: Dictionary) -> int:
 	var tower_pos: Vector2 = _tower_position(tower)
 	var sun: Vector2 = _sun_pos()
 	var stats: Dictionary = _tower_runtime_stats(tower)
-	var range: float = float(stats["range"])
-	var range_squared: float = range * range
+	var tower_range: float = float(stats["range"])
+	var range_squared: float = tower_range * tower_range
 	var best_index: int = -1
 	var best_sun_dist_squared: float = INF
 
@@ -1269,10 +1813,62 @@ func _fire_tower(tower: Dictionary, enemy_index: int) -> void:
 	var stats: Dictionary = _tower_runtime_stats(tower)
 	var tower_pos: Vector2 = _tower_position(tower)
 	var enemy_pos: Vector2 = enemies[enemy_index]["pos"]
+	if _should_use_physics_projectile(tower):
+		_spawn_physics_projectile(tower, enemy_pos, float(stats["damage"]), str(tower["type"]))
+		_add_visual_effect("muzzle", tower_pos, cfg["color"], 0.20, 16.0)
+		_play_sfx("physics_fire", 0.06)
+		return
+
 	_add_shot(tower_pos, enemy_pos, cfg["color"], 0.15, 3.0, str(tower["type"]))
 	_add_visual_effect("muzzle", tower_pos, cfg["color"], 0.16, 14.0)
 	_play_sfx("shot", 0.035)
 	_damage_enemy(enemy_index, float(stats["damage"]), str(tower["type"]))
+
+
+func _should_use_physics_projectile(tower: Dictionary) -> bool:
+	var tower_type: String = str(tower.get("type", ""))
+	if tower_type != "helios_cannon" and tower_type != "tardigrade_bomb":
+		return false
+	return GameTowerLibraryScript.level(tower) >= 2
+
+
+func _spawn_physics_projectile(tower: Dictionary, target_pos: Vector2, damage: float, tower_type: String, slingshot: bool = false) -> void:
+	var tower_pos: Vector2 = _tower_position(tower)
+	var velocity: Vector2 = _compute_physics_launch_velocity(tower, target_pos, 300.0)
+	if slingshot:
+		var inward: Vector2 = (_sun_pos() - tower_pos).normalized()
+		var tangent: Vector2 = Vector2(-sin(float(tower["angle"])), cos(float(tower["angle"])))
+		velocity = tangent * 420.0 + inward * 60.0
+
+	var color: Color = _tower_config(tower_type)["color"]
+	physics_projectiles.append({
+		"pos": tower_pos,
+		"velocity": velocity,
+		"damage": damage,
+		"tower_type": tower_type,
+		"lifetime": 0.0,
+		"last_dist": tower_pos.distance_to(_sun_pos()),
+		"color": color,
+		"trail": [tower_pos],
+	})
+
+
+func _compute_physics_launch_velocity(tower: Dictionary, target_pos: Vector2, base_speed: float) -> Vector2:
+	var tower_pos: Vector2 = _tower_position(tower)
+	var ring: Dictionary = RINGS[int(tower["ring"])]
+	var ring_radius: float = _ring_radius(int(tower["ring"]))
+	var ring_period: float = float(ring["period"])
+	if gameplay_math != null:
+		var cpp_velocity = gameplay_math.call("compute_physics_launch_velocity", tower_pos, target_pos, float(tower["angle"]), ring_radius, ring_period, base_speed)
+		if cpp_velocity is Vector2:
+			return cpp_velocity
+
+	var to_target: Vector2 = target_pos - tower_pos
+	if to_target.length_squared() <= 0.001:
+		to_target = _sun_pos() - tower_pos
+	var angular_velocity: float = TAU / ring_period
+	var tangent: Vector2 = Vector2(-sin(float(tower["angle"])), cos(float(tower["angle"])))
+	return to_target.normalized() * base_speed + tangent * angular_velocity * ring_radius * 0.6
 
 
 func _tower_fire_interval(tower: Dictionary) -> float:
@@ -1301,8 +1897,8 @@ func _find_burrower_target_for_tower(tower: Dictionary) -> int:
 
 	var tower_pos: Vector2 = _tower_position(tower)
 	var stats: Dictionary = _tower_runtime_stats(tower)
-	var range: float = float(stats["range"])
-	var range_squared: float = range * range
+	var tower_range: float = float(stats["range"])
+	var range_squared: float = tower_range * tower_range
 	var best_index: int = -1
 	var best_hp: float = INF
 	for i in range(burrowers.size()):
@@ -1366,6 +1962,7 @@ func _damage_enemy(enemy_index: int, amount: float, source: String) -> void:
 	if variant == "farmer" and (source == "photon_splitter" or source == "helios_cannon"):
 		enemy["hp"] = min(float(enemy["hp"]) + amount * 0.4, float(enemy["max_hp"]) * 1.8)
 		enemy["speed"] = min(float(enemy["speed"]) + 1.0, 150.0)
+		enemy["max_speed"] = maxf(float(enemy.get("max_speed", 0.0)), float(enemy["speed"]) * 2.25)
 		enemy["heal_timer"] = ENEMY_HIT_FLASH_SECONDS
 		enemies[enemy_index] = enemy
 		_add_visual_effect("heal", enemy_pos, Color(0.70, 1.0, 0.46), 0.34, float(enemy["radius"]) + 18.0)
@@ -1388,7 +1985,31 @@ func _damage_enemy(enemy_index: int, amount: float, source: String) -> void:
 	_play_sfx("hit", 0.035)
 
 	if float(enemy["hp"]) <= 0.0:
+		if variant == "prime" and int(enemy.get("prime_phase", 0)) == 1:
+			_enter_prime_frenzy(enemy_index, enemy)
+			return
 		_defeat_enemy(enemy_index)
+
+
+func _enter_prime_frenzy(enemy_index: int, enemy: Dictionary) -> void:
+	enemy["prime_phase"] = 2
+	enemy["hp"] = 300.0
+	enemy["max_hp"] = 300.0
+	enemy["speed"] = minf(float(enemy.get("speed", 23.0)) * 1.8, 80.0)
+	enemy["max_speed"] = float(enemy["speed"]) * 1.85
+	enemy["radius"] = maxf(float(enemy.get("radius", 34.0)), 42.0)
+	enemy["draw_size"] = maxf(float(enemy.get("draw_size", 84.0)), 108.0)
+	enemy["color"] = Color(1.0, 0.08, 0.06)
+	enemy["frenzy_timer"] = 0.35
+	enemy["hit_timer"] = ENEMY_HIT_FLASH_SECONDS
+	enemies[enemy_index] = enemy
+	prime_frenzy_interval = 1.5
+	prime_frenzy_max_active = 36
+	_add_visual_effect("burst", enemy.get("pos", _sun_pos()), Color(1.0, 0.18, 0.10), 0.72, float(enemy["radius"]) + 52.0)
+	_show_wave_banner("Prime Frenzy", "Astrophage Prime is spawning Drifters.", Color(1.0, 0.12, 0.08), 3.2)
+	_play_sfx("prime_phase_shift", 0.8)
+	_set_message("Prime entered Frenzy. Drifters will keep spawning until it dies.", 3.4)
+	_update_ui()
 
 
 func _defeat_enemy(enemy_index: int) -> void:
@@ -1398,7 +2019,6 @@ func _defeat_enemy(enemy_index: int) -> void:
 	var enemy: Dictionary = enemies[enemy_index]
 	var variant: String = str(enemy["variant"])
 	var pos: Vector2 = enemy["pos"]
-	var enemy_color: Color = enemy.get("color", Color(1.0, 0.62, 0.36))
 
 	GameState.add_credits(int(enemy["reward"]))
 	GameState.on_enemy_killed(int(enemy["variant_id"]))
@@ -1415,6 +2035,8 @@ func _defeat_enemy(enemy_index: int) -> void:
 			var offset: Vector2 = Vector2.RIGHT.rotated(TAU * float(i) / 3.0) * 24.0
 			_spawn_enemy("drifter", pos + offset)
 	elif variant == "prime":
+		prime_frenzy_interval = 0.0
+		prime_frenzy_timer = 0.0
 		_set_message("Astrophage Prime has collapsed. Clear the remaining swarm.", 3.0)
 
 	_update_ui()
@@ -1690,24 +2312,56 @@ func _draw_enemy(enemy: Dictionary) -> void:
 	var radius: float = float(enemy["radius"])
 	var hp_ratio: float = clamp(float(enemy["hp"]) / float(enemy["max_hp"]), 0.0, 1.0)
 	var enemy_color: Color = enemy["color"]
-	var texture = _enemy_texture(str(enemy["variant"]))
+	var variant: String = str(enemy["variant"])
+	var animation_state: String = _enemy_animation_state(enemy)
+	var texture = _enemy_animation_texture(enemy)
+	if texture == null:
+		texture = _enemy_texture(variant)
+	var hit_flash: float = clampf(float(enemy.get("hit_timer", 0.0)) / ENEMY_HIT_FLASH_SECONDS, 0.0, 1.0)
+	var heal_flash: float = clampf(float(enemy.get("heal_timer", 0.0)) / ENEMY_HIT_FLASH_SECONDS, 0.0, 1.0)
 
 	draw_circle(pos, radius + 5.0, Color(0.0, 0.0, 0.0, 0.44))
 	if texture:
 		var size: Vector2 = Vector2(float(enemy["draw_size"]) + 8.0, float(enemy["draw_size"]) + 8.0)
-		draw_texture_rect(texture, Rect2(pos - size * 0.5, size), false)
+		if animation_state == "move" and not _enemy_animation_frames(variant, "move").is_empty():
+			_draw_rotated_enemy_texture(texture, pos, size, _enemy_sprite_draw_angle(enemy, variant))
+		else:
+			draw_texture_rect(texture, Rect2(pos - size * 0.5, size), false)
 	else:
 		draw_circle(pos, radius, enemy_color)
+	_draw_enemy_circle_border(enemy, hit_flash, heal_flash)
 	_draw_enemy_status_markers(enemy, pos, radius)
-	var hit_flash: float = clampf(float(enemy.get("hit_timer", 0.0)) / ENEMY_HIT_FLASH_SECONDS, 0.0, 1.0)
-	var heal_flash: float = clampf(float(enemy.get("heal_timer", 0.0)) / ENEMY_HIT_FLASH_SECONDS, 0.0, 1.0)
-	var show_bar: bool = hp_ratio < 0.995 or hit_flash > 0.0 or heal_flash > 0.0 or str(enemy["variant"]) == "prime"
+	var show_bar: bool = hp_ratio < 0.995 or hit_flash > 0.0 or heal_flash > 0.0 or variant == "prime"
 	if show_bar:
 		var bar_width: float = maxf(radius * 2.65, 40.0)
-		if str(enemy["variant"]) == "prime":
+		if variant == "prime":
 			bar_width = maxf(bar_width, 88.0)
 		var bar_pos: Vector2 = Vector2(pos.x - bar_width * 0.5, pos.y - radius - 18.0)
 		_draw_health_bar(bar_pos, bar_width, HEALTH_BAR_HEIGHT, hp_ratio, enemy_color, hit_flash, heal_flash)
+
+
+func _draw_rotated_enemy_texture(texture, pos: Vector2, size: Vector2, angle: float) -> void:
+	var screen_pos: Vector2 = board_draw_translation + pos * board_draw_zoom
+	draw_set_transform(screen_pos, angle, Vector2(board_draw_zoom, board_draw_zoom))
+	draw_texture_rect(texture, Rect2(size * -0.5, size), false)
+	draw_set_transform(board_draw_translation, 0.0, Vector2(board_draw_zoom, board_draw_zoom))
+
+
+func _draw_enemy_circle_border(enemy: Dictionary, hit_flash: float, heal_flash: float) -> void:
+	var pos: Vector2 = enemy["pos"]
+	var radius: float = float(enemy["radius"])
+	var draw_size: float = float(enemy.get("draw_size", radius * 2.0))
+	var border_radius: float = maxf(radius + 5.5, draw_size * 0.5 + 4.0)
+	var enemy_color: Color = enemy.get("color", Color(0.78, 0.92, 1.0))
+	var ring_color: Color = enemy_color.lerp(Color(0.92, 0.98, 1.0), 0.34)
+	if heal_flash > 0.0:
+		ring_color = ring_color.lerp(Color(0.66, 1.0, 0.54), heal_flash)
+	elif hit_flash > 0.0:
+		ring_color = ring_color.lerp(Color(1.0, 0.86, 0.30), hit_flash)
+
+	draw_arc(pos, border_radius + 1.6, 0.0, TAU, 72, Color(0.0, 0.0, 0.0, 0.58), 3.0, true)
+	draw_arc(pos, border_radius, 0.0, TAU, 72, Color(ring_color.r, ring_color.g, ring_color.b, 0.64), 1.7, true)
+	draw_arc(pos, border_radius - 2.2, -PI * 0.5, -PI * 0.5 + TAU * 0.30, 24, Color(0.90, 1.0, 1.0, 0.34), 1.1, true)
 
 
 func _draw_health_bar(pos: Vector2, width: float, height: float, ratio: float, accent: Color, hit_flash: float = 0.0, heal_flash: float = 0.0) -> void:
@@ -1942,7 +2596,15 @@ func _draw_visual_effects() -> void:
 				var texture: Texture2D = effect.get("texture", null) as Texture2D
 				if texture != null:
 					var ghost_size: Vector2 = Vector2(draw_size, draw_size) * (0.92 + progress * 0.28)
-					draw_texture_rect(texture, Rect2(pos - ghost_size * 0.5, ghost_size), false, Color(1.0, 0.84, 0.74, 0.24 * alpha))
+					var ghost_tint: Color = Color(1.0, 0.84, 0.74, 0.24 * alpha)
+					if bool(effect.get("rotates_sprite", false)):
+						var ghost_angle: float = float(effect.get("sprite_angle", 0.0)) - float(ENEMY_ANIMATION_BASE_ANGLES.get(str(effect.get("variant", "")), 0.0))
+						var ghost_screen_pos: Vector2 = board_draw_translation + pos * board_draw_zoom
+						draw_set_transform(ghost_screen_pos, ghost_angle, Vector2(board_draw_zoom, board_draw_zoom))
+						draw_texture_rect(texture, Rect2(ghost_size * -0.5, ghost_size), false, ghost_tint)
+						draw_set_transform(board_draw_translation, 0.0, Vector2(board_draw_zoom, board_draw_zoom))
+					else:
+						draw_texture_rect(texture, Rect2(pos - ghost_size * 0.5, ghost_size), false, ghost_tint)
 				draw_circle(pos, radius * (0.34 + progress * 0.42), Color(color.r, color.g, color.b, 0.16 * alpha))
 				draw_arc(pos, radius + progress * 30.0, 0.0, TAU, 80, Color(color.r, color.g, color.b, 0.66 * alpha), 1.8, true)
 				draw_arc(pos, radius * 0.62 + progress * 18.0, -PI * 0.35, PI * 1.15, 54, Color(1.0, 0.84, 0.42, 0.36 * alpha), 1.2, true)
@@ -1971,7 +2633,15 @@ func _draw_visual_effects() -> void:
 				var prime_draw_size: float = float(effect.get("draw_size", radius * 2.0))
 				if prime_texture != null:
 					var prime_size: Vector2 = Vector2(prime_draw_size, prime_draw_size) * (1.0 + progress * 0.22)
-					draw_texture_rect(prime_texture, Rect2(pos - prime_size * 0.5, prime_size), false, Color(1.0, 0.60, 0.46, 0.28 * alpha))
+					var prime_tint: Color = Color(1.0, 0.60, 0.46, 0.28 * alpha)
+					if bool(effect.get("rotates_sprite", false)):
+						var prime_angle: float = float(effect.get("sprite_angle", 0.0)) - float(ENEMY_ANIMATION_BASE_ANGLES.get(str(effect.get("variant", "")), 0.0))
+						var prime_screen_pos: Vector2 = board_draw_translation + pos * board_draw_zoom
+						draw_set_transform(prime_screen_pos, prime_angle, Vector2(board_draw_zoom, board_draw_zoom))
+						draw_texture_rect(prime_texture, Rect2(prime_size * -0.5, prime_size), false, prime_tint)
+						draw_set_transform(board_draw_translation, 0.0, Vector2(board_draw_zoom, board_draw_zoom))
+					else:
+						draw_texture_rect(prime_texture, Rect2(pos - prime_size * 0.5, prime_size), false, prime_tint)
 				draw_circle(pos, radius * (0.46 + progress * 0.34), Color(0.05, 0.0, 0.0, 0.32 * alpha))
 				draw_arc(pos, radius + progress * 76.0, 0.0, TAU, 152, Color(1.0, 0.24, 0.14, 0.68 * alpha), 3.0, true)
 				draw_arc(pos, radius * 0.72 + progress * 42.0, 0.0, TAU, 124, Color(1.0, 0.82, 0.28, 0.45 * alpha), 2.0, true)
@@ -2117,7 +2787,11 @@ func _add_enemy_death_effect(enemy: Dictionary) -> void:
 			screen_shake_timer = maxf(screen_shake_timer, 0.38)
 			screen_shake_strength = maxf(screen_shake_strength, 9.0)
 
-	effect_store.add_enemy_death(enemy, _enemy_texture(variant), float(enemy.get("draw_size", radius * 2.0)))
+	var texture = _enemy_animation_texture(enemy)
+	if texture == null:
+		texture = _enemy_texture(variant)
+	var rotates_sprite: bool = not _enemy_animation_frames(variant, "move").is_empty()
+	effect_store.add_enemy_death(enemy, texture, float(enemy.get("draw_size", radius * 2.0)), rotates_sprite)
 	queue_redraw()
 
 
@@ -2160,6 +2834,43 @@ func _sun_state_key() -> String:
 func _refresh_next_wave_preview() -> void:
 	var next_wave: int = int(clamp(GameState.current_wave + 1, 1, playable_wave_limit))
 	next_wave_preview = GameWaveLibraryScript.load_wave(next_wave)
+	if GameState.game_phase == GameState.Phase.BETWEEN_WAVE:
+		_show_wave_preview(next_wave_preview)
+	else:
+		_clear_wave_preview()
+
+
+func _show_wave_preview(wave_data: Dictionary) -> void:
+	wave_preview_points.clear()
+	if wave_data.is_empty():
+		return
+
+	var wave_type: String = str(wave_data.get("wave_type", "normal"))
+	if wave_type == "clash" or wave_type == "boss":
+		var groups: Array = GameWaveLibraryScript._array_value(wave_data.get("clash_groups", []))
+		if groups.is_empty() or not (groups[0] is Dictionary):
+			return
+		var first_group: Dictionary = groups[0]
+		var variants: Array = GameWaveLibraryScript._array_value(first_group.get("variants", []))
+		var preview_count: int = min(variants.size(), 16)
+		for i in range(preview_count):
+			wave_preview_points.append(_spawn_position_for_pattern(str(first_group.get("spawn_pattern", "random")), i, preview_count, first_group))
+	elif wave_type == "formation":
+		var formation: Dictionary = wave_data.get("formation", {})
+		var preview_count: int = min(max(8, int(formation.get("count", 8))), 16)
+		for i in range(preview_count):
+			wave_preview_points.append(_spawn_position_for_pattern(str(formation.get("type", "ring")), i, preview_count, formation))
+	else:
+		for i in range(8):
+			wave_preview_points.append(_spawn_position_for_pattern("ring", i, 8))
+	queue_redraw()
+
+
+func _clear_wave_preview() -> void:
+	if wave_preview_points.is_empty():
+		return
+	wave_preview_points.clear()
+	queue_redraw()
 
 
 func _is_prime_alive() -> bool:
@@ -2239,6 +2950,57 @@ func _enemy_texture(variant: String):
 	return textures["enemies"].get(variant, null)
 
 
+func _enemy_animation_texture(enemy: Dictionary):
+	var variant: String = str(enemy.get("variant", "drifter"))
+	var state: String = _enemy_animation_state(enemy)
+	var frames: Array = _enemy_animation_frames(variant, state)
+	if frames.is_empty() and state != "idle":
+		state = "idle"
+		frames = _enemy_animation_frames(variant, state)
+	if frames.is_empty():
+		return null
+
+	var fps: float = 8.0 if state == "move" else 4.0
+	var anim_time: float = Time.get_ticks_msec() / 1000.0 + float(enemy.get("anim_offset", 0.0))
+	var frame_index: int = int(floor(anim_time * fps)) % frames.size()
+	return frames[frame_index]
+
+
+func _enemy_animation_state(enemy: Dictionary) -> String:
+	if GameState.game_phase == GameState.Phase.WAVE_ACTIVE and float(enemy.get("speed", 0.0)) > 0.0:
+		return "move"
+	return "idle"
+
+
+func _enemy_animation_frames(variant: String, state: String) -> Array:
+	var animation_store: Dictionary = textures.get("enemy_animations", {})
+	var variant_frames: Dictionary = animation_store.get(variant, {})
+	if variant_frames.is_empty():
+		return []
+	var frames = variant_frames.get(state, [])
+	if frames is Array:
+		return frames
+	return []
+
+
+func _enemy_sprite_draw_angle(enemy: Dictionary, variant: String) -> float:
+	var move_angle: float = float(enemy.get("sprite_angle", enemy.get("move_angle", 0.0)))
+	var base_angle: float = float(ENEMY_ANIMATION_BASE_ANGLES.get(variant, 0.0))
+	return move_angle - base_angle
+
+
+func _enemy_preview_texture(variant: String):
+	var idle_frames: Array = _enemy_animation_frames(variant, "idle")
+	if not idle_frames.is_empty():
+		return idle_frames[0]
+
+	var move_frames: Array = _enemy_animation_frames(variant, "move")
+	if not move_frames.is_empty():
+		return move_frames[0]
+
+	return _enemy_texture(variant)
+
+
 func _ring_summary() -> String:
 	return GameOrbitMathScript.ring_summary()
 
@@ -2306,7 +3068,7 @@ func _update_ui() -> void:
 		"kills": str(GameState.enemies_killed_total),
 		"flare": "F READY" if GameState.flare_charge > 0 else "CHARGING",
 		"luminosity": float(GameState.get_luminosity_percent()),
-		"enemy_texture": _enemy_texture(GameWaveLibraryScript.primary_variant(wave_data)),
+		"enemy_texture": _enemy_preview_texture(GameWaveLibraryScript.primary_variant(wave_data)),
 		"intel_status": intel_status,
 		"enemy_summary": GameWaveLibraryScript.spawn_summary(wave_data).to_upper(),
 		"threat": GameWaveLibraryScript.intel_detail(

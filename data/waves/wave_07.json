@@ -1,18 +1,27 @@
 {
-    "wave": 7, "name": "Night Side",
-    "spawn_interval": 1.9,
+    "wave": 7,
+    "name": "Night Side",
+    "wave_type": "formation",
+    "spawn_interval": 1.8,
     "enemies": [
-        { "variant": "drifter", "count": 10 },
-        { "variant": "bloom", "count": 5 },
-        { "variant": "burrower", "count": 3 },
-        { "variant": "mimic", "count": 3 }
+        { "variant": "drifter", "count": 24 },
+        { "variant": "bloom", "count": 8 },
+        { "variant": "burrower", "count": 7 },
+        { "variant": "mimic", "count": 5 }
     ],
+    "formation": {
+        "type": "v_shape",
+        "variants": ["burrower"],
+        "count": 7,
+        "spread_angle_deg": 45
+    },
     "event": {
         "type": "ring_blind",
         "rings": [0, 1],
         "duration": 20,
         "trigger_at_percent": 0.1
     },
-    "reward_base": 90,
-    "tutorial_hint": "Corona Belt and Chromosphere Band rings go dark for 20 seconds early in the wave!"
+    "reward_base": 88,
+    "escalation_threshold_seconds": 40,
+    "tutorial_hint": "Burrowers arrive in formation! Inner rings go dark - rely on outer towers."
 }

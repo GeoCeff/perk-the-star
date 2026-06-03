@@ -1,11 +1,15 @@
 {
-    "wave": 8, "name": "The Harvest",
-    "spawn_interval": 1.7,
+    "wave": 8,
+    "name": "The Harvest",
+    "wave_type": "normal",
+    "spawn_interval": 1.6,
     "enemies": [
-        { "variant": "drifter", "count": 12 },
-        { "variant": "bloom", "count": 6 },
-        { "variant": "farmer", "count": 5 }
+        { "variant": "drifter", "count": 30 },
+        { "variant": "bloom", "count": 10 },
+        { "variant": "farmer", "count": 8 }
     ],
-    "event": null, "reward_base": 100,
-    "tutorial_hint": "Solar Farmers show ABSORB and gain HP/speed from energy towers. Cryo-debuff them first."
+    "event": null,
+    "reward_base": 100,
+    "escalation_threshold_seconds": 45,
+    "tutorial_hint": "Solar Farmers gain HP from energy tower hits. Cryo-debuff them before attacking!"
 }

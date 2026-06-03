@@ -3,6 +3,7 @@
 #include "astrophage.h"
 #include "sun_node.h"
 #include "wave_data.h"
+#include "v2_gameplay_math.h"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/godot.hpp>
@@ -17,6 +18,7 @@ void initialize_perk_module(ModuleInitializationLevel p_level) {
     ClassDB::register_class<Astrophage>();
     ClassDB::register_class<SunNode>();
     ClassDB::register_class<WaveData>();
+    ClassDB::register_class<V2GameplayMath>();
 }
 
 void uninitialize_perk_module(ModuleInitializationLevel p_level) {
