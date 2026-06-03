@@ -3,7 +3,7 @@ extends Node
 # Simple global music player. Menus can ask for menu music, while gameplay uses
 # its own wave/ending tracks in game.gd.
 
-const MAIN_MENU_BGM_PATH: String = "res://assets/audio/bgm/main_menu.ogg"
+const MAIN_MENU_BGM_PATH: String = "res://assets/audio/bgm/final/main_menu.wav"
 
 var player: AudioStreamPlayer
 var current_track_path: String = ""
@@ -48,8 +48,12 @@ func _set_audio_stream_loop(stream, loop_enabled: bool) -> void:
 	if stream == null:
 		return
 	for property in stream.get_property_list():
-		if str(property.get("name", "")) == "loop":
+		var property_name: String = str(property.get("name", ""))
+		if property_name == "loop":
 			stream.set("loop", loop_enabled)
+			return
+		if property_name == "loop_mode":
+			stream.set("loop_mode", AudioStreamWAV.LOOP_FORWARD if loop_enabled else AudioStreamWAV.LOOP_DISABLED)
 			return
 
 

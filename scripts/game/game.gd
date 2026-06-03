@@ -25,10 +25,10 @@ const BURROWER_EXCAVATION_HP: float = GameCatalog.BURROWER_EXCAVATION_HP
 const BURROWER_DRAIN_INTERVAL: float = GameCatalog.BURROWER_DRAIN_INTERVAL
 const BURROWER_DRAIN_DAMAGE: float = GameCatalog.BURROWER_DRAIN_DAMAGE
 
-const WAVE_BGM_PATHS: Array = [
-	"res://assets/audio/bgm/waves_1.ogg",
-	"res://assets/audio/bgm/waves_2.ogg",
-]
+const WAVE_EARLY_BGM_PATH: String = "res://assets/audio/bgm/final/wave_01.wav"
+const WAVE_MID_BGM_PATH: String = "res://assets/audio/bgm/final/wave_02.wav"
+const WAVE_LATE_BGM_PATH: String = "res://assets/audio/bgm/final/wave_03.wav"
+const BOSS_BGM_PATH: String = "res://assets/audio/bgm/final/BOSS.wav"
 const END_BGM_PATH: String = "res://assets/audio/bgm/end.ogg"
 const GAME_HUD_SCENE_PATH: String = "res://scenes/ui/game_hud.tscn"
 const GAME_PAUSE_MENU_SCENE_PATH: String = "res://scenes/ui/game_pause_menu.tscn"
@@ -37,7 +37,6 @@ const TUTORIAL_OVERLAY_SCRIPT = preload("res://scripts/ui/tutorial_overlay.gd")
 const BATTLE_BACKGROUND_PATH: String = "res://assets/sprites/backgrounds/battle_nebula_hq.png"
 const END_TITLE_FONT_PATH: String = "res://assets/fonts/Kenney Future.ttf"
 const END_BODY_FONT_PATH: String = "res://assets/fonts/Electrolize-Regular.ttf"
-const WAVE_TRACK_SWAP_SECONDS: float = 55.0
 const SUN_HIT_EFFECT_SECONDS: float = 0.55
 const ENEMY_STATUS_TAG_HEIGHT: float = 15.0
 const ENEMY_STATUS_FONT_SIZE: int = 10
@@ -101,8 +100,7 @@ var end_body_font: Font
 # Music state
 var bgm_player: AudioStreamPlayer
 var battle_background_texture: Texture2D
-var wave_music_index: int = 0
-var wave_music_timer: float = 0.0
+var current_bgm_path: String = ""
 var ending_music_started: bool = false
 var sfx_bus: GameSfxBus
 
@@ -472,39 +470,38 @@ func _load_assets() -> void:
 	_build_sfx_bus()
 
 
-func _play_wave_music() -> void:
+func _play_wave_music(wave_number: int = 0) -> void:
+	if bgm_player == null:
+		return
+
 	ending_music_started = false
-	wave_music_index = clamp(wave_music_index, 0, WAVE_BGM_PATHS.size() - 1)
-	_set_music_stream(str(WAVE_BGM_PATHS[wave_music_index]), true)
-	wave_music_timer = 0.0
+	var target_wave: int = wave_number
+	if target_wave <= 0:
+		target_wave = int(clamp(GameState.current_wave + 1, 1, MAX_WAVES))
+
+	var track_path: String = _bgm_path_for_wave(target_wave)
+	if current_bgm_path != track_path or bgm_player.stream == null:
+		_set_music_stream(track_path, true)
 	_apply_music_settings()
 	if GameState.music_enabled and bgm_player.stream and not bgm_player.playing:
 		bgm_player.play()
 
 
-func _process_music(delta: float) -> void:
+func _process_music(_delta: float) -> void:
 	if bgm_player == null or ending_music_started:
 		return
 	if not GameState.music_enabled:
 		return
-	if WAVE_BGM_PATHS.size() < 2:
-		return
-
-	wave_music_timer += delta
-	if wave_music_timer < WAVE_TRACK_SWAP_SECONDS:
-		return
-
-	wave_music_index = (wave_music_index + 1) % WAVE_BGM_PATHS.size()
-	_set_music_stream(str(WAVE_BGM_PATHS[wave_music_index]), true)
-	bgm_player.play()
-	wave_music_timer = 0.0
+	if bgm_player.stream and not bgm_player.playing:
+		bgm_player.play()
 
 
 func _play_ending_music() -> void:
 	if ending_music_started:
 		return
 	ending_music_started = true
-	_set_music_stream(END_BGM_PATH, true)
+	if current_bgm_path != END_BGM_PATH or bgm_player.stream == null:
+		_set_music_stream(END_BGM_PATH, true)
 	_apply_music_settings()
 	if GameState.music_enabled and bgm_player.stream:
 		bgm_player.play()
@@ -527,9 +524,25 @@ func _play_sfx(kind: String, min_interval: float = 0.0) -> void:
 
 
 func _set_music_stream(path: String, loop_enabled: bool) -> void:
+	if bgm_player == null:
+		return
 	var stream = load(path)
+	if stream == null:
+		push_warning("Game: missing music track at %s." % path)
+		return
 	_set_audio_stream_loop(stream, loop_enabled)
 	bgm_player.stream = stream
+	current_bgm_path = path
+
+
+func _bgm_path_for_wave(wave_number: int) -> String:
+	if wave_number >= 12:
+		return BOSS_BGM_PATH
+	if wave_number >= 9:
+		return WAVE_LATE_BGM_PATH
+	if wave_number >= 5:
+		return WAVE_MID_BGM_PATH
+	return WAVE_EARLY_BGM_PATH
 
 
 func _apply_music_settings() -> void:
@@ -544,8 +557,12 @@ func _set_audio_stream_loop(stream, loop_enabled: bool) -> void:
 	if stream == null:
 		return
 	for property in stream.get_property_list():
-		if str(property.get("name", "")) == "loop":
+		var property_name: String = str(property.get("name", ""))
+		if property_name == "loop":
 			stream.set("loop", loop_enabled)
+			return
+		if property_name == "loop_mode":
+			stream.set("loop_mode", AudioStreamWAV.LOOP_FORWARD if loop_enabled else AudioStreamWAV.LOOP_DISABLED)
 			return
 
 
@@ -737,8 +754,7 @@ func _on_start_wave_pressed() -> void:
 	wave_active = true
 	_begin_wave_event(current_wave_data)
 	_play_sfx("wave_start", 0.35)
-	if GameState.music_enabled and bgm_player and bgm_player.stream and not bgm_player.playing:
-		bgm_player.play()
+	_play_wave_music(wave_number)
 	_set_message(str(current_wave_data.get("tutorial_hint", "Wave incoming.")), 5.0)
 	_update_ui()
 

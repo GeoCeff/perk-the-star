@@ -63,12 +63,14 @@ The first gameplay launch shows an optional mission training overlay with diagra
 - `assets/sprites/clean/towers/` contains the active generated tower sprites.
 - `assets/fonts/` contains the UI/display fonts.
 - `assets/ui/` contains shared reticle, bar, and icon assets.
-- `assets/audio/bgm/` contains menu, wave, and ending music.
+- `assets/audio/bgm/final/` contains the active main menu, wave-range, and boss music.
 - `assets/licenses/` contains third-party asset credits and license files.
 
 ## Audio And Feedback
 
-Music can be toggled or adjusted from Settings. The setting is saved to `user://settings.cfg` and is shared by main menu, mission codex, settings, wave, and ending music.
+Music can be toggled or adjusted from Settings. The setting is saved to `user://settings.cfg` and is shared by main menu, mission codex, settings, wave, boss, and ending music.
+
+The active BGM routing is `main_menu.wav` for menus, `wave_01.wav` for waves 1-4, `wave_02.wav` for waves 5-8, `wave_03.wav` for waves 9-11, and `BOSS.wav` for wave 12.
 
 Gameplay feedback sounds are generated in `scripts/game/game_sfx_bus.gd` for the current prototype. These temporary SFX cover buttons, tower placement, upgrades, selling, shots, hits, solar flare, wave clear, victory, failure, and sun breach feedback until final SFX assets are added.
 
