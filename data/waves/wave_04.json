@@ -1,11 +1,11 @@
 {
     "wave": 4, "name": "Going Under",
-    "spawn_interval": 2.2,
+    "spawn_interval": 2.25,
     "enemies": [
         { "variant": "drifter", "count": 10 },
         { "variant": "bloom", "count": 3 },
         { "variant": "burrower", "count": 2 }
     ],
-    "event": null, "reward_base": 45,
+    "event": null, "reward_base": 55,
     "tutorial_hint": "Burrowers drain luminosity once they reach the Sun! Bio-Lab excavates them."
 }

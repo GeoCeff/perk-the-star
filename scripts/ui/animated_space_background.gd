@@ -1,5 +1,9 @@
 extends TextureRect
 
+# Shader-based background motion used by menu/codex/settings screens.
+# The image stays the same, but slow UV drift and glow pulses make it feel
+# alive without requiring extra animated assets.
+
 @export var drift_strength: float = 0.024
 @export var glow_strength: float = 0.46
 @export var dim_strength: float = 0.34

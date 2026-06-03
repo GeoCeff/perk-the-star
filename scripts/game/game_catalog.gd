@@ -1,6 +1,8 @@
 extends RefCounted
 
 # Static gameplay data lives here so game.gd can focus on runtime flow.
+# If we need to tune balance, replace sprites, or explain tower/enemy stats,
+# this is the first file to open.
 
 const MAX_WAVES: int = 12
 const SUN_RADIUS: float = 58.0
@@ -8,11 +10,11 @@ const SUN_DAMAGE_RADIUS: float = 62.0
 const RING_RADIUS_SCALE: float = 1.5
 const ENEMY_SPAWN_PADDING: float = 260.0
 const SLOT_ANGLE_OFFSET: float = -PI / 2.0
-const FLARE_DAMAGE: float = 85.0
+const FLARE_DAMAGE: float = 95.0
 const BURROWER_DIG_RADIUS: float = 74.0
 const BURROWER_EXCAVATION_HP: float = 52.0
 const BURROWER_DRAIN_INTERVAL: float = 1.0
-const BURROWER_DRAIN_DAMAGE: float = 0.012
+const BURROWER_DRAIN_DAMAGE: float = 0.010
 
 const ENEMY_ASSET_PATHS: Dictionary = {
 	"drifter": "res://assets/sprites/enemies/Drifter.png",
@@ -23,6 +25,8 @@ const ENEMY_ASSET_PATHS: Dictionary = {
 	"prime": "res://assets/sprites/enemies/ASTROPHAGE PRIME.png",
 }
 
+# Active tower sprites use the clean generated set. Older sprite folders are
+# still kept in assets for comparison and future cleanup.
 const TOWER_ASSET_PATHS: Dictionary = {
 	"photon_splitter": "res://assets/sprites/clean/towers/photon_splitter.png",
 	"cryo_probe": "res://assets/sprites/clean/towers/cryo_probe.png",
@@ -32,6 +36,8 @@ const TOWER_ASSET_PATHS: Dictionary = {
 	"tardigrade_bomb": "res://assets/sprites/clean/towers/tardigrade_bomb.png",
 }
 
+# Rings are the orbit lanes. The final in-game radius is multiplied by
+# RING_RADIUS_SCALE so the board can be widened without rewriting each entry.
 const RINGS: Array = [
 	{"id": 1, "name": "Corona Belt", "radius": 80.0, "period": 6.0, "slots": 4, "best": "Photon Splitter, Helios Cannon"},
 	{"id": 2, "name": "Chromosphere Band", "radius": 140.0, "period": 11.0, "slots": 6, "best": "Cryo Probe, Tardigrade Bomb"},
@@ -51,14 +57,16 @@ const TOWER_ORDER: Array = [
 ]
 
 const TOWER_CONFIGS: Dictionary = {
-	"photon_splitter": {"label": "Photon Splitter", "damage": 16.0, "rate": 0.9, "range": 225.0, "color": Color(1.0, 0.86, 0.28)},
-	"cryo_probe": {"label": "Cryo Probe", "damage": 5.0, "rate": 0.55, "range": 230.0, "color": Color(0.34, 0.86, 1.0)},
-	"bio_lab": {"label": "Bio-Lab Station", "damage": 10.0, "rate": 0.55, "range": 245.0, "color": Color(0.46, 1.0, 0.52)},
-	"magnetic_net": {"label": "Magnetic Net", "damage": 4.0, "rate": 0.42, "range": 270.0, "color": Color(0.76, 0.62, 1.0)},
-	"helios_cannon": {"label": "Helios Cannon", "damage": 76.0, "rate": 0.14, "range": 280.0, "color": Color(1.0, 0.43, 0.22)},
-	"tardigrade_bomb": {"label": "Tardigrade Bomb", "damage": 20.0, "rate": 0.38, "range": 240.0, "color": Color(1.0, 0.58, 0.76)},
+	"photon_splitter": {"label": "Photon Splitter", "damage": 17.0, "rate": 0.95, "range": 235.0, "color": Color(1.0, 0.86, 0.28)},
+	"cryo_probe": {"label": "Cryo Probe", "damage": 6.0, "rate": 0.62, "range": 245.0, "color": Color(0.34, 0.86, 1.0)},
+	"bio_lab": {"label": "Bio-Lab Station", "damage": 12.0, "rate": 0.60, "range": 260.0, "color": Color(0.46, 1.0, 0.52)},
+	"magnetic_net": {"label": "Magnetic Net", "damage": 5.0, "rate": 0.48, "range": 285.0, "color": Color(0.76, 0.62, 1.0)},
+	"helios_cannon": {"label": "Helios Cannon", "damage": 84.0, "rate": 0.16, "range": 305.0, "color": Color(1.0, 0.43, 0.22)},
+	"tardigrade_bomb": {"label": "Tardigrade Bomb", "damage": 24.0, "rate": 0.42, "range": 260.0, "color": Color(1.0, 0.58, 0.76)},
 }
 
+# Text shown by the tower hover cards. Keeping it beside the stats makes it
+# easier to explain why each tower exists.
 const TOWER_INFO: Dictionary = {
 	"photon_splitter": {
 		"role": "STEADY BEAM  |  EARLY INTERCEPT",
@@ -92,11 +100,12 @@ const TOWER_INFO: Dictionary = {
 	},
 }
 
+# Enemy stats are used when game.gd spawns enemies from JSON wave files.
 const ENEMY_CONFIGS: Dictionary = {
-	"drifter": {"variant_id": 0, "label": "Drifter", "hp": 30.0, "speed": 48.0, "damage": 0.05, "reward": 5, "radius": 15.0, "draw_size": 46.0, "color": Color(0.96, 0.42, 0.48)},
-	"bloom": {"variant_id": 1, "label": "Bloom", "hp": 62.0, "speed": 44.0, "damage": 0.05, "reward": 10, "radius": 18.0, "draw_size": 54.0, "color": Color(1.0, 0.62, 0.36)},
-	"burrower": {"variant_id": 2, "label": "Coronal Burrower", "hp": 115.0, "speed": 32.0, "damage": 0.08, "reward": 20, "radius": 19.0, "draw_size": 58.0, "color": Color(0.76, 0.50, 0.30)},
-	"mimic": {"variant_id": 3, "label": "Photon Mimic", "hp": 52.0, "speed": 50.0, "damage": 0.05, "reward": 15, "radius": 16.0, "draw_size": 48.0, "color": Color(0.70, 0.62, 0.98)},
-	"farmer": {"variant_id": 4, "label": "Solar Farmer", "hp": 44.0, "speed": 46.0, "damage": 0.05, "reward": 12, "radius": 17.0, "draw_size": 50.0, "color": Color(0.55, 0.92, 0.45)},
-	"prime": {"variant_id": 5, "label": "Astrophage Prime", "hp": 520.0, "speed": 24.0, "damage": 0.12, "reward": 100, "radius": 34.0, "draw_size": 84.0, "color": Color(1.0, 0.18, 0.15)},
+	"drifter": {"variant_id": 0, "label": "Drifter", "hp": 32.0, "speed": 47.0, "damage": 0.05, "reward": 6, "radius": 15.0, "draw_size": 46.0, "color": Color(0.96, 0.42, 0.48)},
+	"bloom": {"variant_id": 1, "label": "Bloom", "hp": 68.0, "speed": 42.0, "damage": 0.05, "reward": 12, "radius": 18.0, "draw_size": 54.0, "color": Color(1.0, 0.62, 0.36)},
+	"burrower": {"variant_id": 2, "label": "Coronal Burrower", "hp": 120.0, "speed": 31.0, "damage": 0.08, "reward": 24, "radius": 19.0, "draw_size": 58.0, "color": Color(0.76, 0.50, 0.30)},
+	"mimic": {"variant_id": 3, "label": "Photon Mimic", "hp": 58.0, "speed": 48.0, "damage": 0.05, "reward": 17, "radius": 16.0, "draw_size": 48.0, "color": Color(0.70, 0.62, 0.98)},
+	"farmer": {"variant_id": 4, "label": "Solar Farmer", "hp": 50.0, "speed": 44.0, "damage": 0.05, "reward": 15, "radius": 17.0, "draw_size": 50.0, "color": Color(0.55, 0.92, 0.45)},
+	"prime": {"variant_id": 5, "label": "Astrophage Prime", "hp": 560.0, "speed": 23.0, "damage": 0.12, "reward": 130, "radius": 34.0, "draw_size": 84.0, "color": Color(1.0, 0.18, 0.15)},
 }

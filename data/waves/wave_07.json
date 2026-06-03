@@ -1,6 +1,6 @@
 {
     "wave": 7, "name": "Night Side",
-    "spawn_interval": 1.8,
+    "spawn_interval": 1.9,
     "enemies": [
         { "variant": "drifter", "count": 10 },
         { "variant": "bloom", "count": 5 },
@@ -13,6 +13,6 @@
         "duration": 20,
         "trigger_at_percent": 0.1
     },
-    "reward_base": 70,
+    "reward_base": 90,
     "tutorial_hint": "Corona Belt and Chromosphere Band rings go dark for 20 seconds early in the wave!"
 }

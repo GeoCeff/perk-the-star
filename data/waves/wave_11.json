@@ -1,6 +1,6 @@
 {
     "wave": 11, "name": "Penultimate",
-    "spawn_interval": 1.3,
+    "spawn_interval": 1.35,
     "enemies": [
         { "variant": "drifter", "count": 18 },
         { "variant": "bloom", "count": 8 },
@@ -8,6 +8,6 @@
         { "variant": "mimic", "count": 5 },
         { "variant": "farmer", "count": 6 }
     ],
-    "event": null, "reward_base": 130,
+    "event": null, "reward_base": 155,
     "tutorial_hint": "Maximum density before the boss. Outer Veil ring becomes critical for early intercept."
 }

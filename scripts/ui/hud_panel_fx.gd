@@ -1,5 +1,8 @@
 extends Control
 
+# Decorative overlay for the gameplay HUD. It follows existing HUD panels and
+# draws the cyan/gold frame treatment without changing the actual UI layout.
+
 const FRAME_TARGET_PATHS: Array[String] = [
 	"../TopPanel",
 	"../StatusPanel",
@@ -20,11 +23,12 @@ func _process(_delta: float) -> void:
 
 
 func _draw() -> void:
+	var time_seconds: float = Time.get_ticks_msec() / 1000.0
 	for path in FRAME_TARGET_PATHS:
 		var target: Control = get_node_or_null(NodePath(path)) as Control
 		if target == null or not target.visible:
 			continue
-		_draw_hud_frame(_local_rect_for_target(target).grow(4.0))
+		_draw_hud_frame(_local_rect_for_target(target).grow(4.0), time_seconds)
 
 
 func _local_rect_for_target(target: Control) -> Rect2:
@@ -33,13 +37,14 @@ func _local_rect_for_target(target: Control) -> Rect2:
 	return Rect2(inverse * target_rect.position, target_rect.size)
 
 
-func _draw_hud_frame(rect: Rect2) -> void:
+func _draw_hud_frame(rect: Rect2, time_seconds: float) -> void:
 	if rect.size.x <= 8.0 or rect.size.y <= 8.0:
 		return
 
-	var cyan: Color = Color(0.18, 0.82, 0.96, 0.68)
-	var cyan_soft: Color = Color(0.18, 0.82, 0.96, 0.16)
-	var gold: Color = Color(1.0, 0.78, 0.26, 0.78)
+	var pulse: float = 0.5 + sin(time_seconds * 1.1 + rect.position.x * 0.003) * 0.5
+	var cyan: Color = Color(0.18, 0.82, 0.96, 0.56 + pulse * 0.12)
+	var cyan_soft: Color = Color(0.18, 0.82, 0.96, 0.10 + pulse * 0.035)
+	var gold: Color = Color(1.0, 0.78, 0.26, 0.66 + pulse * 0.10)
 	var corner: float = clampf(minf(rect.size.x, rect.size.y) * 0.32, 18.0, 42.0)
 
 	draw_rect(rect, cyan_soft, false, 1.0)
@@ -53,6 +58,11 @@ func _draw_hud_frame(rect: Rect2) -> void:
 		var center_x: float = rect.position.x + rect.size.x * 0.5
 		draw_line(Vector2(center_x - rail, rect.position.y), Vector2(center_x + rail, rect.position.y), gold, 1.2)
 		draw_line(Vector2(center_x - rail, rect.position.y + rect.size.y), Vector2(center_x + rail, rect.position.y + rect.size.y), gold, 1.2)
+		var sweep_t: float = fposmod(time_seconds * 0.18 + rect.position.x * 0.0009, 1.0)
+		var sweep_x: float = center_x - rail + sweep_t * rail * 2.0
+		var sweep: Color = Color(1.0, 0.92, 0.56, 0.30 + pulse * 0.12)
+		draw_line(Vector2(sweep_x - 14.0, rect.position.y), Vector2(sweep_x + 14.0, rect.position.y), sweep, 1.4)
+		draw_line(Vector2(sweep_x - 14.0, rect.position.y + rect.size.y), Vector2(sweep_x + 14.0, rect.position.y + rect.size.y), sweep, 1.4)
 
 	if rect.size.y > 92.0:
 		var rail_y: float = minf(38.0, rect.size.y * 0.22)

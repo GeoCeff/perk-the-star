@@ -1,5 +1,8 @@
 extends Node
 
+# Simple global music player. Menus can ask for menu music, while gameplay uses
+# its own wave/ending tracks in game.gd.
+
 const MAIN_MENU_BGM_PATH: String = "res://assets/audio/bgm/main_menu.ogg"
 
 var player: AudioStreamPlayer

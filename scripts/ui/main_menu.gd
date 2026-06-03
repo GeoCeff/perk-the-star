@@ -1,5 +1,8 @@
 extends Control
 
+# Main entry screen. It resets the match state, starts menu music, fills in
+# menu labels, and applies the shared sci-fi theme.
+
 const SpaceTheme = preload("res://scripts/ui/space_theme.gd")
 
 const GAME_TITLE: String = "PERK THE STAR"

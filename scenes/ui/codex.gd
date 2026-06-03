@@ -1,5 +1,8 @@
 extends Control
 
+# Reusable Mission Codex screen. The main menu and pause menu both use this
+# content, so gameplay explanations stay in one place.
+
 const SpaceTheme = preload("res://scripts/ui/space_theme.gd")
 
 @export_file("*.tscn") var return_scene_path: String = "res://scenes/main_menu.tscn"
@@ -31,6 +34,7 @@ Objective
 - Keep luminosity above zero.
 - Clear all 12 JSON-authored waves.
 - Spend Sol Credits on orbiting defense satellites.
+- Build, upgrade, or sell towers even while a wave is active.
 - Survive through Astrophage Prime.
 
 Command phrase
@@ -39,42 +43,48 @@ Defend me, defend me! - Oa ka Perk!"""
 	"systems": {
 		"title": "Core Systems",
 		"body": """GameState
-Central runtime data: luminosity, Sol Credits, wave phase, score, signals, and flare charge.
+Central runtime data: luminosity, Sol Credits, wave phase, score, signals, flare charge, tutorial completion, screen shake, and Auto Start.
 
 Sun
 Tracks luminosity, expression states, and death/victory state. The Sun changes expression as luminosity drops.
 
 OrbitalTower
-Orbiting defense satellites. Their value depends on orbital radius, period, firing cooldown, and engagement windows.
+Orbiting defense satellites. Their value depends on orbital radius, period, firing cooldown, tower level, and engagement windows.
 
 WaveManager
 Loads wave JSON and manages the 12-wave spawn loop.
 
 SolarFlare
-Manual radial burst. The guide describes a flare every 3 waves, fired in a cone to relieve pressure.
+Manual radial burst. The flare charges every 3 cleared waves and can be fired during an active wave to relieve pressure.
 
 UIManager
-Loading screen, HUD, post-mortem, and briefing interface."""
+HUD, tower hover cards, tower management, wave intel, tutorial overlay, pause menu, settings, codex, and end-state buttons.
+
+Camera
+Mouse wheel zooms around the cursor. Right/middle drag, screen-edge hover, and WASD pan around the star. Center Sun snaps back."""
 	},
 	"towers": {
 		"title": "Tower Dossier",
 		"body": """Photon Splitter
-Baseline direct-damage tower. Best on the fast Corona Belt and paired with Helios Cannon coverage.
+Baseline direct-damage tower. Best on the fast Corona Belt for early intercept, but Photon Mimics ignore it and Solar Farmers can absorb it.
 
 Cryo Probe
-Control tower for slowing threats. Strong on the Chromosphere Band and useful before enemies reach inner rings.
+Control tower for slowing threats. Strong on the Chromosphere Band and useful before enemies reach inner rings. It can be disrupted by solar storm events.
 
 Bio-Lab Station
-Analysis and counter-biology platform. The guide calls it out for Photosphere Arc placement and boss-phase interactions.
+Analysis and counter-biology platform. It clears lodged Burrowers, benefits from Research Surge, and opens Astrophage Prime's shell.
 
 Magnetic Net
-Field-control support tower. Best paired with Bio-Lab Station on the Photosphere Arc.
+Long-range field-control support tower. It slows enemies so heavy towers get more time to fire.
 
 Helios Cannon
-High-impact solar weapon. Best on the Corona Belt when timing windows are tight.
+High-impact solar weapon. Strong finisher, but Solar Farmers absorb it and accelerate if they are not controlled first.
 
 Tardigrade Bomb
-Area-pressure tool. Recommended for Chromosphere Band coverage in the ring table."""
+Heavy finisher. Best after Cryo Probe or Magnetic Net has slowed the target.
+
+Upgrades + Selling
+Click a placed tower to open its management panel. Upgrades show current stats, exact stat gains, final upgraded stats, and cost. Selling refunds part of the Sol spent."""
 	},
 	"astrophage": {
 		"title": "Astrophage Variants",
@@ -82,19 +92,19 @@ Area-pressure tool. Recommended for Chromosphere Band coverage in the ring table
 Baseline Astrophage. Use it to verify tower timing, wave pacing, and credit rewards.
 
 1 - Bloom
-Splitting threat. The guide's workflow references Bloom split behavior as an implementation milestone.
+Splitting threat. Defeated Blooms split into three Drifters, so slowing them before they break is safer.
 
 2 - Burrower
-Sun-pressure threat. Burrowers are intended to create luminosity drain pressure once they reach the Sun.
+Sun-pressure threat. If it reaches the Sun, it lodges inside and drains luminosity until Bio-Lab excavates it.
 
 3 - Mimic
-Detection/targeting challenge. Forces the defense plan to rely on more than one tower type.
+Detection/targeting challenge. Carries the MIMIC tag and ignores Photon Splitters, forcing mixed tower plans.
 
 4 - Farmer
-Counterplay enemy. Designed to punish careless energy damage and reward correct tower sequencing.
+Counterplay enemy. Carries the ABSORB tag and feeds from Photon/Helios damage, gaining HP and speed.
 
 5 - Astrophage Prime
-Boss wave target. Wave 12 is the Prime encounter."""
+Boss wave target. Wave 12 is the Prime encounter. SHELL blocks most damage until Bio-Lab opens it; OPEN means the boss is vulnerable."""
 	},
 	"rings": {
 		"title": "Rings + Waves",
@@ -112,7 +122,10 @@ Wave Plan
 - Wave 6: mid-wave auto flare / Cryo disruption.
 - Wave 7: night-side ring pressure.
 - Wave 10: Bio-Lab boost.
-- Wave 12: Astrophage Prime."""
+- Wave 12: Astrophage Prime.
+
+Wave Intel
+The HUD previews enemy counts, warning tags, reward, and a quick counter hint before each wave. Auto Start can launch ready waves after a short countdown."""
 	},
 	"endings": {
 		"title": "Victory + Failure",
@@ -127,6 +140,9 @@ Clear 12 waves with luminosity from 1% to 20%.
 
 Sun Extinguished
 Luminosity hits 0%. The guide routes this into a post-mortem screen.
+
+End Screen Tools
+Retry Run restarts the mission, Main Menu leaves the run, R retries, and M returns to menu.
 
 Field Reminder
 Every credit spent should buy time, coverage, or control. A beautiful orbit means nothing if the Sun goes dark."""

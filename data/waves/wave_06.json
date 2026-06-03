@@ -1,6 +1,6 @@
 {
     "wave": 6, "name": "Solar Storm",
-    "spawn_interval": 1.9,
+    "spawn_interval": 2.0,
     "enemies": [
         { "variant": "drifter", "count": 12 },
         { "variant": "bloom", "count": 4 },
@@ -11,6 +11,6 @@
         "trigger_at_percent": 0.5,
         "cryo_disruption_seconds": 8
     },
-    "reward_base": 60,
+    "reward_base": 75,
     "tutorial_hint": "A mid-wave solar storm fires automatically. Cryo Probes disrupted for 8 seconds!"
 }

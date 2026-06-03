@@ -1,5 +1,9 @@
 extends RefCounted
 
+# Shared style helper for menus, HUD, codex, settings, and pause screens.
+# Centralizing fonts, colors, panels, and buttons keeps the UI consistent and
+# avoids repeating the same theme setup in every scene script.
+
 const FONT_BODY_PATH: String = "res://assets/fonts/Electrolize-Regular.ttf"
 const FONT_DISPLAY_PATH: String = "res://assets/fonts/Kenney Future.ttf"
 const FONT_BUTTON_PATH: String = "res://assets/fonts/Kenney Future Narrow.ttf"
@@ -120,6 +124,8 @@ static func apply_rich_text_body(rich_text: RichTextLabel, font_size: int = 16) 
 
 
 static func format_readout_text(raw_text: String) -> String:
+	# Settings and codex pages use plain text in code, then this helper adds
+	# light BBCode styling so the source stays readable.
 	var result: Array[String] = []
 	var previous_blank: bool = true
 	for raw_line in raw_text.split("\n"):

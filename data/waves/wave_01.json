@@ -1,7 +1,7 @@
 {
     "index": 1,
     "name": "First Contact",
-    "credit_reward": 30,
+    "credit_reward": 35,
     "spawns": [
         { "variant": 0, "count": 5, "interval": 2.0 }
     ],

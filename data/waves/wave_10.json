@@ -14,6 +14,6 @@
         "duration": 999,
         "trigger_at_percent": 0.0
     },
-    "reward_base": 110,
+    "reward_base": 135,
     "tutorial_hint": "All Bio-Lab Stations run at 4x speed this wave!"
 }

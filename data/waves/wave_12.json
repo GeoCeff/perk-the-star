@@ -15,6 +15,6 @@
         "interval": 1.8,
         "max_active": 18
     },
-    "reward_base": 200,
-    "tutorial_hint": "Astrophage Prime: Shell phase immune (Bio-Lab breaks it). Active phase vulnerable. Frenzy spawns Drifters nonstop!"
+    "reward_base": 220,
+    "tutorial_hint": "Astrophage Prime: SHELL is immune until Bio-Lab breaks it, then OPEN is vulnerable. Frenzy spawns Drifters nonstop!"
 }

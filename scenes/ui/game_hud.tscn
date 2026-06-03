@@ -41,7 +41,7 @@ clip_text = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.82, 0.88, 0.96, 0.92)
 theme_override_font_sizes/font_size = 11
-text = "Place towers between waves. Towers orbit and fire automatically."
+text = "Place towers before or during waves. Towers orbit and fire automatically."
 autowrap_mode = 3
 
 [node name="StatusPanel" type="PanelContainer" parent="Hud"]
@@ -49,9 +49,9 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -946.0
+offset_left = -1034.0
 offset_top = 18.0
-offset_right = -314.0
+offset_right = -400.0
 offset_bottom = 124.0
 grow_horizontal = 0
 
@@ -167,7 +167,7 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -296.0
+offset_left = -418.0
 offset_top = 18.0
 offset_right = -28.0
 offset_bottom = 124.0
@@ -183,6 +183,13 @@ custom_minimum_size = Vector2(154, 46)
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 text = "START WAVE 1"
+
+[node name="AutoStartButton" type="Button" parent="Hud/ActionsPanel/ActionRow"]
+custom_minimum_size = Vector2(96, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+toggle_mode = true
+text = "AUTO\nSTART"
 
 [node name="MenuButton" type="Button" parent="Hud/ActionsPanel/ActionRow"]
 custom_minimum_size = Vector2(80, 46)
@@ -422,7 +429,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.94, 0.92, 0.86, 0.96)
 theme_override_font_sizes/font_size = 13
-text = "Select an orbital slot, then start Wave 1."
+text = "Select a tower, then click an orbital slot to build."
 autowrap_mode = 3
 vertical_alignment = 1
 

@@ -1,5 +1,8 @@
 extends Control
 
+# Decorative UI layer for menu-style screens. It draws drifting Astrophage
+# silhouettes, small star motes, and sci-fi frame ornaments.
+
 @export var draw_drift: bool = true
 @export var draw_frame: bool = false
 @export var frame_target_path: NodePath
@@ -28,10 +31,11 @@ func _process(_delta: float) -> void:
 
 
 func _draw() -> void:
+	var time_seconds: float = Time.get_ticks_msec() / 1000.0
 	if draw_drift:
-		_draw_drift()
+		_draw_drift(time_seconds)
 	if draw_frame:
-		_draw_frame()
+		_draw_frame(time_seconds)
 
 
 func _load_textures() -> void:
@@ -55,12 +59,11 @@ func _build_drifters() -> void:
 	]
 
 
-func _draw_drift() -> void:
+func _draw_drift(time_seconds: float) -> void:
 	if drift_textures.is_empty():
 		return
 
 	var viewport_size: Vector2 = get_rect().size
-	var time_seconds: float = Time.get_ticks_msec() / 1000.0
 	_draw_star_motes(viewport_size, time_seconds)
 
 	for i in range(drifters.size()):
@@ -95,17 +98,18 @@ func _draw_star_motes(viewport_size: Vector2, time_seconds: float) -> void:
 			draw_line(point - Vector2(10.0, 1.5), point + Vector2(10.0, -1.5), Color(0.50, 0.90, 1.0, alpha * 0.42), 0.8)
 
 
-func _draw_frame() -> void:
+func _draw_frame(time_seconds: float) -> void:
 	var target: Control = get_node_or_null(frame_target_path) as Control
 	if target == null:
 		return
 
 	var rect: Rect2 = target.get_global_rect().grow(10.0)
 	var inner_rect: Rect2 = rect.grow(-9.0)
-	var cyan: Color = Color(0.18, 0.82, 0.96, 0.82)
-	var cyan_soft: Color = Color(0.18, 0.82, 0.96, 0.20)
-	var gold: Color = Color(1.0, 0.78, 0.26, 0.86)
-	var panel_blue: Color = Color(0.08, 0.36, 0.52, 0.32)
+	var pulse: float = 0.5 + sin(time_seconds * 1.0 + rect.position.y * 0.004) * 0.5
+	var cyan: Color = Color(0.18, 0.82, 0.96, 0.70 + pulse * 0.12)
+	var cyan_soft: Color = Color(0.18, 0.82, 0.96, 0.14 + pulse * 0.04)
+	var gold: Color = Color(1.0, 0.78, 0.26, 0.76 + pulse * 0.10)
+	var panel_blue: Color = Color(0.08, 0.36, 0.52, 0.24 + pulse * 0.06)
 	var corner: float = 72.0
 	var notch: float = 18.0
 
@@ -123,6 +127,11 @@ func _draw_frame() -> void:
 	draw_line(rect.position + Vector2(rect.size.x * 0.5 - 80.0, rect.size.y), rect.position + Vector2(rect.size.x * 0.5 + 80.0, rect.size.y), gold, 1.8)
 	draw_line(rect.position + Vector2(0.0, rect.size.y * 0.5 - 54.0), rect.position + Vector2(0.0, rect.size.y * 0.5 + 54.0), cyan, 1.4)
 	draw_line(rect.position + Vector2(rect.size.x, rect.size.y * 0.5 - 54.0), rect.position + Vector2(rect.size.x, rect.size.y * 0.5 + 54.0), cyan, 1.4)
+	var sweep_t: float = fposmod(time_seconds * 0.15 + rect.position.x * 0.0006, 1.0)
+	var sweep_x: float = rect.position.x + rect.size.x * 0.5 - 80.0 + sweep_t * 160.0
+	var sweep_color: Color = Color(1.0, 0.92, 0.56, 0.30 + pulse * 0.12)
+	draw_line(Vector2(sweep_x - 20.0, rect.position.y), Vector2(sweep_x + 20.0, rect.position.y), sweep_color, 1.6)
+	draw_line(Vector2(sweep_x - 20.0, rect.position.y + rect.size.y), Vector2(sweep_x + 20.0, rect.position.y + rect.size.y), sweep_color, 1.6)
 
 	for point in [
 		rect.position + Vector2(rect.size.x * 0.5 - 112.0, 0.0),
@@ -130,7 +139,7 @@ func _draw_frame() -> void:
 		rect.position + Vector2(rect.size.x * 0.5 - 112.0, rect.size.y),
 		rect.position + Vector2(rect.size.x * 0.5 + 112.0, rect.size.y),
 	]:
-		draw_circle(point, notch * 0.18, gold)
+		draw_circle(point, notch * (0.14 + pulse * 0.05), gold)
 
 
 func _draw_corner(origin: Vector2, horizontal: Vector2, vertical: Vector2, length: float, color: Color, accent: Color) -> void:

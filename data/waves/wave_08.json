@@ -6,6 +6,6 @@
         { "variant": "bloom", "count": 6 },
         { "variant": "farmer", "count": 5 }
     ],
-    "event": null, "reward_base": 80,
-    "tutorial_hint": "Solar Farmers GAIN HP and speed when hit by energy towers! Cryo-debuff them first."
+    "event": null, "reward_base": 100,
+    "tutorial_hint": "Solar Farmers show ABSORB and gain HP/speed from energy towers. Cryo-debuff them first."
 }
