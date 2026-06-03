@@ -126,7 +126,7 @@ This keeps game decisions in the gameplay script and UI display work in the HUD 
 
 ## Audio Pattern
 
-The current prototype uses music files from `assets/audio/bgm/`. Short feedback sounds are generated in `game_sfx_bus.gd` so the game has button, combat, wave, and end-state cues even before final SFX assets are ready. Those generated sounds are stored under named keys, so they can be replaced later without changing the gameplay functions that call them.
+The active background music lives in `assets/audio/bgm/final/`. `main_menu.ogg` plays on menu screens, `wave_01.ogg` covers waves 1-4, `wave_02.ogg` covers waves 5-8, `wave_03.ogg` covers waves 9-11, and `BOSS.ogg` plays on wave 12. Short feedback sounds are still routed through `game_sfx_bus.gd`, so they can be replaced later without changing the gameplay functions that call them.
 
 ## Demo Script
 

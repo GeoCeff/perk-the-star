@@ -28,6 +28,7 @@ const AUTHOR_LABEL: String = "Geo Ceff Gabaisen & Dexter Juevesano"
 func _ready() -> void:
 	GameState.reset_state()
 	GameState.load_audio_settings()
+	GameState.ensure_music_audible()
 	MusicManager.play_menu_music()
 
 	title_label.text = GAME_TITLE
