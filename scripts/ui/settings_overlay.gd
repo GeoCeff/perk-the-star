@@ -52,7 +52,7 @@ Common Fixes
 - Failed to load GDExtension: rebuild and confirm game/bin/perk_the_star.gdextension points to the DLL.
 - gdextension_interface.h missing: install or update godot-cpp before building.
 - Wave JSON issue: validate the matching file in data/waves.
-- Missing music: confirm assets/audio/bgm/final contains main_menu.wav, wave_01.wav, wave_02.wav, wave_03.wav, and BOSS.wav."""
+- Missing music: confirm assets/audio/bgm/final contains main_menu.ogg, wave_01.ogg, wave_02.ogg, wave_03.ogg, and BOSS.ogg."""
 
 @onready var close_button: Button = $settings_panel/settings_margin/settings_box/settings_close
 @onready var settings_panel: PanelContainer = $settings_panel

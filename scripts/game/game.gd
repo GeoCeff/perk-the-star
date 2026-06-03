@@ -25,10 +25,10 @@ const BURROWER_EXCAVATION_HP: float = GameCatalog.BURROWER_EXCAVATION_HP
 const BURROWER_DRAIN_INTERVAL: float = GameCatalog.BURROWER_DRAIN_INTERVAL
 const BURROWER_DRAIN_DAMAGE: float = GameCatalog.BURROWER_DRAIN_DAMAGE
 
-const WAVE_EARLY_BGM_PATH: String = "res://assets/audio/bgm/final/wave_01.wav"
-const WAVE_MID_BGM_PATH: String = "res://assets/audio/bgm/final/wave_02.wav"
-const WAVE_LATE_BGM_PATH: String = "res://assets/audio/bgm/final/wave_03.wav"
-const BOSS_BGM_PATH: String = "res://assets/audio/bgm/final/BOSS.wav"
+const WAVE_EARLY_BGM_PATH: String = "res://assets/audio/bgm/final/wave_01.ogg"
+const WAVE_MID_BGM_PATH: String = "res://assets/audio/bgm/final/wave_02.ogg"
+const WAVE_LATE_BGM_PATH: String = "res://assets/audio/bgm/final/wave_03.ogg"
+const BOSS_BGM_PATH: String = "res://assets/audio/bgm/final/BOSS.ogg"
 const END_BGM_PATH: String = "res://assets/audio/bgm/end.ogg"
 const GAME_HUD_SCENE_PATH: String = "res://scenes/ui/game_hud.tscn"
 const GAME_PAUSE_MENU_SCENE_PATH: String = "res://scenes/ui/game_pause_menu.tscn"
@@ -119,6 +119,10 @@ func _ready() -> void:
 	SpaceTheme.apply_cursor()
 	GameState.reset_state()
 	GameState.load_audio_settings()
+	GameState.ensure_music_audible()
+	MusicManager.stop_music()
+	if not GameState.music_settings_changed.is_connected(_on_music_settings_changed):
+		GameState.music_settings_changed.connect(_on_music_settings_changed)
 	GameState.set_phase(GameState.Phase.BETWEEN_WAVE)
 	_load_assets()
 	_play_wave_music()
@@ -466,6 +470,8 @@ func _load_assets() -> void:
 		bgm_player = AudioStreamPlayer.new()
 		bgm_player.name = "GameMusic"
 		add_child(bgm_player)
+	bgm_player.process_mode = Node.PROCESS_MODE_ALWAYS
+	bgm_player.bus = "Master"
 	bgm_player.volume_db = GameState.get_music_volume_db()
 	_build_sfx_bus()
 
@@ -491,6 +497,8 @@ func _process_music(_delta: float) -> void:
 	if bgm_player == null or ending_music_started:
 		return
 	if not GameState.music_enabled:
+		if bgm_player.playing:
+			bgm_player.stop()
 		return
 	if bgm_player.stream and not bgm_player.playing:
 		bgm_player.play()
@@ -526,11 +534,11 @@ func _play_sfx(kind: String, min_interval: float = 0.0) -> void:
 func _set_music_stream(path: String, loop_enabled: bool) -> void:
 	if bgm_player == null:
 		return
-	var stream = load(path)
+	var stream = MusicManager.load_music_stream(path, loop_enabled)
 	if stream == null:
 		push_warning("Game: missing music track at %s." % path)
 		return
-	_set_audio_stream_loop(stream, loop_enabled)
+	bgm_player.stop()
 	bgm_player.stream = stream
 	current_bgm_path = path
 
@@ -551,6 +559,13 @@ func _apply_music_settings() -> void:
 	bgm_player.volume_db = GameState.get_music_volume_db()
 	if not GameState.music_enabled:
 		bgm_player.stop()
+		return
+	if bgm_player.stream and not bgm_player.playing:
+		bgm_player.play()
+
+
+func _on_music_settings_changed(_enabled: bool, _volume: float) -> void:
+	_apply_music_settings()
 
 
 func _set_audio_stream_loop(stream, loop_enabled: bool) -> void:

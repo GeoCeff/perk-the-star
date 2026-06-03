@@ -211,9 +211,10 @@ grow_horizontal = 0
 
 [node name="IntelBox" type="VBoxContainer" parent="Hud/WaveIntel"]
 layout_mode = 2
-theme_override_constants/separation = 7
+theme_override_constants/separation = 9
 
 [node name="IntelHeader" type="HBoxContainer" parent="Hud/WaveIntel/IntelBox"]
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 
 [node name="IntelTitle" type="Label" parent="Hud/WaveIntel/IntelBox/IntelHeader"]
@@ -223,17 +224,20 @@ theme_override_font_sizes/font_size = 15
 text = "WAVE INTEL"
 
 [node name="IntelStatus" type="Label" parent="Hud/WaveIntel/IntelBox/IntelHeader"]
+custom_minimum_size = Vector2(58, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "NEXT"
 horizontal_alignment = 2
+vertical_alignment = 1
 
 [node name="EnemyRow" type="HBoxContainer" parent="Hud/WaveIntel/IntelBox"]
+custom_minimum_size = Vector2(0, 106)
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 13
 
 [node name="EnemyPreview" type="TextureRect" parent="Hud/WaveIntel/IntelBox/EnemyRow"]
-custom_minimum_size = Vector2(48, 48)
+custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -242,30 +246,33 @@ stretch_mode = 5
 clip_contents = true
 
 [node name="EnemyText" type="VBoxContainer" parent="Hud/WaveIntel/IntelBox/EnemyRow"]
-custom_minimum_size = Vector2(250, 68)
+custom_minimum_size = Vector2(256, 104)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 4
+theme_override_constants/separation = 6
 
 [node name="EnemyLabel" type="Label" parent="Hud/WaveIntel/IntelBox/EnemyRow/EnemyText"]
+custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 autowrap_mode = 3
+vertical_alignment = 1
 
 [node name="ThreatLabel" type="Label" parent="Hud/WaveIntel/IntelBox/EnemyRow/EnemyText"]
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 76)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.82, 0.88, 0.96, 0.92)
 theme_override_font_sizes/font_size = 11
 autowrap_mode = 3
 
 [node name="RingLabel" type="Label" parent="Hud/WaveIntel/IntelBox"]
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.74, 0.82, 0.92, 0.86)
 theme_override_font_sizes/font_size = 10
 text = "RINGS"
 autowrap_mode = 3
+vertical_alignment = 1
 
 [node name="BottomRow" type="Control" parent="Hud"]
 layout_mode = 1

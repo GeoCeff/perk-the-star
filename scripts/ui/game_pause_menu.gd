@@ -74,7 +74,7 @@ func _apply_style() -> void:
 	subtitle_label.add_theme_color_override("font_color", Color(0.62, 0.88, 0.98, 0.96))
 	SpaceTheme.apply_secondary_button(codex_button, SpaceTheme.ICON_CODEX_PATH)
 	SpaceTheme.apply_secondary_button(settings_button, SpaceTheme.ICON_SETTINGS_PATH)
-	SpaceTheme.apply_secondary_button(controls_button, "")
+	SpaceTheme.apply_secondary_button(controls_button, SpaceTheme.ICON_SETTINGS_PATH)
 	SpaceTheme.apply_secondary_button(retry_button, SpaceTheme.ICON_PLAY_PATH)
 	SpaceTheme.apply_danger_button(main_menu_button, SpaceTheme.ICON_BACK_PATH)
 	SpaceTheme.apply_primary_button(back_button, SpaceTheme.ICON_PLAY_PATH)

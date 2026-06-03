@@ -575,7 +575,7 @@ func _fit_layout_to_viewport() -> void:
 		status_panel.offset_top = 140.0
 		status_panel.offset_bottom = 246.0
 		wave_intel_panel.offset_top = 264.0
-		wave_intel_panel.offset_bottom = 486.0
+		wave_intel_panel.offset_bottom = 512.0
 	else:
 		top_panel.offset_right = 820.0
 		status_panel.offset_left = -1060.0
@@ -583,7 +583,7 @@ func _fit_layout_to_viewport() -> void:
 		status_panel.offset_top = 18.0
 		status_panel.offset_bottom = 124.0
 		wave_intel_panel.offset_top = 146.0
-		wave_intel_panel.offset_bottom = 368.0
+		wave_intel_panel.offset_bottom = 394.0
 	if tower_info_card != null and tower_info_card.visible and hovered_tower_type != "":
 		_position_tower_info_card(hovered_tower_type)
 	if tower_manage_card != null and tower_manage_card.visible:
@@ -661,10 +661,15 @@ func _apply_readability_overrides() -> void:
 
 	enemy_label.add_theme_font_size_override("font_size", 13)
 	enemy_label.add_theme_color_override("font_color", Color(0.96, 0.99, 1.0, 0.98))
+	enemy_label.add_theme_constant_override("line_spacing", 1)
 	intel_status_label.add_theme_font_size_override("font_size", 10)
 	intel_status_label.add_theme_color_override("font_color", Color(1.0, 0.84, 0.38, 0.95))
-	threat_label.add_theme_font_size_override("font_size", 11)
+	threat_label.add_theme_font_size_override("font_size", 10)
+	threat_label.add_theme_color_override("font_color", Color(0.82, 0.90, 0.98, 0.94))
+	threat_label.add_theme_constant_override("line_spacing", 2)
 	ring_label.add_theme_font_size_override("font_size", 10)
+	ring_label.add_theme_color_override("font_color", Color(0.58, 0.78, 0.92, 0.90))
+	ring_label.add_theme_constant_override("line_spacing", 1)
 	message_label.add_theme_font_size_override("font_size", 13)
 	message_label.add_theme_color_override("font_color", Color(0.98, 0.95, 0.84, 0.96))
 

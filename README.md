@@ -70,7 +70,7 @@ The first gameplay launch shows an optional mission training overlay with diagra
 
 Music can be toggled or adjusted from Settings. The setting is saved to `user://settings.cfg` and is shared by main menu, mission codex, settings, wave, boss, and ending music.
 
-The active BGM routing is `main_menu.wav` for menus, `wave_01.wav` for waves 1-4, `wave_02.wav` for waves 5-8, `wave_03.wav` for waves 9-11, and `BOSS.wav` for wave 12.
+The active BGM routing is `main_menu.ogg` for menus, `wave_01.ogg` for waves 1-4, `wave_02.ogg` for waves 5-8, `wave_03.ogg` for waves 9-11, and `BOSS.ogg` for wave 12.
 
 Gameplay feedback sounds are generated in `scripts/game/game_sfx_bus.gd` for the current prototype. These temporary SFX cover buttons, tower placement, upgrades, selling, shots, hits, solar flare, wave clear, victory, failure, and sun breach feedback until final SFX assets are added.
 

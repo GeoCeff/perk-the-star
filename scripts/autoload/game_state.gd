@@ -5,6 +5,8 @@ extends Node
 # still lives in `scripts/game/game.gd`.
 
 const SETTINGS_PATH: String = "user://settings.cfg"
+const DEFAULT_MUSIC_VOLUME: float = 0.72
+const MIN_AUDIBLE_MUSIC_VOLUME: float = 0.08
 
 
 # Core match stats
@@ -24,6 +26,7 @@ var music_volume: float = 0.72
 var tutorial_completed: bool = false
 var screen_shake_enabled: bool = true
 var auto_start_waves_enabled: bool = false
+var music_changed_by_user_this_session: bool = false
 
 
 # The phase is the simple state machine for the game.
@@ -89,6 +92,10 @@ func load_audio_settings() -> void:
 	var config := ConfigFile.new()
 	var error := config.load(SETTINGS_PATH)
 	if error != OK:
+		emit_signal("music_settings_changed", music_enabled, music_volume)
+		emit_signal("tutorial_settings_changed", tutorial_completed)
+		emit_signal("game_feel_settings_changed", screen_shake_enabled)
+		emit_signal("auto_start_settings_changed", auto_start_waves_enabled)
 		return
 	music_enabled = bool(config.get_value("audio", "music_enabled", music_enabled))
 	music_volume = clamp(float(config.get_value("audio", "music_volume", music_volume)), 0.0, 1.0)
@@ -108,13 +115,26 @@ func save_audio_settings() -> void:
 	config.save(SETTINGS_PATH)
 
 
+func ensure_music_audible() -> void:
+	if music_changed_by_user_this_session:
+		return
+	if music_enabled and music_volume >= MIN_AUDIBLE_MUSIC_VOLUME:
+		return
+	music_enabled = true
+	music_volume = maxf(music_volume, DEFAULT_MUSIC_VOLUME)
+	save_audio_settings()
+	emit_signal("music_settings_changed", music_enabled, music_volume)
+
+
 func set_music_enabled(enabled: bool) -> void:
+	music_changed_by_user_this_session = true
 	music_enabled = enabled
 	save_audio_settings()
 	emit_signal("music_settings_changed", music_enabled, music_volume)
 
 
 func set_music_volume(volume: float) -> void:
+	music_changed_by_user_this_session = true
 	music_volume = clamp(volume, 0.0, 1.0)
 	save_audio_settings()
 	emit_signal("music_settings_changed", music_enabled, music_volume)

@@ -126,7 +126,7 @@ This keeps game decisions in the gameplay script and UI display work in the HUD 
 
 ## Audio Pattern
 
-The active background music lives in `assets/audio/bgm/final/`. `main_menu.wav` plays on menu screens, `wave_01.wav` covers waves 1-4, `wave_02.wav` covers waves 5-8, `wave_03.wav` covers waves 9-11, and `BOSS.wav` plays on wave 12. Short feedback sounds are still routed through `game_sfx_bus.gd`, so they can be replaced later without changing the gameplay functions that call them.
+The active background music lives in `assets/audio/bgm/final/`. `main_menu.ogg` plays on menu screens, `wave_01.ogg` covers waves 1-4, `wave_02.ogg` covers waves 5-8, `wave_03.ogg` covers waves 9-11, and `BOSS.ogg` plays on wave 12. Short feedback sounds are still routed through `game_sfx_bus.gd`, so they can be replaced later without changing the gameplay functions that call them.
 
 ## Demo Script
 
