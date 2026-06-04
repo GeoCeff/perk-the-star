@@ -13,11 +13,14 @@ if platform == "windows":
 else:
     env.Append(CPPFLAGS=["-std=c++17"])
 
+env.Append(CPPDEFINES=["TYPED_METHOD_BIND"])
+
 godot_cpp_dir = "godot-cpp"
 
 env.Append(CPPPATH=[
     f"{godot_cpp_dir}/include",
     f"{godot_cpp_dir}/gen/include",
+    f"{godot_cpp_dir}/gdextension",
     f"{godot_cpp_dir}/godot-headers",
     "gdextension/src"
 ])

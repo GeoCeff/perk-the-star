@@ -46,10 +46,10 @@ We are not deleting old assets yet. Some unused or older files are intentionally
 - `scripts/game/game_effect_store.gd`
   Effect storage helper. It stores short-lived shot/effect dictionaries and removes them when their timers expire.
 
-- `scripts/game/game_wave_library.gd`
+- `GameWaveLibraryNative`
   Wave JSON helper. It loads wave files, normalizes event data, builds spawn queues, and formats Wave Intel text.
 
-- `scripts/game/game_tower_library.gd`
+- `GameTowerLibraryNative`
   Tower math helper. It calculates upgrade stats, upgrade costs, sell refunds, tower button text, and management-card readouts.
 
 - `scripts/game/game_sfx_bus.gd`
@@ -95,7 +95,7 @@ Towers are stored as dictionaries in the `towers` array. Each tower remembers:
 - its fire cooldown
 - its level and total Sol spent
 
-The tower's base stats come from `GameCatalog.TOWER_CONFIGS`. Runtime upgrades are calculated in `game_tower_library.gd` so we do not need separate copied data for every level.
+The tower's base stats come from native tower config data. Runtime upgrades are calculated in `GameTowerLibraryNative` so we do not need separate copied data for every level.
 
 ## How Enemies Work
 
@@ -111,7 +111,7 @@ Enemy base stats come from `GameCatalog.ENEMY_CONFIGS`. The wave JSON only needs
 
 ## Wave Data
 
-The files in `data/waves/` are JSON so we can tune the campaign without editing gameplay logic. `game_wave_library.gd` loads them, normalizes missing/null events, and builds the spawn queue used by `game.gd`.
+The files in `data/waves/` are JSON so we can tune the campaign without editing gameplay logic. `GameWaveLibraryNative` loads them, normalizes missing/null events, and builds the spawn queue used by `game.gd`.
 
 ## UI Pattern
 

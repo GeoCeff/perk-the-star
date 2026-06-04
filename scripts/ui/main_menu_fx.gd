@@ -3,59 +3,20 @@ extends Control
 # Decorative UI layer for menu-style screens. It draws drifting Astrophage
 # silhouettes, small star motes, and sci-fi frame ornaments.
 
+const GameCatalog = preload("res://scripts/game/game_catalog.gd")
+
 @export var draw_drift: bool = true
 @export var draw_frame: bool = false
 @export var frame_target_path: NodePath
 
-const DRIFT_ANIMATION_SETS: Array = [
-	{
-		"base_angle": 0.0,
-		"fps": 6.0,
-		"frames": [
-			"res://assets/sprites/clean/enemies_optimized/drifter_move_1.png",
-			"res://assets/sprites/clean/enemies_optimized/drifter_move_2.png",
-			"res://assets/sprites/clean/enemies_optimized/drifter_move_3.png",
-		],
-	},
-	{
-		"base_angle": 0.0,
-		"fps": 6.0,
-		"frames": [
-			"res://assets/sprites/clean/enemies_optimized/bloom_move_1.png",
-			"res://assets/sprites/clean/enemies_optimized/bloom_move_2.png",
-			"res://assets/sprites/clean/enemies_optimized/bloom_move_3.png",
-		],
-	},
-	{
-		"base_angle": -PI * 0.25,
-		"fps": 6.0,
-		"frames": [
-			"res://assets/sprites/clean/enemies_optimized/solar_move_1.png",
-			"res://assets/sprites/clean/enemies_optimized/solar_move_2.png",
-			"res://assets/sprites/clean/enemies_optimized/solar_move_3.png",
-		],
-	},
-	{
-		"base_angle": -PI * 0.5,
-		"fps": 7.0,
-		"frames": [
-			"res://assets/sprites/clean/enemies_optimized/coronal_move_1.png",
-			"res://assets/sprites/clean/enemies_optimized/coronal_move_2.png",
-			"res://assets/sprites/clean/enemies_optimized/coronal_move_3.png",
-			"res://assets/sprites/clean/enemies_optimized/coronal_move_4.png",
-		],
-	},
-	{
-		"base_angle": 0.0,
-		"fps": 5.0,
-		"frames": [
-			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_1.png",
-			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_2.png",
-			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_3.png",
-			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_4.png",
-		],
-	},
-]
+const DRIFT_VARIANTS: Array[String] = ["drifter", "bloom", "farmer", "burrower", "prime"]
+const DRIFT_FPS: Dictionary = {
+	"drifter": 6.0,
+	"bloom": 6.0,
+	"farmer": 6.0,
+	"burrower": 7.0,
+	"prime": 5.0,
+}
 
 var drift_animation_sets: Array = []
 var drifters: Array[Dictionary] = []
@@ -82,17 +43,18 @@ func _draw() -> void:
 
 func _load_textures() -> void:
 	drift_animation_sets.clear()
-	for spec in DRIFT_ANIMATION_SETS:
+	for variant in DRIFT_VARIANTS:
+		var animation_spec: Dictionary = GameCatalog.ENEMY_ANIMATION_PATHS.get(variant, {})
 		var frames: Array[Texture2D] = []
-		for path in spec.get("frames", []):
+		for path in animation_spec.get("move", []):
 			var texture: Texture2D = load(str(path)) as Texture2D
 			if texture != null:
 				frames.append(texture)
 		if not frames.is_empty():
 			drift_animation_sets.append({
 				"frames": frames,
-				"base_angle": float(spec.get("base_angle", 0.0)),
-				"fps": float(spec.get("fps", 6.0)),
+				"base_angle": float(GameCatalog.ENEMY_ANIMATION_BASE_ANGLES.get(variant, 0.0)),
+				"fps": float(DRIFT_FPS.get(variant, 6.0)),
 			})
 
 

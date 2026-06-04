@@ -46,10 +46,10 @@ The first gameplay launch shows an optional mission training overlay with diagra
 - `scripts/game/game_catalog.gd` owns static balance data, ring layout, tower definitions, enemy definitions, and active sprite paths.
 - `scripts/game/game_view_controller.gd` owns pan, zoom, viewport cache, and screen/world coordinate conversion.
 - `scripts/game/game_orbit_math.gd` owns ring radius, slot angle, orbital position, and ring summary math.
-- `scripts/game/game_effect_store.gd` owns short-lived shot/effect arrays and cleanup.
-- `scripts/game/game_wave_library.gd` loads wave JSON and formats Wave Intel readouts.
-- `scripts/game/game_tower_library.gd` calculates tower stats, upgrade costs, refunds, and Tower Bay text.
-- `scripts/game/game_sfx_bus.gd` generates temporary prototype SFX and reuses a small audio-player pool.
+- `GameEffectStoreNative` owns short-lived shot/effect arrays and cleanup.
+- `GameWaveLibraryNative` loads wave JSON and formats Wave Intel readouts.
+- `GameTowerLibraryNative` calculates tower stats, upgrade costs, refunds, and Tower Bay text.
+- `GameSfxBusNative` generates temporary prototype SFX and reuses a small audio-player pool.
 - `scripts/ui/space_theme.gd` centralizes shared fonts, colors, cursor styling, and sci-fi panel/button helpers.
 - `scripts/ui/game_hud.gd` owns HUD labels, buttons, tower hover cards, and HUD signals.
 - `scripts/ui/tutorial_overlay.gd` owns the optional first-run mission training diagrams.

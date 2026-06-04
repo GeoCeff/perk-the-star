@@ -1,5 +1,7 @@
 #include "orbital_tower.h"
 #include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/core/object.hpp>
+#include <godot_cpp/core/property_info.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 using namespace godot;
@@ -39,7 +41,7 @@ void OrbitalTower::_bind_methods() {
 
 OrbitalTower::OrbitalTower()
     : m_angle(0.0), m_angular_velocity(0.0), m_ring_radius(80.0),
-      m_engagement_arc(M_PI / 6.0),
+      m_engagement_arc(ORBITAL_TOWER_PI / 6.0),
       m_sun_pos(Vector2(640, 360)),
       m_tower_type("photon_splitter"),
       m_damage(10.0), m_fire_rate(0.3), m_fire_timer(0.0),
@@ -56,7 +58,7 @@ void OrbitalTower::setup(const String& tower_type, int /*ring_idx*/,
     m_tower_type       = tower_type;
     m_angle            = start_angle;
     m_ring_radius      = radius;
-    m_angular_velocity = (2.0 * M_PI) / period;  // ω = 2π/T
+    m_angular_velocity = (2.0 * ORBITAL_TOWER_PI) / period;
 
     // Per-type stats
     if      (tower_type == "photon_splitter") { m_damage=10; m_fire_rate=0.3; m_slow_amount=0.0; m_chain_count=0; }
@@ -69,11 +71,11 @@ void OrbitalTower::setup(const String& tower_type, int /*ring_idx*/,
 
 void OrbitalTower::_process(double delta) {
     // ── Orbital motion ──
-    m_angle = std::fmod(m_angle + m_angular_velocity * delta, 2.0 * M_PI);
+    m_angle = std::fmod(m_angle + m_angular_velocity * delta, 2.0 * ORBITAL_TOWER_PI);
     double px = m_sun_pos.x + m_ring_radius * std::cos(m_angle);
     double py = m_sun_pos.y + m_ring_radius * std::sin(m_angle);
     set_position(Vector2(static_cast<float>(px), static_cast<float>(py)));
-    set_rotation(static_cast<float>(m_angle + M_PI / 2.0));
+    set_rotation(static_cast<float>(m_angle + ORBITAL_TOWER_PI / 2.0));
 
     // ── Cooldown ──
     if (m_cooldown_timer > 0) m_cooldown_timer -= delta;
@@ -91,8 +93,8 @@ void OrbitalTower::_process(double delta) {
 bool OrbitalTower::is_in_arc(const Vector2& enemy_pos) const {
     Vector2 to_enemy = enemy_pos - get_global_position();
     double enemy_angle = std::atan2(to_enemy.y, to_enemy.x);
-    double diff = std::fmod(enemy_angle - m_angle + 4.0 * M_PI, 2.0 * M_PI);
-    if (diff > M_PI) diff -= 2.0 * M_PI;
+    double diff = std::fmod(enemy_angle - m_angle + 4.0 * ORBITAL_TOWER_PI, 2.0 * ORBITAL_TOWER_PI);
+    if (diff > ORBITAL_TOWER_PI) diff -= 2.0 * ORBITAL_TOWER_PI;
     return std::abs(diff) <= m_engagement_arc;
 }
 

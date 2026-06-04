@@ -1,5 +1,7 @@
 #include "astrophage.h"
 #include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/core/object.hpp>
+#include <godot_cpp/core/property_info.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <algorithm>
@@ -23,12 +25,12 @@ void Astrophage::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_sun_position","v"),&Astrophage::set_sun_position);
 
     ADD_SIGNAL(MethodInfo("defeated",
-        PropertyInfo(Variant::INT, "reward_credits")));
+        PropertyInfo(::godot::Variant::INT, "reward_credits")));
     ADD_SIGNAL(MethodInfo("reached_corona"));
     ADD_SIGNAL(MethodInfo("bloom_split",
-        PropertyInfo(Variant::VECTOR2, "position")));
+        PropertyInfo(::godot::Variant::VECTOR2, "position")));
     ADD_SIGNAL(MethodInfo("cluster_damage_request",
-        PropertyInfo(Variant::FLOAT, "damage")));
+        PropertyInfo(::godot::Variant::FLOAT, "damage")));
 
     BIND_ENUM_CONSTANT(DRIFTER);
     BIND_ENUM_CONSTANT(BLOOM);
@@ -37,7 +39,7 @@ void Astrophage::_bind_methods() {
     BIND_ENUM_CONSTANT(FARMER);
     BIND_ENUM_CONSTANT(PRIME);
 
-    ADD_PROPERTY(PropertyInfo(Variant::VECTOR2,"sun_position"),
+    ADD_PROPERTY(PropertyInfo(::godot::Variant::VECTOR2,"sun_position"),
         "set_sun_position","get_sun_position");
 }
 

@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://b15jp1xqi4ldg"]
+[gd_scene load_steps=2 format=3 uid="uid://b15jp1xqi4ldg"]
 
 [ext_resource type="Script" uid="uid://ckhbpku0qq2s7" path="res://scripts/ui/game_hud.gd" id="1_hud"]
-[ext_resource type="Script" path="res://scripts/ui/hud_panel_fx.gd" id="2_fx"]
 
 [node name="GameHudLayer" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -440,7 +439,7 @@ text = "Select a tower, then click an orbital slot to build."
 autowrap_mode = 3
 vertical_alignment = 1
 
-[node name="HudFrameOrnaments" type="Control" parent="Hud"]
+[node name="HudFrameOrnaments" type="HudPanelFxNative" parent="Hud"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -448,4 +447,3 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-script = ExtResource("2_fx")

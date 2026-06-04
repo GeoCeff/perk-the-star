@@ -12,7 +12,7 @@ class Astrophage : public Node2D {
     GDCLASS(Astrophage, Node2D)
 
 public:
-    enum Variant {
+    enum EnemyVariant {
         DRIFTER,
         BLOOM,
         BURROWER,
@@ -74,4 +74,4 @@ private:
 
 }
 
-VARIANT_ENUM_CAST(godot::Astrophage::Variant);
+VARIANT_ENUM_CAST(godot::Astrophage::EnemyVariant);
