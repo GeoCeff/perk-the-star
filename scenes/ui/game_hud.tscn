@@ -1,9 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://b15jp1xqi4ldg"]
+[gd_scene load_steps=1 format=3 uid="uid://b15jp1xqi4ldg"]
 
-[ext_resource type="Script" uid="uid://ckhbpku0qq2s7" path="res://scripts/ui/game_hud.gd" id="1_hud"]
-
-[node name="GameHudLayer" type="CanvasLayer"]
-script = ExtResource("1_hud")
+[node name="GameHudLayer" type="GameHudNative"]
 
 [node name="Hud" type="Control" parent="."]
 layout_mode = 3

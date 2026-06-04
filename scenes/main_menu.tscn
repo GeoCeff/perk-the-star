@@ -1,10 +1,8 @@
 [gd_scene format=3 uid="uid://cdqloioshs0p2"]
 
-[ext_resource type="Script" uid="uid://cbos8pff64cu3" path="res://scripts/ui/main_menu.gd" id="1_l6cm7"]
 [ext_resource type="Texture2D" uid="uid://c70g8b74fpkwt" path="res://assets/sprites/backgrounds/menu_nebula.png" id="2_ekxnf"]
-[ext_resource type="Script" uid="uid://c1htnov1edgt4" path="res://scripts/ui/main_menu_fx.gd" id="8_fx"]
 
-[node name="MainMenu" type="Control" unique_id=1745890239]
+[node name="MainMenu" type="MainMenuNative" unique_id=1745890239]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,7 +11,6 @@ offset_left = -1.0
 offset_right = -1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_l6cm7")
 
 [node name="background" type="AnimatedSpaceBackgroundNative" parent="." unique_id=1611998608]
 layout_mode = 1
@@ -35,7 +32,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.006, 0.012, 0.024, 0.68)
 
-[node name="SpaceLifeLayer" type="Control" parent="." unique_id=1226320939]
+[node name="SpaceLifeLayer" type="MainMenuFxNative" parent="." unique_id=1226320939]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -43,7 +40,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-script = ExtResource("8_fx")
 
 [node name="menu_frame" type="PanelContainer" parent="." unique_id=191122492]
 layout_mode = 1
@@ -138,7 +134,7 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Exit"
 
-[node name="FrameOrnaments" type="Control" parent="." unique_id=2030709623]
+[node name="FrameOrnaments" type="MainMenuFxNative" parent="." unique_id=2030709623]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -148,7 +144,6 @@ offset_right = -2.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-script = ExtResource("8_fx")
 draw_drift = false
 draw_frame = true
 frame_target_path = NodePath("../menu_frame")

@@ -14,6 +14,18 @@
 #include "settings_controls_native.h"
 #include "animated_space_background_native.h"
 #include "hud_panel_fx_native.h"
+#include "main_menu_native.h"
+#include "main_menu_fx_native.h"
+#include "game_pause_menu_native.h"
+#include "settings_overlay_native.h"
+#include "tutorial_overlay_native.h"
+#include "music_manager_native.h"
+#include "codex_native.h"
+#include "game_state_native.h"
+#include "game_catalog_native.h"
+#include "space_theme_native.h"
+#include "game_hud_native.h"
+#include "game_runtime_native.h"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/godot.hpp>
@@ -44,6 +56,18 @@ void initialize_perk_module(ModuleInitializationLevel p_level) {
     ClassDB::register_class<SettingsOverlayCloseButtonNative>();
     ClassDB::register_class<AnimatedSpaceBackgroundNative>();
     ClassDB::register_class<HudPanelFxNative>();
+    ClassDB::register_class<MainMenuNative>();
+    ClassDB::register_class<MainMenuFxNative>();
+    ClassDB::register_class<GamePauseMenuNative>();
+    ClassDB::register_class<SettingsOverlayNative>();
+    ClassDB::register_class<TutorialOverlayNative>();
+    ClassDB::register_class<MusicManagerNative>();
+    ClassDB::register_class<CodexNative>();
+    ClassDB::register_class<GameStateNative>();
+    ClassDB::register_class<GameCatalogNative>();
+    ClassDB::register_class<SpaceThemeNative>();
+    ClassDB::register_class<GameHudNative>();
+    ClassDB::register_class<GameRuntimeNative>();
 }
 
 void uninitialize_perk_module(ModuleInitializationLevel p_level) {

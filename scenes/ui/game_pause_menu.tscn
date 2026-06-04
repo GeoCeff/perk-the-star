@@ -1,11 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://b2fblksua60t0"]
+[gd_scene format=3 uid="uid://b2fblksua60t0"]
 
-[ext_resource type="Script" path="res://scripts/ui/game_pause_menu.gd" id="1_pause"]
-[ext_resource type="Script" path="res://scripts/ui/main_menu_fx.gd" id="2_fx"]
-
-[node name="GamePauseMenu" type="CanvasLayer"]
+[node name="GamePauseMenu" type="GamePauseMenuNative"]
 process_mode = 3
-script = ExtResource("1_pause")
 
 [node name="OverlayRoot" type="Control" parent="."]
 layout_mode = 3
@@ -127,7 +123,7 @@ theme_override_font_sizes/font_size = 16
 text = "Simulation suspended. Field units holding orbit."
 horizontal_alignment = 1
 
-[node name="FrameOrnaments" type="Control" parent="OverlayRoot"]
+[node name="FrameOrnaments" type="MainMenuFxNative" parent="OverlayRoot"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -135,7 +131,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-script = ExtResource("2_fx")
 draw_drift = false
 draw_frame = true
 frame_target_path = NodePath("../PausePanel")

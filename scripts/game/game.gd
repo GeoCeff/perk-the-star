@@ -6,18 +6,18 @@ extends Node2D
 # parsing, and temporary SFX live in small helper files so this file can focus
 # on what happens during play.
 
-const SpaceTheme = preload("res://scripts/ui/space_theme.gd")
-const GameCatalog = preload("res://scripts/game/game_catalog.gd")
+var SpaceTheme: RefCounted = ClassDB.instantiate("SpaceThemeNative") as RefCounted
 
-const MAX_WAVES: int = GameCatalog.MAX_WAVES
-const SUN_RADIUS: float = GameCatalog.SUN_RADIUS
-const SUN_DAMAGE_RADIUS: float = GameCatalog.SUN_DAMAGE_RADIUS
-const ENEMY_SPAWN_PADDING: float = GameCatalog.ENEMY_SPAWN_PADDING
-const FLARE_DAMAGE: float = GameCatalog.FLARE_DAMAGE
-const BURROWER_DIG_RADIUS: float = GameCatalog.BURROWER_DIG_RADIUS
-const BURROWER_EXCAVATION_HP: float = GameCatalog.BURROWER_EXCAVATION_HP
-const BURROWER_DRAIN_INTERVAL: float = GameCatalog.BURROWER_DRAIN_INTERVAL
-const BURROWER_DRAIN_DAMAGE: float = GameCatalog.BURROWER_DRAIN_DAMAGE
+var game_catalog: RefCounted = ClassDB.instantiate("GameCatalogNative") as RefCounted
+var MAX_WAVES: int = int(game_catalog.get("max_waves"))
+var SUN_RADIUS: float = float(game_catalog.get("sun_radius"))
+var SUN_DAMAGE_RADIUS: float = float(game_catalog.get("sun_damage_radius"))
+var ENEMY_SPAWN_PADDING: float = float(game_catalog.get("enemy_spawn_padding"))
+var FLARE_DAMAGE: float = float(game_catalog.get("flare_damage"))
+var BURROWER_DIG_RADIUS: float = float(game_catalog.get("burrower_dig_radius"))
+var BURROWER_EXCAVATION_HP: float = float(game_catalog.get("burrower_excavation_hp"))
+var BURROWER_DRAIN_INTERVAL: float = float(game_catalog.get("burrower_drain_interval"))
+var BURROWER_DRAIN_DAMAGE: float = float(game_catalog.get("burrower_drain_damage"))
 
 const WAVE_EARLY_BGM_PATH: String = "res://assets/audio/bgm/final/wave_01.ogg"
 const WAVE_MID_BGM_PATH: String = "res://assets/audio/bgm/final/wave_02.ogg"
@@ -27,7 +27,6 @@ const END_BGM_PATH: String = "res://assets/audio/bgm/end.ogg"
 const GAME_HUD_SCENE_PATH: String = "res://scenes/ui/game_hud.tscn"
 const GAME_PAUSE_MENU_SCENE_PATH: String = "res://scenes/ui/game_pause_menu.tscn"
 const MAIN_MENU_SCENE_PATH: String = "res://scenes/main_menu.tscn"
-const TUTORIAL_OVERLAY_SCRIPT = preload("res://scripts/ui/tutorial_overlay.gd")
 const BATTLE_BACKGROUND_PATH: String = "res://assets/sprites/backgrounds/battle_nebula_hq.png"
 const END_TITLE_FONT_PATH: String = "res://assets/fonts/Kenney Future.ttf"
 const END_BODY_FONT_PATH: String = "res://assets/fonts/Electrolize-Regular.ttf"
@@ -38,22 +37,22 @@ const ENEMY_HIT_FLASH_SECONDS: float = 0.24
 const HEALTH_BAR_HEIGHT: float = 6.0
 const AUTO_START_DELAY: float = 3.0
 
-const ENEMY_ASSET_PATHS: Dictionary = GameCatalog.ENEMY_ASSET_PATHS
-const ENEMY_ANIMATION_PATHS: Dictionary = GameCatalog.ENEMY_ANIMATION_PATHS
-const ENEMY_ANIMATION_BASE_ANGLES: Dictionary = GameCatalog.ENEMY_ANIMATION_BASE_ANGLES
-const ENEMY_MASSES: Dictionary = GameCatalog.ENEMY_MASSES
-const ENEMY_GRAVITY_CONST: float = GameCatalog.ENEMY_GRAVITY_CONST
-const ENEMY_GRAVITY_ACCEL_CAP: float = GameCatalog.ENEMY_GRAVITY_ACCEL_CAP
-const PHYSICS_PROJECTILE_GRAVITY_CONST: float = GameCatalog.PHYSICS_PROJECTILE_GRAVITY_CONST
-const PHYSICS_PROJECTILE_DAMAGE_RING_MULT: float = GameCatalog.PHYSICS_PROJECTILE_DAMAGE_RING_MULT
-const PHYSICS_PROJECTILE_OUTWARD_DEFLECT: float = GameCatalog.PHYSICS_PROJECTILE_OUTWARD_DEFLECT
-const PHYSICS_PROJECTILE_MAX_LIFETIME: float = GameCatalog.PHYSICS_PROJECTILE_MAX_LIFETIME
-const PHYSICS_PROJECTILE_HIT_RADIUS: float = GameCatalog.PHYSICS_PROJECTILE_HIT_RADIUS
-const SLINGSHOT_COST: int = GameCatalog.SLINGSHOT_COST
-const TOWER_ASSET_PATHS: Dictionary = GameCatalog.TOWER_ASSET_PATHS
-const RINGS: Array = GameCatalog.RINGS
-const ENEMY_CONFIGS: Dictionary = GameCatalog.ENEMY_CONFIGS
-const SLOT_ANGLE_OFFSET: float = GameCatalog.SLOT_ANGLE_OFFSET
+var ENEMY_ASSET_PATHS: Dictionary = game_catalog.call("enemy_asset_paths") as Dictionary
+var ENEMY_ANIMATION_PATHS: Dictionary = game_catalog.call("enemy_animation_paths") as Dictionary
+var ENEMY_ANIMATION_BASE_ANGLES: Dictionary = game_catalog.call("enemy_animation_base_angles") as Dictionary
+var ENEMY_MASSES: Dictionary = game_catalog.call("enemy_masses") as Dictionary
+var ENEMY_GRAVITY_CONST: float = float(game_catalog.get("enemy_gravity_const"))
+var ENEMY_GRAVITY_ACCEL_CAP: float = float(game_catalog.get("enemy_gravity_accel_cap"))
+var PHYSICS_PROJECTILE_GRAVITY_CONST: float = float(game_catalog.get("physics_projectile_gravity_const"))
+var PHYSICS_PROJECTILE_DAMAGE_RING_MULT: float = float(game_catalog.get("physics_projectile_damage_ring_mult"))
+var PHYSICS_PROJECTILE_OUTWARD_DEFLECT: float = float(game_catalog.get("physics_projectile_outward_deflect"))
+var PHYSICS_PROJECTILE_MAX_LIFETIME: float = float(game_catalog.get("physics_projectile_max_lifetime"))
+var PHYSICS_PROJECTILE_HIT_RADIUS: float = float(game_catalog.get("physics_projectile_hit_radius"))
+var SLINGSHOT_COST: int = int(game_catalog.get("slingshot_cost"))
+var TOWER_ASSET_PATHS: Dictionary = game_catalog.call("tower_asset_paths") as Dictionary
+var RINGS: Array = game_catalog.call("rings") as Array
+var ENEMY_CONFIGS: Dictionary = game_catalog.call("enemy_configs") as Dictionary
+var SLOT_ANGLE_OFFSET: float = float(game_catalog.get("slot_angle_offset"))
 const VIEW_ZOOM_STEP: float = 1.12
 
 @export_range(1, 12, 1) var playable_wave_limit: int = 12
@@ -107,9 +106,9 @@ var managed_tower_ring: int = -1
 var managed_tower_slot: int = -1
 
 # UI and asset state
-var game_hud: GameHud
+var game_hud: CanvasLayer
 var tutorial_layer: CanvasLayer
-var tutorial_overlay: TutorialOverlay
+var tutorial_overlay: Control
 var textures: Dictionary = {
 	"enemies": {},
 	"enemy_animations": {},
@@ -126,6 +125,7 @@ var ending_music_started: bool = false
 var sfx_bus: Node
 var gameplay_math: RefCounted
 var orbit_math: RefCounted
+var runtime_native: RefCounted
 
 # Camera/effect state
 var view_controller: RefCounted
@@ -170,6 +170,12 @@ func _ready() -> void:
 		push_error("GameOrbitMathNative is missing. Rebuild the GDExtension before running gameplay.")
 		set_process(false)
 		return
+	if ClassDB.class_exists("GameRuntimeNative"):
+		runtime_native = ClassDB.instantiate("GameRuntimeNative") as RefCounted
+	else:
+		push_error("GameRuntimeNative is missing. Rebuild the GDExtension before running gameplay.")
+		set_process(false)
+		return
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	SpaceTheme.apply_cursor()
 	GameState.reset_state()
@@ -178,7 +184,7 @@ func _ready() -> void:
 	MusicManager.stop_music()
 	if not GameState.music_settings_changed.is_connected(_on_music_settings_changed):
 		GameState.music_settings_changed.connect(_on_music_settings_changed)
-	GameState.set_phase(GameState.Phase.BETWEEN_WAVE)
+	GameState.set_phase(GameState.BETWEEN_WAVE)
 	_load_assets()
 	_play_wave_music()
 	_generate_starfield()
@@ -205,7 +211,7 @@ func _process(delta: float) -> void:
 
 	_process_music(delta)
 
-	if GameState.game_phase == GameState.Phase.WAVE_ACTIVE:
+	if GameState.game_phase == GameState.WAVE_ACTIVE:
 		_process_spawning(delta)
 		_process_wave_event(delta)
 		_process_prime_frenzy(delta)
@@ -265,7 +271,7 @@ func _unhandled_input(event: InputEvent) -> void:
 					return
 				if not _can_build_towers():
 					return
-				if game_hud != null and game_hud.is_screen_position_over_hud(mouse_button.position):
+				if game_hud != null and bool(game_hud.call("is_screen_position_over_hud", mouse_button.position)):
 					return
 				_place_tower_from_screen_position(mouse_button.position)
 				get_viewport().set_input_as_handled()
@@ -323,7 +329,7 @@ func _place_tower_from_screen_position(screen_position: Vector2) -> void:
 
 
 func _try_slingshot_from_screen_position(screen_position: Vector2) -> bool:
-	if game_hud != null and game_hud.is_screen_position_over_hud(screen_position):
+	if game_hud != null and bool(game_hud.call("is_screen_position_over_hud", screen_position)):
 		return false
 	var tower_index: int = _tower_index_at_world_position(_screen_to_world(screen_position))
 	if tower_index == -1:
@@ -359,11 +365,11 @@ func _handle_keyboard_shortcut(keycode: int) -> bool:
 			_on_menu_pressed()
 			return true
 		KEY_R:
-			if GameState.game_phase == GameState.Phase.GAME_OVER or GameState.game_phase == GameState.Phase.VICTORY:
+			if GameState.game_phase == GameState.GAME_OVER or GameState.game_phase == GameState.VICTORY:
 				_on_retry_requested()
 				return true
 		KEY_M:
-			if GameState.game_phase == GameState.Phase.GAME_OVER or GameState.game_phase == GameState.Phase.VICTORY:
+			if GameState.game_phase == GameState.GAME_OVER or GameState.game_phase == GameState.VICTORY:
 				_on_end_main_menu_requested()
 				return true
 		KEY_F:
@@ -443,10 +449,10 @@ func _draw() -> void:
 
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_draw_wave_banner(viewport_size)
-	if GameState.game_phase == GameState.Phase.GAME_OVER:
+	if GameState.game_phase == GameState.GAME_OVER:
 		draw_rect(Rect2(Vector2.ZERO, viewport_size), Color(0.0, 0.0, 0.0, 0.58), true)
 		_draw_end_state_overlay(viewport_size)
-	elif GameState.game_phase == GameState.Phase.VICTORY:
+	elif GameState.game_phase == GameState.VICTORY:
 		draw_rect(Rect2(Vector2.ZERO, viewport_size), Color(1.0, 0.78, 0.18, 0.12), true)
 		_draw_end_state_overlay(viewport_size)
 
@@ -555,7 +561,7 @@ func _draw_orbit_rings(sun: Vector2) -> void:
 
 
 func _draw_wave_preview_paths(sun: Vector2) -> void:
-	if wave_preview_points.is_empty() or GameState.game_phase != GameState.Phase.BETWEEN_WAVE:
+	if wave_preview_points.is_empty() or GameState.game_phase != GameState.BETWEEN_WAVE:
 		return
 
 	var time_seconds: float = Time.get_ticks_msec() / 1000.0
@@ -770,13 +776,7 @@ func _set_music_stream(path: String, loop_enabled: bool) -> void:
 
 
 func _bgm_path_for_wave(wave_number: int) -> String:
-	if wave_number >= 12:
-		return BOSS_BGM_PATH
-	if wave_number >= 9:
-		return WAVE_LATE_BGM_PATH
-	if wave_number >= 5:
-		return WAVE_MID_BGM_PATH
-	return WAVE_EARLY_BGM_PATH
+	return str(runtime_native.call("bgm_path_for_wave", wave_number, WAVE_EARLY_BGM_PATH, WAVE_MID_BGM_PATH, WAVE_LATE_BGM_PATH, BOSS_BGM_PATH))
 
 
 func _apply_music_settings() -> void:
@@ -833,11 +833,11 @@ func _refresh_viewport_cache() -> bool:
 func _needs_frame_redraw(viewport_changed: bool) -> bool:
 	if viewport_changed:
 		return true
-	if GameState.game_phase == GameState.Phase.BETWEEN_WAVE:
+	if GameState.game_phase == GameState.BETWEEN_WAVE:
 		return true
-	if GameState.game_phase == GameState.Phase.WAVE_ACTIVE:
+	if GameState.game_phase == GameState.WAVE_ACTIVE:
 		return true
-	if GameState.game_phase == GameState.Phase.GAME_OVER or GameState.game_phase == GameState.Phase.VICTORY:
+	if GameState.game_phase == GameState.GAME_OVER or GameState.game_phase == GameState.VICTORY:
 		return true
 	if not towers.is_empty() or not enemies.is_empty() or not effect_store.shots.is_empty() or not burrowers.is_empty():
 		return true
@@ -858,7 +858,7 @@ func _process_edge_pan(delta: float) -> bool:
 
 	var viewport_rect: Rect2 = get_viewport_rect()
 	var mouse_position: Vector2 = get_viewport().get_mouse_position()
-	var hud_blocks_mouse: bool = game_hud != null and game_hud.is_screen_position_over_hud(mouse_position)
+	var hud_blocks_mouse: bool = game_hud != null and bool(game_hud.call("is_screen_position_over_hud", mouse_position))
 	return view_controller.process_edge_pan(delta, viewport_rect, mouse_position, hud_blocks_mouse, _outer_ring_radius())
 
 
@@ -869,11 +869,11 @@ func _process_keyboard_pan(delta: float) -> bool:
 
 
 func _build_ui() -> void:
-	var layer: GameHud = get_node_or_null("GameHudLayer") as GameHud
+	var layer: CanvasLayer = get_node_or_null("GameHudLayer") as CanvasLayer
 	if layer == null:
 		var hud_scene: PackedScene = load(GAME_HUD_SCENE_PATH) as PackedScene
 		if hud_scene != null:
-			layer = hud_scene.instantiate() as GameHud
+			layer = hud_scene.instantiate() as CanvasLayer
 			add_child(layer)
 
 	if layer == null:
@@ -882,26 +882,22 @@ func _build_ui() -> void:
 
 	game_hud = layer
 	# The HUD emits intent; game.gd decides whether an action is allowed.
-	if not game_hud.start_wave_requested.is_connected(_on_start_wave_pressed):
-		game_hud.start_wave_requested.connect(_on_start_wave_pressed)
-	if not game_hud.auto_start_toggled.is_connected(_on_auto_start_toggled):
-		game_hud.auto_start_toggled.connect(_on_auto_start_toggled)
-	if not game_hud.menu_requested.is_connected(_on_menu_pressed):
-		game_hud.menu_requested.connect(_on_menu_pressed)
-	if not game_hud.tower_selected.is_connected(_select_tower):
-		game_hud.tower_selected.connect(_select_tower)
-	if not game_hud.tower_upgrade_requested.is_connected(_on_tower_upgrade_requested):
-		game_hud.tower_upgrade_requested.connect(_on_tower_upgrade_requested)
-	if not game_hud.tower_sell_requested.is_connected(_on_tower_sell_requested):
-		game_hud.tower_sell_requested.connect(_on_tower_sell_requested)
-	if not game_hud.tower_manage_closed.is_connected(_on_tower_manage_closed):
-		game_hud.tower_manage_closed.connect(_on_tower_manage_closed)
-	if not game_hud.recenter_requested.is_connected(_reset_view):
-		game_hud.recenter_requested.connect(_reset_view)
-	if not game_hud.retry_requested.is_connected(_on_retry_requested):
-		game_hud.retry_requested.connect(_on_retry_requested)
-	if not game_hud.main_menu_requested.is_connected(_on_end_main_menu_requested):
-		game_hud.main_menu_requested.connect(_on_end_main_menu_requested)
+	var hud_connections: Dictionary = {
+		"start_wave_requested": Callable(self, "_on_start_wave_pressed"),
+		"auto_start_toggled": Callable(self, "_on_auto_start_toggled"),
+		"menu_requested": Callable(self, "_on_menu_pressed"),
+		"tower_selected": Callable(self, "_select_tower"),
+		"tower_upgrade_requested": Callable(self, "_on_tower_upgrade_requested"),
+		"tower_sell_requested": Callable(self, "_on_tower_sell_requested"),
+		"tower_manage_closed": Callable(self, "_on_tower_manage_closed"),
+		"recenter_requested": Callable(self, "_reset_view"),
+		"retry_requested": Callable(self, "_on_retry_requested"),
+		"main_menu_requested": Callable(self, "_on_end_main_menu_requested"),
+	}
+	for signal_name in hud_connections:
+		var callback: Callable = hud_connections[signal_name]
+		if not game_hud.is_connected(signal_name, callback):
+			game_hud.connect(signal_name, callback)
 
 
 func _maybe_show_tutorial() -> void:
@@ -920,11 +916,15 @@ func _show_tutorial() -> void:
 	tutorial_layer.layer = 80
 	add_child(tutorial_layer)
 
-	tutorial_overlay = TUTORIAL_OVERLAY_SCRIPT.new() as TutorialOverlay
+	tutorial_overlay = ClassDB.instantiate("TutorialOverlayNative") as Control
+	if tutorial_overlay == null:
+		tutorial_layer.queue_free()
+		tutorial_layer = null
+		return
 	tutorial_overlay.name = "TutorialOverlay"
-	tutorial_overlay.set_target_provider(Callable(self, "_tutorial_targets"))
-	tutorial_overlay.tutorial_finished.connect(_on_tutorial_finished)
-	tutorial_overlay.tutorial_skipped.connect(_on_tutorial_skipped)
+	tutorial_overlay.call("set_target_provider", Callable(self, "_tutorial_targets"))
+	tutorial_overlay.connect("tutorial_finished", Callable(self, "_on_tutorial_finished"))
+	tutorial_overlay.connect("tutorial_skipped", Callable(self, "_on_tutorial_skipped"))
 	tutorial_layer.add_child(tutorial_overlay)
 	_set_message("Mission training overlay opened. Skip or finish to save it as complete.", 3.0)
 
@@ -951,7 +951,8 @@ func _clear_tutorial_overlay() -> void:
 func _tutorial_targets() -> Dictionary:
 	var targets: Dictionary = {}
 	if game_hud != null:
-		targets.merge(game_hud.get_tutorial_targets(), true)
+		var hud_targets: Dictionary = game_hud.call("get_tutorial_targets") as Dictionary
+		targets.merge(hud_targets, true)
 
 	var sun_screen_pos: Vector2 = _world_to_screen(_sun_pos())
 	targets["sun"] = {
@@ -974,7 +975,7 @@ func _tutorial_targets() -> Dictionary:
 
 
 func _on_start_wave_pressed() -> void:
-	if GameState.game_phase != GameState.Phase.BETWEEN_WAVE:
+	if GameState.game_phase != GameState.BETWEEN_WAVE:
 		return
 	_clear_auto_start_timer(false)
 
@@ -991,7 +992,7 @@ func _on_start_wave_pressed() -> void:
 		return
 
 	GameState.current_wave = wave_number
-	GameState.set_phase(GameState.Phase.WAVE_ACTIVE)
+	GameState.set_phase(GameState.WAVE_ACTIVE)
 	_clear_wave_preview()
 	_start_wave_spawning(current_wave_data)
 	wave_active = true
@@ -1222,7 +1223,7 @@ func _wave_progress_ratio() -> float:
 
 
 func _try_manual_flare() -> void:
-	if GameState.game_phase != GameState.Phase.WAVE_ACTIVE:
+	if GameState.game_phase != GameState.WAVE_ACTIVE:
 		_set_message("Solar flare can only fire during an active wave.", 1.6)
 		return
 	if enemies.is_empty():
@@ -1391,7 +1392,7 @@ func _process_towers(delta: float) -> void:
 			towers[i] = tower
 			continue
 
-		if GameState.game_phase == GameState.Phase.WAVE_ACTIVE and float(tower["fire_timer"]) <= 0.0:
+		if GameState.game_phase == GameState.WAVE_ACTIVE and float(tower["fire_timer"]) <= 0.0:
 			if str(tower["type"]) == "bio_lab":
 				var burrower_index: int = _find_burrower_target_for_tower(tower)
 				if burrower_index != -1:
@@ -1479,7 +1480,7 @@ func _process_enemies(delta: float) -> void:
 		_set_message("The corona was breached. Luminosity is falling.", 2.0)
 		_update_ui()
 
-	if GameState.game_phase == GameState.Phase.GAME_OVER:
+	if GameState.game_phase == GameState.GAME_OVER:
 		wave_active = false
 		spawn_queue.clear()
 		_play_sfx("failure", 6.0)
@@ -1502,7 +1503,7 @@ func _process_burrowers(delta: float) -> void:
 			_update_ui()
 		burrowers[i] = burrower
 
-	if GameState.game_phase == GameState.Phase.GAME_OVER:
+	if GameState.game_phase == GameState.GAME_OVER:
 		wave_active = false
 		spawn_queue.clear()
 		_play_sfx("failure", 6.0)
@@ -1642,7 +1643,7 @@ func _should_auto_start_wave() -> bool:
 		return false
 	if tutorial_overlay != null:
 		return false
-	if GameState.game_phase != GameState.Phase.BETWEEN_WAVE:
+	if GameState.game_phase != GameState.BETWEEN_WAVE:
 		return false
 	var wave_number: int = GameState.current_wave + 1
 	if wave_number > MAX_WAVES or wave_number > playable_wave_limit:
@@ -1662,7 +1663,7 @@ func _clear_auto_start_timer(refresh_ui: bool = true) -> void:
 func _check_wave_clear() -> void:
 	if not wave_active:
 		return
-	if GameState.game_phase != GameState.Phase.WAVE_ACTIVE:
+	if GameState.game_phase != GameState.WAVE_ACTIVE:
 		return
 	if not spawn_queue.is_empty() or not clash_schedule.is_empty() or not enemies.is_empty() or not burrowers.is_empty():
 		return
@@ -1680,7 +1681,7 @@ func _check_wave_clear() -> void:
 
 	if GameState.current_wave >= playable_wave_limit and playable_wave_limit < MAX_WAVES:
 		_play_sfx("wave_clear")
-		GameState.set_phase(GameState.Phase.BETWEEN_WAVE)
+		GameState.set_phase(GameState.BETWEEN_WAVE)
 		_refresh_next_wave_preview()
 		_show_next_wave_banner()
 		_set_message("Wave %d cleared. Additional waves are locked for this scene." % GameState.current_wave, 999.0)
@@ -1691,7 +1692,7 @@ func _check_wave_clear() -> void:
 		_set_message("Victory. Final rank: %s." % GameState.get_rank(), 999.0)
 	else:
 		_play_sfx("wave_clear")
-		GameState.set_phase(GameState.Phase.BETWEEN_WAVE)
+		GameState.set_phase(GameState.BETWEEN_WAVE)
 		_refresh_next_wave_preview()
 		_show_next_wave_banner()
 		_set_message("Wave %d cleared. Corps reward: %d Sol Credits." % [GameState.current_wave, reward], 4.0)
@@ -1788,7 +1789,7 @@ func _spawn_enemy(variant: String, spawn_pos = null) -> void:
 	var base_speed: float = float(cfg["speed"])
 
 	# Runtime enemies are small dictionaries so wave files only need to choose
-	# a variant; all stats still come from GameCatalog.
+	# a variant; all stats still come from the native catalog.
 	enemies.append({
 		"variant": key,
 		"variant_id": cfg["variant_id"],
@@ -2507,7 +2508,7 @@ func _draw_build_preview() -> void:
 	var mouse_position: Vector2 = get_viewport().get_mouse_position()
 	if not get_viewport_rect().has_point(mouse_position):
 		return
-	if game_hud.is_screen_position_over_hud(mouse_position):
+	if bool(game_hud.call("is_screen_position_over_hud", mouse_position)):
 		return
 
 	var slot: Dictionary = _nearest_ring_slot(_screen_to_world(mouse_position))
@@ -2712,7 +2713,7 @@ func _draw_visual_effects() -> void:
 
 
 func _draw_end_state_overlay(viewport_size: Vector2) -> void:
-	var victory: bool = GameState.game_phase == GameState.Phase.VICTORY
+	var victory: bool = GameState.game_phase == GameState.VICTORY
 	var accent: Color = SpaceTheme.COLOR_GOLD if victory else Color(1.0, 0.28, 0.18, 0.92)
 	var title: String = "SOL SAVED" if victory else "LUMINOSITY COLLAPSE"
 	var subtitle: String = "Mission complete. The defense grid held." if victory else "The defense grid failed. The sun went dark."
@@ -2761,17 +2762,15 @@ func _draw_centered_text(font: Font, text: String, x: float, y: float, width: fl
 
 
 func _ease_out_cubic(value: float) -> float:
-	var t: float = clampf(value, 0.0, 1.0)
-	return 1.0 - pow(1.0 - t, 3.0)
+	return float(runtime_native.call("ease_out_cubic", value))
 
 
 func _ease_in_out_sine(value: float) -> float:
-	var t: float = clampf(value, 0.0, 1.0)
-	return 0.5 - cos(t * PI) * 0.5
+	return float(runtime_native.call("ease_in_out_sine", value))
 
 
 func _sun_pos() -> Vector2:
-	return get_viewport_rect().size * 0.5
+	return runtime_native.call("sun_pos", get_viewport_rect().size) as Vector2
 
 
 func _view_translation(viewport_size: Vector2) -> Vector2:
@@ -2779,14 +2778,7 @@ func _view_translation(viewport_size: Vector2) -> Vector2:
 
 
 func _screen_shake_offset() -> Vector2:
-	if screen_shake_timer <= 0.0 or not GameState.screen_shake_enabled:
-		return Vector2.ZERO
-	var fade: float = clampf(screen_shake_timer / 0.34, 0.0, 1.0)
-	var time_seconds: float = Time.get_ticks_msec() / 1000.0
-	return Vector2(
-		sin(time_seconds * 73.0),
-		cos(time_seconds * 61.0)
-	) * screen_shake_strength * fade
+	return runtime_native.call("screen_shake_offset", screen_shake_timer, GameState.screen_shake_enabled, screen_shake_strength) as Vector2
 
 
 func _screen_to_world(screen_position: Vector2) -> Vector2:
@@ -2809,10 +2801,7 @@ func _reset_view() -> void:
 
 
 func _can_build_towers() -> bool:
-	return (
-		GameState.game_phase == GameState.Phase.BETWEEN_WAVE
-		or GameState.game_phase == GameState.Phase.WAVE_ACTIVE
-	)
+	return bool(runtime_native.call("can_build_towers", GameState.game_phase, GameState.BETWEEN_WAVE, GameState.WAVE_ACTIVE))
 
 
 func _clamp_view_offset() -> void:
@@ -2879,7 +2868,7 @@ func _sun_state_key() -> String:
 func _refresh_next_wave_preview() -> void:
 	var next_wave: int = int(clamp(GameState.current_wave + 1, 1, playable_wave_limit))
 	next_wave_preview = _wave_load(next_wave)
-	if GameState.game_phase == GameState.Phase.BETWEEN_WAVE:
+	if GameState.game_phase == GameState.BETWEEN_WAVE:
 		_show_wave_preview(next_wave_preview)
 	else:
 		_clear_wave_preview()
@@ -2957,10 +2946,10 @@ func _managed_tower_view_data() -> Dictionary:
 
 
 func _end_state_view_data() -> Dictionary:
-	if GameState.game_phase != GameState.Phase.GAME_OVER and GameState.game_phase != GameState.Phase.VICTORY:
+	if GameState.game_phase != GameState.GAME_OVER and GameState.game_phase != GameState.VICTORY:
 		return {}
 
-	var victory: bool = GameState.game_phase == GameState.Phase.VICTORY
+	var victory: bool = GameState.game_phase == GameState.VICTORY
 	var title: String = "SOL SAVED" if victory else "LUMINOSITY COLLAPSE"
 	var subtitle: String = "Mission complete. The defense grid held." if victory else "The defense grid failed. The sun went dark."
 	var stats: String = "WAVES %d/%d  |  KILLS %d  |  SCORE %d  |  LUMINOSITY %d%%" % [
@@ -3014,7 +3003,7 @@ func _enemy_animation_texture(enemy: Dictionary):
 func _enemy_animation_state(enemy: Dictionary) -> String:
 	if str(enemy.get("variant", "")) == "prime" and int(enemy.get("prime_phase", 0)) >= 2:
 		return "active"
-	if GameState.game_phase == GameState.Phase.WAVE_ACTIVE and float(enemy.get("speed", 0.0)) > 0.0:
+	if GameState.game_phase == GameState.WAVE_ACTIVE and float(enemy.get("speed", 0.0)) > 0.0:
 		return "move"
 	return "idle"
 
@@ -3109,7 +3098,7 @@ func _active_modifier_summary() -> String:
 
 
 func _selected_tower_readout() -> String:
-	return str(tower_library.call("selected_readout", selected_tower, GameState.game_phase == GameState.Phase.WAVE_ACTIVE))
+	return str(tower_library.call("selected_readout", selected_tower, GameState.game_phase == GameState.WAVE_ACTIVE))
 
 
 func _set_message(text: String, duration: float = 0.0) -> void:
@@ -3128,26 +3117,26 @@ func _update_ui() -> void:
 
 	# The HUD receives one dictionary instead of reading gameplay variables
 	# directly. That keeps display code separate from gameplay rules.
-	var wave_data: Dictionary = current_wave_data if GameState.game_phase == GameState.Phase.WAVE_ACTIVE else next_wave_preview
+	var wave_data: Dictionary = current_wave_data if GameState.game_phase == GameState.WAVE_ACTIVE else next_wave_preview
 	var wave_index: int = int(wave_data.get("index", min(GameState.current_wave + 1, MAX_WAVES)))
 	var wave_name: String = str(wave_data.get("name", "First Contact"))
 	var title_text: String = "WAVE %02d/%02d | %s" % [wave_index, MAX_WAVES, wave_name.to_upper()]
-	if GameState.game_phase != GameState.Phase.WAVE_ACTIVE:
+	if GameState.game_phase != GameState.WAVE_ACTIVE:
 		title_text = "%s %02d/%02d" % [briefing_title.to_upper(), wave_index, MAX_WAVES]
 		if briefing_title.strip_edges().to_lower() != wave_name.strip_edges().to_lower():
 			title_text += " | %s" % wave_name.to_upper()
 
 	var reward: int = int(wave_data.get("credit_reward", 0))
 	var next_wave: int = min(GameState.current_wave + 1, MAX_WAVES)
-	var start_disabled: bool = GameState.game_phase != GameState.Phase.BETWEEN_WAVE or next_wave > playable_wave_limit
+	var start_disabled: bool = GameState.game_phase != GameState.BETWEEN_WAVE or next_wave > playable_wave_limit
 	var start_text: String = "START WAVE %d" % next_wave
-	var intel_status: String = "LIVE" if GameState.game_phase == GameState.Phase.WAVE_ACTIVE else "NEXT"
+	var intel_status: String = "LIVE" if GameState.game_phase == GameState.WAVE_ACTIVE else "NEXT"
 	if GameState.auto_start_waves_enabled and not start_disabled and auto_start_timer > 0.0:
 		start_text = "AUTO IN %d" % max(1, int(ceil(auto_start_timer)))
 		intel_status = "AUTO %d" % max(1, int(ceil(auto_start_timer)))
 	elif GameState.auto_start_waves_enabled and not start_disabled:
 		intel_status = "AUTO START"
-	game_hud.update_view({
+	game_hud.call("update_view", {
 		"wave_title": title_text,
 		"brief": _wave_clean_hint(str(wave_data.get("tutorial_hint", "Defend the Sun.")), wave_name),
 		"credits": str(GameState.sol_credits),
@@ -3161,7 +3150,7 @@ func _update_ui() -> void:
 		"threat": _wave_intel_detail(
 			wave_data,
 			reward,
-			enemies.size() if GameState.game_phase == GameState.Phase.WAVE_ACTIVE else -1,
+			enemies.size() if GameState.game_phase == GameState.WAVE_ACTIVE else -1,
 			burrowers.size(),
 			spawn_queue.size(),
 			_active_modifier_summary()

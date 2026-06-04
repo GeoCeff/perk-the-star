@@ -1,17 +1,14 @@
-[gd_scene load_steps=4 format=3 uid="uid://cicrgf64sxa6b"]
+[gd_scene load_steps=2 format=3 uid="uid://cicrgf64sxa6b"]
 
-[ext_resource type="Script" uid="uid://b31xthdyco4vm" path="res://scripts/ui/settings_overlay.gd" id="1_settings"]
 [ext_resource type="Texture2D" path="res://assets/sprites/backgrounds/menu_nebula.png" id="5_bg"]
-[ext_resource type="Script" path="res://scripts/ui/main_menu_fx.gd" id="6_fx"]
 
-[node name="SettingsOverlay" type="Control"]
+[node name="SettingsOverlay" type="SettingsOverlayNative"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_settings")
 
 [node name="background" type="AnimatedSpaceBackgroundNative" parent="."]
 layout_mode = 1
@@ -33,7 +30,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.005, 0.008, 0.016, 0.72)
 
-[node name="SpaceLifeLayer" type="Control" parent="."]
+[node name="SpaceLifeLayer" type="MainMenuFxNative" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -41,7 +38,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-script = ExtResource("6_fx")
 
 [node name="settings_panel" type="PanelContainer" parent="."]
 layout_mode = 1
@@ -157,7 +153,7 @@ size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
 text = "Close"
 
-[node name="FrameOrnaments" type="Control" parent="."]
+[node name="FrameOrnaments" type="MainMenuFxNative" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -165,7 +161,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-script = ExtResource("6_fx")
 draw_drift = false
 draw_frame = true
 frame_target_path = NodePath("../settings_panel")

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cntf47tnib4ta"
-path="res://.godot/imported/photpn_idle_2.png-a3ee4c940485f56061adc82dd6dd7d00.ctex"
+uid="uid://c7uewh08yqtmc"
+path="res://.godot/imported/astrophage-active_move_1.png-4a7dc9bc479459a420d2a5ea41dd9a12.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/clean/enemies/photpn_idle_2.png"
-dest_files=["res://.godot/imported/photpn_idle_2.png-a3ee4c940485f56061adc82dd6dd7d00.ctex"]
+source_file="res://assets/sprites/clean/enemies/astrophage-active_move_1.png"
+dest_files=["res://.godot/imported/astrophage-active_move_1.png-4a7dc9bc479459a420d2a5ea41dd9a12.ctex"]
 
 [params]
 

@@ -49,7 +49,7 @@ The first gameplay launch shows an optional mission training overlay with diagra
 - `GameEffectStoreNative` owns short-lived shot/effect arrays and cleanup.
 - `GameWaveLibraryNative` loads wave JSON and formats Wave Intel readouts.
 - `GameTowerLibraryNative` calculates tower stats, upgrade costs, refunds, and Tower Bay text.
-- `GameSfxBusNative` generates temporary prototype SFX and reuses a small audio-player pool.
+- `GameSfxBusNative` loads available SFX assets and falls back to generated tones.
 - `scripts/ui/space_theme.gd` centralizes shared fonts, colors, cursor styling, and sci-fi panel/button helpers.
 - `scripts/ui/game_hud.gd` owns HUD labels, buttons, tower hover cards, and HUD signals.
 - `scripts/ui/tutorial_overlay.gd` owns the optional first-run mission training diagrams.
@@ -72,7 +72,7 @@ Music can be toggled or adjusted from Settings. The setting is saved to `user://
 
 The active BGM routing is `main_menu.ogg` for menus, `wave_01.ogg` for waves 1-4, `wave_02.ogg` for waves 5-8, `wave_03.ogg` for waves 9-11, and `BOSS.ogg` for wave 12.
 
-Gameplay feedback sounds are generated in `scripts/game/game_sfx_bus.gd` for the current prototype. These temporary SFX cover buttons, tower placement, upgrades, selling, shots, hits, solar flare, wave clear, victory, failure, and sun breach feedback until final SFX assets are added.
+Gameplay feedback sounds are handled by `GameSfxBusNative`. It uses repo WAV assets for wave starts, clash warnings, counter attacks, physics shots, slingshots, enemy deaths, Prime phase shifts, sun damage, wave clears, and game over, with generated fallback tones for the remaining quick UI and combat cues.
 
 ## Game Feel Settings
 

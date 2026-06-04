@@ -1,17 +1,14 @@
-[gd_scene load_steps=4 format=3 uid="uid://diu2fn8hhbhh1"]
+[gd_scene load_steps=2 format=3 uid="uid://diu2fn8hhbhh1"]
 
-[ext_resource type="Script" uid="uid://dtjoc0x8y5c28" path="res://scenes/ui/codex.gd" id="1_63g6e"]
 [ext_resource type="Texture2D" path="res://assets/sprites/backgrounds/menu_nebula.png" id="2_bg"]
-[ext_resource type="Script" path="res://scripts/ui/main_menu_fx.gd" id="3_fx"]
 
-[node name="Codex" type="Control" unique_id=525885548]
+[node name="Codex" type="CodexNative" unique_id=525885548]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_63g6e")
 
 [node name="background" type="AnimatedSpaceBackgroundNative" parent="."]
 layout_mode = 1
@@ -33,7 +30,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.005, 0.008, 0.016, 0.72)
 
-[node name="SpaceLifeLayer" type="Control" parent="."]
+[node name="SpaceLifeLayer" type="MainMenuFxNative" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -41,7 +38,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-script = ExtResource("3_fx")
 
 [node name="panel" type="PanelContainer" parent="."]
 layout_mode = 1
@@ -161,7 +157,7 @@ fit_content = true
 scroll_active = false
 autowrap_mode = 3
 
-[node name="FrameOrnaments" type="Control" parent="."]
+[node name="FrameOrnaments" type="MainMenuFxNative" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -169,7 +165,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-script = ExtResource("3_fx")
 draw_drift = false
 draw_frame = true
 frame_target_path = NodePath("../panel")

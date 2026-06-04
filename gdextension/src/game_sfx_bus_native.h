@@ -34,6 +34,8 @@ public:
     void play(const String& kind, double min_interval = 0.0);
 
 private:
+    Ref<AudioStreamWAV> load_wav(const String& path) const;
+    Ref<AudioStreamWAV> load_or_make(const String& file_name, double start_freq, double end_freq, double duration, double volume, double noise = 0.0);
     Ref<AudioStreamWAV> make_sfx(double start_freq, double end_freq, double duration, double volume, double noise = 0.0);
 };
 

@@ -16,8 +16,8 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 
 [autoload]
 
-GameState="*uid://dkcaw83x7j31a"
-MusicManager="*res://scripts/autoload/music_manager.gd"
+GameState="*res://scenes/autoload/game_state.tscn"
+MusicManager="*res://scenes/autoload/music_manager.tscn"
 
 [display]
 
