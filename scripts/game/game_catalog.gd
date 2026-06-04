@@ -25,8 +25,8 @@ const ENEMY_ASSET_PATHS: Dictionary = {
 	"prime": "res://assets/sprites/enemies/ASTROPHAGE PRIME.png",
 }
 
-# Clean enemy sprites are animation frames. Photon Mimic's pulled frames are
-# transparent, so it keeps using ENEMY_ASSET_PATHS until usable frames arrive.
+# Clean enemy sprites are animation frames. Photon Mimic and Astrophage Prime
+# use the latest added frames when available.
 const ENEMY_ANIMATION_PATHS: Dictionary = {
 	"drifter": {
 		"idle": [
@@ -73,12 +73,28 @@ const ENEMY_ANIMATION_PATHS: Dictionary = {
 			"res://assets/sprites/clean/enemies_optimized/solar_move_3.png",
 		],
 	},
+	"mimic": {
+		"idle": [
+			"res://assets/sprites/clean/enemies/photon_idle_1.png",
+			"res://assets/sprites/clean/enemies/photpn_idle_2.png",
+		],
+		"move": [
+			"res://assets/sprites/clean/enemies/photon_idle_1.png",
+			"res://assets/sprites/clean/enemies/photpn_idle_2.png",
+		],
+	},
 	"prime": {
 		"idle": [
 			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_idle_1.png",
 			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_idle_2.png",
 		],
 		"move": [
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_1.png",
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_2.png",
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_3.png",
+			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_4.png",
+		],
+		"active": [
 			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_1.png",
 			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_2.png",
 			"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_3.png",
@@ -91,6 +107,7 @@ const ENEMY_ANIMATION_BASE_ANGLES: Dictionary = {
 	"drifter": 0.0,
 	"bloom": 0.0,
 	"burrower": -PI * 0.5,
+	"mimic": 0.0,
 	"farmer": -PI * 0.25,
 	"prime": 0.0,
 }

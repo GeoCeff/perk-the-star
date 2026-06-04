@@ -8,12 +8,6 @@ extends Node2D
 
 const SpaceTheme = preload("res://scripts/ui/space_theme.gd")
 const GameCatalog = preload("res://scripts/game/game_catalog.gd")
-const GameEffectStoreScript = preload("res://scripts/game/game_effect_store.gd")
-const GameOrbitMathScript = preload("res://scripts/game/game_orbit_math.gd")
-const GameSfxBusScript = preload("res://scripts/game/game_sfx_bus.gd")
-const GameTowerLibraryScript = preload("res://scripts/game/game_tower_library.gd")
-const GameViewControllerScript = preload("res://scripts/game/game_view_controller.gd")
-const GameWaveLibraryScript = preload("res://scripts/game/game_wave_library.gd")
 
 const MAX_WAVES: int = GameCatalog.MAX_WAVES
 const SUN_RADIUS: float = GameCatalog.SUN_RADIUS
@@ -59,6 +53,8 @@ const SLINGSHOT_COST: int = GameCatalog.SLINGSHOT_COST
 const TOWER_ASSET_PATHS: Dictionary = GameCatalog.TOWER_ASSET_PATHS
 const RINGS: Array = GameCatalog.RINGS
 const ENEMY_CONFIGS: Dictionary = GameCatalog.ENEMY_CONFIGS
+const SLOT_ANGLE_OFFSET: float = GameCatalog.SLOT_ANGLE_OFFSET
+const VIEW_ZOOM_STEP: float = 1.12
 
 @export_range(1, 12, 1) var playable_wave_limit: int = 12
 @export var briefing_title: String = "SOL DEFENSE CORPS"
@@ -103,7 +99,9 @@ var enemies: Array = []
 var burrowers: Array = []
 var towers: Array = []
 var stars: Array = []
-var effect_store: GameEffectStore
+var effect_store: RefCounted
+var tower_library: RefCounted
+var wave_library: RefCounted
 var selected_tower: String = "photon_splitter"
 var managed_tower_ring: int = -1
 var managed_tower_slot: int = -1
@@ -125,11 +123,12 @@ var bgm_player: AudioStreamPlayer
 var battle_background_texture: Texture2D
 var current_bgm_path: String = ""
 var ending_music_started: bool = false
-var sfx_bus: GameSfxBus
+var sfx_bus: Node
 var gameplay_math: RefCounted
+var orbit_math: RefCounted
 
 # Camera/effect state
-var view_controller: GameViewController
+var view_controller: RefCounted
 var sun_hit_timer: float = 0.0
 var screen_shake_timer: float = 0.0
 var screen_shake_strength: float = 0.0
@@ -139,10 +138,38 @@ var board_draw_zoom: float = 1.0
 
 func _ready() -> void:
 	randomize()
-	effect_store = GameEffectStoreScript.new() as GameEffectStore
-	view_controller = GameViewControllerScript.new() as GameViewController
+	if ClassDB.class_exists("GameViewControllerNative"):
+		view_controller = ClassDB.instantiate("GameViewControllerNative") as RefCounted
+	else:
+		push_error("GameViewControllerNative is missing. Rebuild the GDExtension before running gameplay.")
+		set_process(false)
+		return
+	if ClassDB.class_exists("GameEffectStoreNative"):
+		effect_store = ClassDB.instantiate("GameEffectStoreNative") as RefCounted
+	else:
+		push_error("GameEffectStoreNative is missing. Rebuild the GDExtension before running gameplay.")
+		set_process(false)
+		return
+	if ClassDB.class_exists("GameTowerLibraryNative"):
+		tower_library = ClassDB.instantiate("GameTowerLibraryNative") as RefCounted
+	else:
+		push_error("GameTowerLibraryNative is missing. Rebuild the GDExtension before running gameplay.")
+		set_process(false)
+		return
+	if ClassDB.class_exists("GameWaveLibraryNative"):
+		wave_library = ClassDB.instantiate("GameWaveLibraryNative") as RefCounted
+	else:
+		push_error("GameWaveLibraryNative is missing. Rebuild the GDExtension before running gameplay.")
+		set_process(false)
+		return
 	if ClassDB.class_exists("V2GameplayMath"):
 		gameplay_math = ClassDB.instantiate("V2GameplayMath") as RefCounted
+	if ClassDB.class_exists("GameOrbitMathNative"):
+		orbit_math = ClassDB.instantiate("GameOrbitMathNative") as RefCounted
+	else:
+		push_error("GameOrbitMathNative is missing. Rebuild the GDExtension before running gameplay.")
+		set_process(false)
+		return
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	SpaceTheme.apply_cursor()
 	GameState.reset_state()
@@ -214,12 +241,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		match mouse_button.button_index:
 			MOUSE_BUTTON_WHEEL_UP:
 				if mouse_button.pressed:
-					_set_view_zoom(view_controller.zoom * GameViewControllerScript.ZOOM_STEP, mouse_button.position)
+					_set_view_zoom(view_controller.zoom * VIEW_ZOOM_STEP, mouse_button.position)
 					get_viewport().set_input_as_handled()
 				return
 			MOUSE_BUTTON_WHEEL_DOWN:
 				if mouse_button.pressed:
-					_set_view_zoom(view_controller.zoom / GameViewControllerScript.ZOOM_STEP, mouse_button.position)
+					_set_view_zoom(view_controller.zoom / VIEW_ZOOM_STEP, mouse_button.position)
 					get_viewport().set_input_as_handled()
 				return
 			MOUSE_BUTTON_RIGHT:
@@ -302,7 +329,7 @@ func _try_slingshot_from_screen_position(screen_position: Vector2) -> bool:
 	if tower_index == -1:
 		return false
 	var tower: Dictionary = towers[tower_index]
-	if str(tower.get("type", "")) != "helios_cannon" or GameTowerLibraryScript.level(tower) < 2:
+	if str(tower.get("type", "")) != "helios_cannon" or _tower_level(tower) < 2:
 		return false
 	if not GameState.spend_credits(SLINGSHOT_COST):
 		_set_message("Need %d Sol Credits for Helios Slingshot Shot." % SLINGSHOT_COST, 2.0)
@@ -358,9 +385,10 @@ func _handle_keyboard_shortcut(keycode: int) -> bool:
 
 
 func _select_tower_by_hotkey(index: int) -> bool:
-	if index < 0 or index >= GameTowerLibraryScript.TOWER_ORDER.size():
+	var tower_order: Array = tower_library.call("tower_order") as Array
+	if index < 0 or index >= tower_order.size():
 		return false
-	var tower_type: String = str(GameTowerLibraryScript.TOWER_ORDER[index])
+	var tower_type: String = str(tower_order[index])
 	var cost: int = GameState.get_tower_cost(tower_type)
 	if not _can_build_towers():
 		return true
@@ -492,7 +520,7 @@ func _draw_orbit_rings(sun: Vector2) -> void:
 
 		var tick_count: int = int(ring["slots"]) * 2
 		for tick_index in range(tick_count):
-			var tick_angle: float = GameOrbitMathScript.SLOT_ANGLE_OFFSET + TAU * float(tick_index) / float(tick_count)
+			var tick_angle: float = SLOT_ANGLE_OFFSET + TAU * float(tick_index) / float(tick_count)
 			var direction: Vector2 = Vector2(cos(tick_angle), sin(tick_angle))
 			var tick_length: float = 9.0 if tick_index % 2 == 0 else 5.0
 			draw_line(
@@ -713,7 +741,12 @@ func _build_sfx_bus() -> void:
 	if audio_parent == null:
 		audio_parent = self
 
-	sfx_bus = GameSfxBusScript.new() as GameSfxBus
+	if not ClassDB.class_exists("GameSfxBusNative"):
+		push_error("GameSfxBusNative is missing. Rebuild the GDExtension before running gameplay.")
+		return
+	sfx_bus = ClassDB.instantiate("GameSfxBusNative") as Node
+	if sfx_bus == null:
+		return
 	sfx_bus.name = "GameSfxBus"
 	audio_parent.add_child(sfx_bus)
 	sfx_bus.initialize()
@@ -952,7 +985,7 @@ func _on_start_wave_pressed() -> void:
 	if wave_number > MAX_WAVES:
 		return
 
-	current_wave_data = GameWaveLibraryScript.load_wave(wave_number)
+	current_wave_data = _wave_load(wave_number)
 	if current_wave_data.is_empty():
 		_set_message("Could not load wave_%02d.json." % wave_number, 3.0)
 		return
@@ -1027,7 +1060,7 @@ func _on_tower_upgrade_requested(ring_index: int, slot_index: int) -> void:
 
 	var tower: Dictionary = towers[tower_index]
 	var level: int = _tower_level(tower)
-	if level >= GameTowerLibraryScript.MAX_LEVEL:
+	if level >= int(tower_library.call("max_level")):
 		_set_message("%s is already at maximum calibration." % _tower_config(str(tower["type"]))["label"], 1.8)
 		return
 
@@ -1219,28 +1252,28 @@ func _start_wave_spawning(wave_data: Dictionary) -> void:
 	spawn_queue.clear()
 	clash_schedule.clear()
 	spawned_wave_count = 0
-	total_wave_spawn_count = GameWaveLibraryScript.total_spawn_count(wave_data)
+	total_wave_spawn_count = _wave_total_spawn_count(wave_data)
 	spawn_timer = 0.35
 
 	match str(wave_data.get("wave_type", "normal")):
 		"clash", "boss":
 			_schedule_clash_groups(wave_data.get("clash_groups", []))
 			var accent: Color = Color(1.0, 0.30, 0.12) if str(wave_data.get("wave_type", "normal")) == "clash" else Color(1.0, 0.14, 0.12)
-			_show_wave_banner(GameWaveLibraryScript.preview_label(wave_data), str(wave_data.get("name", "Wave incoming")), accent, 4.2)
+			_show_wave_banner(_wave_preview_label(wave_data), str(wave_data.get("name", "Wave incoming")), accent, 4.2)
 			_play_sfx("clash_incoming", 1.0)
 		"formation":
-			spawn_queue = GameWaveLibraryScript.build_spawn_queue(wave_data)
+			spawn_queue = _wave_build_spawn_queue(wave_data)
 			_schedule_formation_group(wave_data.get("formation", {}))
-			_show_wave_banner(GameWaveLibraryScript.preview_label(wave_data), str(wave_data.get("name", "Wave incoming")), Color(0.42, 0.90, 1.0), 3.4)
+			_show_wave_banner(_wave_preview_label(wave_data), str(wave_data.get("name", "Wave incoming")), Color(0.42, 0.90, 1.0), 3.4)
 		_:
-			spawn_queue = GameWaveLibraryScript.build_spawn_queue(wave_data)
+			spawn_queue = _wave_build_spawn_queue(wave_data)
 
 
 func _schedule_clash_groups(groups) -> void:
-	for raw_group in GameWaveLibraryScript._array_value(groups):
+	for raw_group in _wave_array_value(groups):
 		if not (raw_group is Dictionary):
 			continue
-		var variants: Array = GameWaveLibraryScript._array_value(raw_group.get("variants", []))
+		var variants: Array = _wave_array_value(raw_group.get("variants", []))
 		if variants.is_empty():
 			continue
 		clash_schedule.append({
@@ -1255,7 +1288,7 @@ func _schedule_formation_group(formation) -> void:
 	if not (formation is Dictionary) or formation.is_empty():
 		return
 	var count: int = max(0, int(formation.get("count", 0)))
-	var variants_source: Array = GameWaveLibraryScript._array_value(formation.get("variants", ["drifter"]))
+	var variants_source: Array = _wave_array_value(formation.get("variants", ["drifter"]))
 	if count <= 0 or variants_source.is_empty():
 		return
 	var variants: Array = []
@@ -1291,7 +1324,7 @@ func _process_clash_schedule(delta: float) -> void:
 		group["timer"] = float(group.get("timer", 0.0)) - delta
 		if float(group["timer"]) <= 0.0:
 			_spawn_clash_group(
-				GameWaveLibraryScript._array_value(group.get("variants", [])),
+				_wave_array_value(group.get("variants", [])),
 				str(group.get("pattern", "random")),
 				group.get("options", {})
 			)
@@ -1686,7 +1719,7 @@ func _try_launch_counter_attack() -> bool:
 	for entry in current_wave_data.get("spawns", []):
 		if not (entry is Dictionary):
 			continue
-		var variant: String = GameWaveLibraryScript.variant_key(entry.get("variant", "drifter"))
+		var variant: String = _wave_variant_key(entry.get("variant", "drifter"))
 		var count: int = int(entry.get("count", 0))
 		if variant != "drifter" and count > highest_count:
 			retaliation_type = variant
@@ -1716,7 +1749,7 @@ func _show_next_wave_banner() -> void:
 	var next_wave: int = GameState.current_wave + 1
 	if next_wave > MAX_WAVES or next_wave > playable_wave_limit:
 		return
-	var next_data: Dictionary = GameWaveLibraryScript.load_wave(next_wave)
+	var next_data: Dictionary = _wave_load(next_wave)
 	if next_data.is_empty():
 		return
 	var accent: Color = Color(1.0, 0.86, 0.34)
@@ -1727,7 +1760,7 @@ func _show_next_wave_banner() -> void:
 			accent = Color(1.0, 0.12, 0.12)
 		"formation":
 			accent = Color(0.42, 0.90, 1.0)
-	_show_wave_banner(GameWaveLibraryScript.preview_label(next_data), str(next_data.get("name", "Next Wave")), accent, 4.0)
+	_show_wave_banner(_wave_preview_label(next_data), str(next_data.get("name", "Next Wave")), accent, 4.0)
 
 
 func _show_wave_banner(title: String, subtitle: String, accent: Color, duration: float = 4.0) -> void:
@@ -1739,7 +1772,7 @@ func _show_wave_banner(title: String, subtitle: String, accent: Color, duration:
 
 
 func _spawn_enemy(variant: String, spawn_pos = null) -> void:
-	var key: String = GameWaveLibraryScript.variant_key(variant)
+	var key: String = _wave_variant_key(variant)
 	var cfg: Dictionary = _enemy_config(key)
 	var sun: Vector2 = _sun_pos()
 	var angle: float = randf() * TAU
@@ -1829,7 +1862,7 @@ func _should_use_physics_projectile(tower: Dictionary) -> bool:
 	var tower_type: String = str(tower.get("type", ""))
 	if tower_type != "helios_cannon" and tower_type != "tardigrade_bomb":
 		return false
-	return GameTowerLibraryScript.level(tower) >= 2
+	return _tower_level(tower) >= 2
 
 
 func _spawn_physics_projectile(tower: Dictionary, target_pos: Vector2, damage: float, tower_type: String, slingshot: bool = false) -> void:
@@ -2060,27 +2093,33 @@ func _lodge_burrower(enemy: Dictionary) -> void:
 
 
 func _nearest_ring_slot(pos: Vector2) -> Dictionary:
-	return GameOrbitMathScript.nearest_ring_slot(pos, _sun_pos(), Callable(self, "_is_slot_taken"))
+	var slot = orbit_math.call("nearest_ring_slot", pos, _sun_pos(), towers)
+	if slot is Dictionary:
+		return slot
+	return {}
 
 
 func _nearest_slot_index(ring_index: int, angle: float) -> int:
-	return GameOrbitMathScript.nearest_slot_index(ring_index, angle)
+	return int(orbit_math.call("nearest_slot_index", ring_index, angle))
 
 
 func _ring_slot_angle(ring_index: int, slot_index: int) -> float:
-	return GameOrbitMathScript.ring_slot_angle(ring_index, slot_index)
+	return float(orbit_math.call("ring_slot_angle", ring_index, slot_index))
 
 
 func _ring_slot_position(ring_index: int, slot_index: int) -> Vector2:
-	return GameOrbitMathScript.ring_slot_position(_sun_pos(), ring_index, slot_index)
+	var pos = orbit_math.call("ring_slot_position", _sun_pos(), ring_index, slot_index)
+	if pos is Vector2:
+		return pos
+	return _sun_pos()
 
 
 func _ring_radius(ring_index: int) -> float:
-	return GameOrbitMathScript.ring_radius(ring_index)
+	return float(orbit_math.call("ring_radius", ring_index))
 
 
 func _outer_ring_radius() -> float:
-	return GameOrbitMathScript.outer_ring_radius()
+	return float(orbit_math.call("outer_ring_radius"))
 
 
 func _is_slot_taken(ring_index: int, slot_index: int) -> bool:
@@ -2157,11 +2196,17 @@ func _is_managed_tower(tower: Dictionary) -> bool:
 
 
 func _tower_position(tower: Dictionary) -> Vector2:
-	return GameOrbitMathScript.tower_position(_sun_pos(), tower)
+	var pos = orbit_math.call("tower_position", _sun_pos(), tower)
+	if pos is Vector2:
+		return pos
+	return _sun_pos()
 
 
 func _burrower_position(burrower: Dictionary) -> Vector2:
-	return GameOrbitMathScript.burrower_position(_sun_pos(), burrower, BURROWER_DIG_RADIUS)
+	var pos = orbit_math.call("burrower_position", _sun_pos(), burrower, BURROWER_DIG_RADIUS)
+	if pos is Vector2:
+		return pos
+	return _sun_pos()
 
 
 func _draw_shot(shot: Dictionary) -> void:
@@ -2323,7 +2368,7 @@ func _draw_enemy(enemy: Dictionary) -> void:
 	draw_circle(pos, radius + 5.0, Color(0.0, 0.0, 0.0, 0.44))
 	if texture:
 		var size: Vector2 = Vector2(float(enemy["draw_size"]) + 8.0, float(enemy["draw_size"]) + 8.0)
-		if animation_state == "move" and not _enemy_animation_frames(variant, "move").is_empty():
+		if animation_state != "idle" and not _enemy_animation_frames(variant, animation_state).is_empty():
 			_draw_rotated_enemy_texture(texture, pos, size, _enemy_sprite_draw_angle(enemy, variant))
 		else:
 			draw_texture_rect(texture, Rect2(pos - size * 0.5, size), false)
@@ -2833,7 +2878,7 @@ func _sun_state_key() -> String:
 
 func _refresh_next_wave_preview() -> void:
 	var next_wave: int = int(clamp(GameState.current_wave + 1, 1, playable_wave_limit))
-	next_wave_preview = GameWaveLibraryScript.load_wave(next_wave)
+	next_wave_preview = _wave_load(next_wave)
 	if GameState.game_phase == GameState.Phase.BETWEEN_WAVE:
 		_show_wave_preview(next_wave_preview)
 	else:
@@ -2847,11 +2892,11 @@ func _show_wave_preview(wave_data: Dictionary) -> void:
 
 	var wave_type: String = str(wave_data.get("wave_type", "normal"))
 	if wave_type == "clash" or wave_type == "boss":
-		var groups: Array = GameWaveLibraryScript._array_value(wave_data.get("clash_groups", []))
+		var groups: Array = _wave_array_value(wave_data.get("clash_groups", []))
 		if groups.is_empty() or not (groups[0] is Dictionary):
 			return
 		var first_group: Dictionary = groups[0]
-		var variants: Array = GameWaveLibraryScript._array_value(first_group.get("variants", []))
+		var variants: Array = _wave_array_value(first_group.get("variants", []))
 		var preview_count: int = min(variants.size(), 16)
 		for i in range(preview_count):
 			wave_preview_points.append(_spawn_position_for_pattern(str(first_group.get("spawn_pattern", "random")), i, preview_count, first_group))
@@ -2881,23 +2926,23 @@ func _is_prime_alive() -> bool:
 
 
 func _tower_config(tower_type: String) -> Dictionary:
-	return GameTowerLibraryScript.config(tower_type)
+	return tower_library.call("config", tower_type) as Dictionary
 
 
 func _tower_level(tower: Dictionary) -> int:
-	return GameTowerLibraryScript.level(tower)
+	return int(tower_library.call("level", tower))
 
 
 func _tower_runtime_stats(tower: Dictionary) -> Dictionary:
-	return GameTowerLibraryScript.runtime_stats(tower)
+	return tower_library.call("runtime_stats", tower) as Dictionary
 
 
 func _tower_upgrade_cost(tower: Dictionary) -> int:
-	return GameTowerLibraryScript.upgrade_cost(tower)
+	return int(tower_library.call("upgrade_cost", tower))
 
 
 func _tower_sell_refund(tower: Dictionary) -> int:
-	return GameTowerLibraryScript.sell_refund(tower)
+	return int(tower_library.call("sell_refund", tower))
 
 
 func _managed_tower_view_data() -> Dictionary:
@@ -2908,7 +2953,7 @@ func _managed_tower_view_data() -> Dictionary:
 		return {}
 
 	var tower: Dictionary = towers[tower_index]
-	return GameTowerLibraryScript.managed_view_data(tower, RINGS)
+	return tower_library.call("managed_view_data", tower, RINGS, GameState.sol_credits) as Dictionary
 
 
 func _end_state_view_data() -> Dictionary:
@@ -2967,6 +3012,8 @@ func _enemy_animation_texture(enemy: Dictionary):
 
 
 func _enemy_animation_state(enemy: Dictionary) -> String:
+	if str(enemy.get("variant", "")) == "prime" and int(enemy.get("prime_phase", 0)) >= 2:
+		return "active"
 	if GameState.game_phase == GameState.Phase.WAVE_ACTIVE and float(enemy.get("speed", 0.0)) > 0.0:
 		return "move"
 	return "idle"
@@ -3002,7 +3049,47 @@ func _enemy_preview_texture(variant: String):
 
 
 func _ring_summary() -> String:
-	return GameOrbitMathScript.ring_summary()
+	return str(orbit_math.call("ring_summary"))
+
+
+func _wave_load(wave_number: int) -> Dictionary:
+	return wave_library.call("load_wave", wave_number) as Dictionary
+
+
+func _wave_build_spawn_queue(wave_data: Dictionary) -> Array:
+	return wave_library.call("build_spawn_queue", wave_data) as Array
+
+
+func _wave_variant_key(raw) -> String:
+	return str(wave_library.call("variant_key", raw))
+
+
+func _wave_primary_variant(wave_data: Dictionary) -> String:
+	return str(wave_library.call("primary_variant", wave_data))
+
+
+func _wave_spawn_summary(wave_data: Dictionary) -> String:
+	return str(wave_library.call("spawn_summary", wave_data))
+
+
+func _wave_intel_detail(wave_data: Dictionary, reward: int, active_count: int, burrowed_count: int, queued_count: int, modifier_summary: String) -> String:
+	return str(wave_library.call("intel_detail", wave_data, reward, active_count, burrowed_count, queued_count, modifier_summary))
+
+
+func _wave_clean_hint(text: String, wave_name: String) -> String:
+	return str(wave_library.call("clean_hint", text, wave_name))
+
+
+func _wave_total_spawn_count(wave_data: Dictionary) -> int:
+	return int(wave_library.call("total_spawn_count", wave_data))
+
+
+func _wave_preview_label(wave_data: Dictionary) -> String:
+	return str(wave_library.call("preview_label", wave_data))
+
+
+func _wave_array_value(value) -> Array:
+	return wave_library.call("array_value", value) as Array
 
 
 func _active_modifier_summary() -> String:
@@ -3022,7 +3109,7 @@ func _active_modifier_summary() -> String:
 
 
 func _selected_tower_readout() -> String:
-	return GameTowerLibraryScript.selected_readout(selected_tower, GameState.game_phase == GameState.Phase.WAVE_ACTIVE)
+	return str(tower_library.call("selected_readout", selected_tower, GameState.game_phase == GameState.Phase.WAVE_ACTIVE))
 
 
 func _set_message(text: String, duration: float = 0.0) -> void:
@@ -3032,7 +3119,7 @@ func _set_message(text: String, duration: float = 0.0) -> void:
 
 
 func _tower_button_view_data() -> Dictionary:
-	return GameTowerLibraryScript.button_view_data(selected_tower, _can_build_towers(), textures["towers"])
+	return tower_library.call("button_view_data", selected_tower, _can_build_towers(), textures["towers"], GameState.sol_credits) as Dictionary
 
 
 func _update_ui() -> void:
@@ -3062,16 +3149,16 @@ func _update_ui() -> void:
 		intel_status = "AUTO START"
 	game_hud.update_view({
 		"wave_title": title_text,
-		"brief": GameWaveLibraryScript.clean_hint(str(wave_data.get("tutorial_hint", "Defend the Sun.")), wave_name),
+		"brief": _wave_clean_hint(str(wave_data.get("tutorial_hint", "Defend the Sun.")), wave_name),
 		"credits": str(GameState.sol_credits),
 		"score": str(GameState.performance_score),
 		"kills": str(GameState.enemies_killed_total),
 		"flare": "F READY" if GameState.flare_charge > 0 else "CHARGING",
 		"luminosity": float(GameState.get_luminosity_percent()),
-		"enemy_texture": _enemy_preview_texture(GameWaveLibraryScript.primary_variant(wave_data)),
+		"enemy_texture": _enemy_preview_texture(_wave_primary_variant(wave_data)),
 		"intel_status": intel_status,
-		"enemy_summary": GameWaveLibraryScript.spawn_summary(wave_data).to_upper(),
-		"threat": GameWaveLibraryScript.intel_detail(
+		"enemy_summary": _wave_spawn_summary(wave_data).to_upper(),
+		"threat": _wave_intel_detail(
 			wave_data,
 			reward,
 			enemies.size() if GameState.game_phase == GameState.Phase.WAVE_ACTIVE else -1,

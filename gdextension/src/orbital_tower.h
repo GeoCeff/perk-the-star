@@ -7,6 +7,8 @@
 
 namespace godot {
 
+static constexpr double ORBITAL_TOWER_PI = 3.14159265358979323846;
+
 class OrbitalTower : public Node2D {
     GDCLASS(OrbitalTower, Node2D)
 
@@ -63,7 +65,7 @@ public:
     double  get_angular_velocity()  const { return m_angular_velocity; }
     double  get_ring_radius()       const { return m_ring_radius; }
     double  get_damage()            const { return m_damage; }
-    double  get_engagement_arc_deg() const { return m_engagement_arc * (180.0 / M_PI); }
+    double  get_engagement_arc_deg() const { return m_engagement_arc * (180.0 / ORBITAL_TOWER_PI); }
     Vector2 get_sun_pos()           const { return m_sun_pos; }
     int     get_upgrade_level()     const { return m_upgrade_level; }
     bool    get_slingshot_ready()   const { return m_slingshot_charge >= 1.0; }

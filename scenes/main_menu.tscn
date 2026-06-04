@@ -2,12 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cbos8pff64cu3" path="res://scripts/ui/main_menu.gd" id="1_l6cm7"]
 [ext_resource type="Texture2D" uid="uid://c70g8b74fpkwt" path="res://assets/sprites/backgrounds/menu_nebula.png" id="2_ekxnf"]
-[ext_resource type="Script" uid="uid://bhui8jry1oi4u" path="res://scripts/ui/main_menu_play_button.gd" id="4_play"]
-[ext_resource type="Script" uid="uid://ic6wsjqiseb5" path="res://scripts/ui/main_menu_codex_button.gd" id="5_codex"]
-[ext_resource type="Script" uid="uid://dp28jtyop8oji" path="res://scripts/ui/main_menu_settings_button.gd" id="6_settings"]
-[ext_resource type="Script" uid="uid://grb3584gy6mf" path="res://scripts/ui/main_menu_exit_button.gd" id="7_exit"]
 [ext_resource type="Script" uid="uid://c1htnov1edgt4" path="res://scripts/ui/main_menu_fx.gd" id="8_fx"]
-[ext_resource type="Script" uid="uid://grt1vhv12ii2" path="res://scripts/ui/animated_space_background.gd" id="9_bgfx"]
 
 [node name="MainMenu" type="Control" unique_id=1745890239]
 layout_mode = 3
@@ -20,7 +15,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_l6cm7")
 
-[node name="background" type="TextureRect" parent="." unique_id=1611998608]
+[node name="background" type="AnimatedSpaceBackgroundNative" parent="." unique_id=1611998608]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,7 +25,6 @@ grow_vertical = 2
 texture = ExtResource("2_ekxnf")
 expand_mode = 1
 stretch_mode = 6
-script = ExtResource("9_bgfx")
 
 [node name="shade" type="ColorRect" parent="." unique_id=1129382354]
 layout_mode = 1
@@ -120,33 +114,29 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_constants/separation = 12
 
-[node name="btn_play" type="Button" parent="CenterContainer/menu_box/button_box" unique_id=470282513]
+[node name="btn_play" type="MainMenuPlayButtonNative" parent="CenterContainer/menu_box/button_box" unique_id=470282513]
 custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Start Defense"
-script = ExtResource("4_play")
 
-[node name="btn_codex" type="Button" parent="CenterContainer/menu_box/button_box" unique_id=915298908]
+[node name="btn_codex" type="MainMenuCodexButtonNative" parent="CenterContainer/menu_box/button_box" unique_id=915298908]
 custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Mission Codex"
-script = ExtResource("5_codex")
 
-[node name="btn_settings" type="Button" parent="CenterContainer/menu_box/button_box" unique_id=2021492708]
+[node name="btn_settings" type="MainMenuSettingsButtonNative" parent="CenterContainer/menu_box/button_box" unique_id=2021492708]
 custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Settings"
-script = ExtResource("6_settings")
 
-[node name="btn_exit" type="Button" parent="CenterContainer/menu_box/button_box" unique_id=1448773002]
+[node name="btn_exit" type="MainMenuExitButtonNative" parent="CenterContainer/menu_box/button_box" unique_id=1448773002]
 custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Exit"
-script = ExtResource("7_exit")
 
 [node name="FrameOrnaments" type="Control" parent="." unique_id=2030709623]
 layout_mode = 1

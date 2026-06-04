@@ -4,6 +4,16 @@
 #include "sun_node.h"
 #include "wave_data.h"
 #include "v2_gameplay_math.h"
+#include "game_orbit_math_native.h"
+#include "game_effect_store_native.h"
+#include "game_view_controller_native.h"
+#include "game_sfx_bus_native.h"
+#include "game_tower_library_native.h"
+#include "game_wave_library_native.h"
+#include "main_menu_buttons_native.h"
+#include "settings_controls_native.h"
+#include "animated_space_background_native.h"
+#include "hud_panel_fx_native.h"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/godot.hpp>
@@ -19,6 +29,21 @@ void initialize_perk_module(ModuleInitializationLevel p_level) {
     ClassDB::register_class<SunNode>();
     ClassDB::register_class<WaveData>();
     ClassDB::register_class<V2GameplayMath>();
+    ClassDB::register_class<GameOrbitMathNative>();
+    ClassDB::register_class<GameEffectStoreNative>();
+    ClassDB::register_class<GameViewControllerNative>();
+    ClassDB::register_class<GameSfxBusNative>();
+    ClassDB::register_class<GameTowerLibraryNative>();
+    ClassDB::register_class<GameWaveLibraryNative>();
+    ClassDB::register_class<MainMenuPlayButtonNative>();
+    ClassDB::register_class<MainMenuCodexButtonNative>();
+    ClassDB::register_class<MainMenuSettingsButtonNative>();
+    ClassDB::register_class<MainMenuExitButtonNative>();
+    ClassDB::register_class<MainMenuMusicToggleNative>();
+    ClassDB::register_class<MainMenuMusicVolumeSliderNative>();
+    ClassDB::register_class<SettingsOverlayCloseButtonNative>();
+    ClassDB::register_class<AnimatedSpaceBackgroundNative>();
+    ClassDB::register_class<HudPanelFxNative>();
 }
 
 void uninitialize_perk_module(ModuleInitializationLevel p_level) {
