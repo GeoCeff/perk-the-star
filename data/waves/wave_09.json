@@ -1,13 +1,51 @@
 {
-    "wave": 9, "name": "Feeding Frenzy",
-    "spawn_interval": 1.5,
+    "wave": 9,
+    "name": "Feeding Frenzy",
+    "wave_type": "clash",
+    "spawn_interval": 1.3,
     "enemies": [
-        { "variant": "drifter", "count": 15 },
-        { "variant": "bloom", "count": 6 },
-        { "variant": "burrower", "count": 3 },
-        { "variant": "mimic", "count": 3 },
-        { "variant": "farmer", "count": 4 }
+        { "variant": "drifter", "count": 32 },
+        { "variant": "bloom", "count": 10 },
+        { "variant": "burrower", "count": 7 },
+        { "variant": "mimic", "count": 7 },
+        { "variant": "farmer", "count": 7 }
     ],
-    "event": null, "reward_base": 120,
-    "tutorial_hint": "All enemy types! Prime window for Magnetic Net + Helios Cannon combo."
+    "clash_groups": [
+        {
+            "variants": [
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "bloom", "bloom", "bloom", "bloom", "bloom"
+            ],
+            "spawn_pattern": "ring",
+            "delay_before": 0.0
+        },
+        {
+            "variants": [
+                "burrower", "burrower", "burrower", "burrower", "burrower", "burrower", "burrower",
+                "mimic", "mimic", "mimic", "mimic",
+                "farmer", "farmer", "farmer"
+            ],
+            "spawn_pattern": "v_shape",
+            "delay_before": 10.0
+        },
+        {
+            "variants": [
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter",
+                "bloom", "bloom", "bloom", "bloom", "bloom",
+                "mimic", "mimic", "mimic",
+                "farmer", "farmer", "farmer", "farmer"
+            ],
+            "spawn_pattern": "ring",
+            "delay_before": 22.0
+        }
+    ],
+    "event": null,
+    "reward_base": 120,
+    "escalation_threshold_seconds": 50,
+    "tutorial_hint": "All enemy types at once. Prepare your whole defense before this one."
 }

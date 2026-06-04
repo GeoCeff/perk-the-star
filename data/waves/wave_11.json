@@ -1,13 +1,57 @@
 {
-    "wave": 11, "name": "Penultimate",
-    "spawn_interval": 1.35,
+    "wave": 11,
+    "name": "Penultimate",
+    "wave_type": "clash",
+    "spawn_interval": 1.0,
     "enemies": [
-        { "variant": "drifter", "count": 18 },
-        { "variant": "bloom", "count": 8 },
-        { "variant": "burrower", "count": 5 },
-        { "variant": "mimic", "count": 5 },
-        { "variant": "farmer", "count": 6 }
+        { "variant": "drifter", "count": 48 },
+        { "variant": "bloom", "count": 14 },
+        { "variant": "burrower", "count": 10 },
+        { "variant": "mimic", "count": 10 },
+        { "variant": "farmer", "count": 12 }
     ],
-    "event": null, "reward_base": 155,
-    "tutorial_hint": "Maximum density before the boss. Outer Veil ring becomes critical for early intercept."
+    "clash_groups": [
+        {
+            "variants": [
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "bloom", "bloom", "bloom", "bloom", "bloom",
+                "bloom", "bloom", "bloom", "bloom", "bloom"
+            ],
+            "spawn_pattern": "ring",
+            "delay_before": 0.0
+        },
+        {
+            "variants": [
+                "burrower", "burrower", "burrower", "burrower", "burrower",
+                "burrower", "burrower", "burrower", "burrower", "burrower",
+                "farmer", "farmer", "farmer", "farmer", "farmer",
+                "farmer", "farmer", "farmer", "farmer", "farmer"
+            ],
+            "spawn_pattern": "v_shape",
+            "delay_before": 8.0
+        },
+        {
+            "variants": [
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter", "drifter", "drifter",
+                "drifter", "drifter", "drifter",
+                "mimic", "mimic", "mimic", "mimic", "mimic",
+                "mimic", "mimic", "mimic", "mimic", "mimic",
+                "bloom", "bloom", "bloom", "bloom",
+                "farmer", "farmer"
+            ],
+            "spawn_pattern": "ring",
+            "delay_before": 18.0
+        }
+    ],
+    "event": null,
+    "reward_base": 160,
+    "escalation_threshold_seconds": 60,
+    "tutorial_hint": "The biggest wave before the boss. Max out your towers now."
 }

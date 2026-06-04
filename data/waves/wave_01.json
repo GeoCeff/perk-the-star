@@ -1,10 +1,13 @@
 {
-    "index": 1,
+    "wave": 1,
     "name": "First Contact",
-    "credit_reward": 35,
-    "spawns": [
-        { "variant": 0, "count": 5, "interval": 2.0 }
+    "wave_type": "normal",
+    "spawn_interval": 3.5,
+    "enemies": [
+        { "variant": "drifter", "count": 6 }
     ],
     "event": null,
-    "tutorial_hint": "First Contact: 5 Drifters are entering the system. Use Photon Splitters on the Corona Belt and protect the Sun's luminosity."
+    "reward_base": 20,
+    "escalation_threshold_seconds": null,
+    "tutorial_hint": "Click ring slots to place towers. Towers orbit and fire automatically."
 }

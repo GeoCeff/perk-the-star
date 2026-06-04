@@ -1,19 +1,28 @@
 {
-    "wave": 10, "name": "Research Surge",
-    "spawn_interval": 1.5,
+    "wave": 10,
+    "name": "Research Surge",
+    "wave_type": "formation",
+    "spawn_interval": 1.2,
     "enemies": [
-        { "variant": "drifter", "count": 14 },
-        { "variant": "bloom", "count": 8 },
-        { "variant": "burrower", "count": 4 },
-        { "variant": "mimic", "count": 4 },
-        { "variant": "farmer", "count": 5 }
+        { "variant": "drifter", "count": 38 },
+        { "variant": "bloom", "count": 12 },
+        { "variant": "burrower", "count": 8 },
+        { "variant": "mimic", "count": 8 },
+        { "variant": "farmer", "count": 10 }
     ],
+    "formation": {
+        "type": "spiral",
+        "variants": ["burrower", "mimic"],
+        "count": 10,
+        "spiral_arms": 2
+    },
     "event": {
         "type": "bio_lab_boost",
         "multiplier": 4,
         "duration": 999,
         "trigger_at_percent": 0.0
     },
-    "reward_base": 135,
-    "tutorial_hint": "All Bio-Lab Stations run at 4x speed this wave!"
+    "reward_base": 140,
+    "escalation_threshold_seconds": 55,
+    "tutorial_hint": "Bio-Lab is at 4x power this wave. Build more if you haven't."
 }

@@ -35,6 +35,13 @@ private:
     Vector2 m_sun_position;
     double  m_wiggle_offset;
     int     m_prime_phase;
+    double  m_mass;
+    double  m_velocity_x;
+    double  m_velocity_y;
+    double  m_max_speed;
+    bool    m_use_gravity;
+    double  m_frenzy_timer;
+    bool    m_is_spawning_frenzy;
 
 protected:
     static void _bind_methods();

@@ -131,7 +131,7 @@ func _load_pcm_wav_stream(path: String, loop_enabled: bool):
 	_set_audio_stream_loop(stream, loop_enabled)
 	if loop_enabled and block_align > 0:
 		stream.loop_begin = 0
-		stream.loop_end = int(data_size / block_align)
+		stream.loop_end = floori(float(data_size) / float(block_align))
 	return stream
 
 

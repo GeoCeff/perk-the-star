@@ -46,7 +46,10 @@ Astrophage::Astrophage()
       m_speed(60), m_speed_modifier(1.0), m_corona_damage(0.05),
       m_is_burrowing(false), m_is_cloaked(false), m_is_clustered(false),
       m_reward_credits(5), m_sun_position(Vector2(640,360)),
-      m_wiggle_offset(0), m_prime_phase(0)
+      m_wiggle_offset(0), m_prime_phase(0),
+      m_mass(1.0), m_velocity_x(0.0), m_velocity_y(0.0),
+      m_max_speed(150.0), m_use_gravity(true),
+      m_frenzy_timer(0.0), m_is_spawning_frenzy(false)
 {}
 Astrophage::~Astrophage() {}
 
@@ -69,6 +72,14 @@ void Astrophage::setup(int variant, const Vector2& spawn_pos, const Vector2& sun
     m_speed         = table[idx].speed;
     m_corona_damage = table[idx].damage;
     m_reward_credits = table[idx].reward;
+    double mass_table[] = {1.0, 1.5, 3.0, 0.8, 1.2, 8.0};
+    m_mass = mass_table[idx];
+    m_velocity_x = 0.0;
+    m_velocity_y = 0.0;
+    m_max_speed = m_speed * (variant == PRIME ? 1.65 : 2.25);
+    m_use_gravity = true;
+    m_frenzy_timer = 0.0;
+    m_is_spawning_frenzy = false;
 
     if (variant == MIMIC) m_is_cloaked = true;
 }
@@ -76,18 +87,33 @@ void Astrophage::setup(int variant, const Vector2& spawn_pos, const Vector2& sun
 void Astrophage::_process(double delta) {
     if (m_is_burrowing) return;
 
-    // Move toward sun
     Vector2 pos = get_global_position();
-    Vector2 dir = (m_sun_position - pos);
+    Vector2 to_sun = (m_sun_position - pos);
+    Vector2 dir = to_sun;
     float dist = dir.length();
     if (dist > 0) dir /= dist;
 
-    // Wiggle perpendicular to travel direction
-    double t = Engine::get_singleton()->get_process_frames() * delta + m_wiggle_offset;
-    Vector2 perp(-dir.y, dir.x);
-    Vector2 wiggle = perp * static_cast<float>(std::sin(t * 1.5) * m_speed * 0.08 * delta);
+    if (m_use_gravity) {
+        const double gravity_const = 5200000.0;
+        double accel = gravity_const / std::max(static_cast<double>(dist) * static_cast<double>(dist) * m_mass, 1200.0);
+        accel = std::min(accel, 360.0);
+        m_velocity_x += dir.x * (accel + m_speed * 0.18) * delta;
+        m_velocity_y += dir.y * (accel + m_speed * 0.18) * delta;
 
-    set_global_position(pos + dir * static_cast<float>(m_speed * m_speed_modifier * delta) + wiggle);
+        double current_speed = std::sqrt(m_velocity_x * m_velocity_x + m_velocity_y * m_velocity_y);
+        double capped_speed = m_max_speed * m_speed_modifier;
+        if (current_speed > capped_speed && current_speed > 0.001) {
+            m_velocity_x = (m_velocity_x / current_speed) * capped_speed;
+            m_velocity_y = (m_velocity_y / current_speed) * capped_speed;
+        }
+
+        set_global_position(pos + Vector2(
+            static_cast<float>(m_velocity_x * delta),
+            static_cast<float>(m_velocity_y * delta)
+        ));
+    } else {
+        set_global_position(pos + dir * static_cast<float>(m_speed * m_speed_modifier * delta));
+    }
 
     // Check corona arrival (40px from sun center)
     if (dist < 40.0f) {
@@ -104,6 +130,7 @@ void Astrophage::take_hit(double damage, const String& source) {
             m_hp    += damage * 0.5;
             m_max_hp = std::max(m_max_hp, m_hp);
             m_speed  = std::min(m_speed + 0.5, 150.0);
+            m_max_speed = std::max(m_max_speed, m_speed * 2.25);
             return;
         }
     }
@@ -128,9 +155,12 @@ void Astrophage::_on_defeated() {
     }
     if (m_variant == PRIME && m_prime_phase == 1) {
         m_prime_phase = 2;
-        m_hp    = 200;
-        m_max_hp = 200;
-        m_speed *= 1.5;
+        m_hp = 300;
+        m_max_hp = 300;
+        m_speed = std::min(m_speed * 1.8, 80.0);
+        m_max_speed = m_speed * 1.85;
+        m_frenzy_timer = 0.0;
+        m_is_spawning_frenzy = true;
         return;
     }
     emit_signal("defeated", m_reward_credits);

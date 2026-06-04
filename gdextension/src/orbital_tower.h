@@ -38,6 +38,10 @@ private:
     // Magnetic Net state
     double  m_cooldown_timer;
 
+    // V2 physics shot state
+    bool    m_slingshot_mode;
+    double  m_slingshot_charge;
+
 public:
     OrbitalTower();
     ~OrbitalTower();
@@ -62,12 +66,15 @@ public:
     double  get_engagement_arc_deg() const { return m_engagement_arc * (180.0 / M_PI); }
     Vector2 get_sun_pos()           const { return m_sun_pos; }
     int     get_upgrade_level()     const { return m_upgrade_level; }
+    bool    get_slingshot_ready()   const { return m_slingshot_charge >= 1.0; }
+    Vector2 compute_physics_launch_velocity(const Vector2& target_pos, double base_speed) const;
 
     // Setters
     void set_tower_type(const String& v)  { m_tower_type = v; }
     void set_sun_pos(const Vector2& v)    { m_sun_pos = v; }
     void set_angle(double v)              { m_angle = v; }
     void set_bio_analyzed(int variant_id) { m_analyzed_variant = variant_id; m_bio_multiplier = 3.0; }
+    void set_slingshot_mode(bool value)   { m_slingshot_mode = value; }
 };
 
-} 
+}
