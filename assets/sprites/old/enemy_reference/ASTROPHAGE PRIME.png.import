@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ctdd850mbtmai"
-path="res://.godot/imported/Photon Mimic.png-67be8ad667b825279b7d385462418dd4.ctex"
+uid="uid://br7fl54n35jpa"
+path="res://.godot/imported/ASTROPHAGE PRIME.png-fa883bf6ade0bcccb506cd5f574ba745.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/enemies/Photon Mimic.png"
-dest_files=["res://.godot/imported/Photon Mimic.png-67be8ad667b825279b7d385462418dd4.ctex"]
+source_file="res://assets/sprites/old/enemy_reference/ASTROPHAGE PRIME.png"
+dest_files=["res://.godot/imported/ASTROPHAGE PRIME.png-fa883bf6ade0bcccb506cd5f574ba745.ctex"]
 
 [params]
 

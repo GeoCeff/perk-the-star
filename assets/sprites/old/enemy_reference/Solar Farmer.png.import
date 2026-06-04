@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bg0ojrejgvf7b"
-path="res://.godot/imported/ASTROPHAGE PRIME.png-380097d86688dc1805e9bcdd237db1be.ctex"
+uid="uid://bglp4x0afeyhx"
+path="res://.godot/imported/Solar Farmer.png-7ae98f56fc65ca3f275c51b65305cc5a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/enemies/ASTROPHAGE PRIME.png"
-dest_files=["res://.godot/imported/ASTROPHAGE PRIME.png-380097d86688dc1805e9bcdd237db1be.ctex"]
+source_file="res://assets/sprites/old/enemy_reference/Solar Farmer.png"
+dest_files=["res://.godot/imported/Solar Farmer.png-7ae98f56fc65ca3f275c51b65305cc5a.ctex"]
 
 [params]
 

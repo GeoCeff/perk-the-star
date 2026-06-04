@@ -9,3 +9,5 @@ This project includes selected assets from the local asset pack at `C:\Users\Geo
 - Sci-Fi Game Icons, local user-provided pack. Used for menu/HUD button icons.
 
 Original license files copied into `assets/licenses/` where available.
+
+Active media is kept in the main asset folders. Older reference sprites are in `assets/sprites/old/`, and older/source audio is in `assets/audio/old/`.

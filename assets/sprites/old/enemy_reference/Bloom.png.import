@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://uom7iuwumfx5"
-path="res://.godot/imported/Drifter.png-9522fab77a3ef876eed5c691a6c1a256.ctex"
+uid="uid://bsll0s8bj1wfx"
+path="res://.godot/imported/Bloom.png-75f6f0e3f9beb612a3b96842a5f1177d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/enemies/Drifter.png"
-dest_files=["res://.godot/imported/Drifter.png-9522fab77a3ef876eed5c691a6c1a256.ctex"]
+source_file="res://assets/sprites/old/enemy_reference/Bloom.png"
+dest_files=["res://.godot/imported/Bloom.png-75f6f0e3f9beb612a3b96842a5f1177d.ctex"]
 
 [params]
 

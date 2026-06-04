@@ -36,7 +36,13 @@ void GameSfxBusNative::initialize() {
     }
 
     streams.clear();
-    streams["button"] = make_sfx(760.0, 1020.0, 0.070, 0.28);
+    streams["button"] = load_or_make("ui_click.wav", 760.0, 1020.0, 0.070, 0.28);
+    streams["ui_click"] = streams["button"];
+    streams["ui_hover"] = load_or_make("ui_hover.wav", 940.0, 1280.0, 0.055, 0.20);
+    streams["ui_insufficient_sol"] = load_or_make("ui_insufficient_sol.wav", 260.0, 160.0, 0.190, 0.30, 0.12);
+    streams["ui_intel_update"] = load_or_make("ui_intel_update.wav", 640.0, 980.0, 0.180, 0.26);
+    streams["ui_mission_text"] = load_or_make("ui_mission_text.wav", 520.0, 780.0, 0.180, 0.22);
+    streams["ui_wave_done"] = load_or_make("ui_wave_done.wav", 520.0, 940.0, 0.300, 0.36);
     streams["build"] = make_sfx(460.0, 760.0, 0.145, 0.34);
     streams["upgrade"] = make_sfx(560.0, 1120.0, 0.190, 0.34);
     streams["sell"] = make_sfx(820.0, 420.0, 0.130, 0.28);
@@ -52,7 +58,7 @@ void GameSfxBusNative::initialize() {
     streams["prime_death"] = load_or_make("enemy_die.wav", 180.0, 46.0, 0.420, 0.42, 0.22);
     streams["flare"] = make_sfx(220.0, 1180.0, 0.360, 0.42, 0.10);
     streams["sun_hit"] = load_or_make("sun_hurt.wav", 135.0, 72.0, 0.210, 0.36, 0.25);
-    streams["wave_clear"] = load_or_make("wave_clear.wav", 520.0, 940.0, 0.300, 0.36);
+    streams["wave_clear"] = streams["ui_wave_done"];
     streams["victory"] = make_sfx(440.0, 1060.0, 0.520, 0.38);
     streams["failure"] = load_or_make("game_over.wav", 260.0, 64.0, 0.520, 0.42, 0.20);
     streams["enemy_breach"] = load_or_make("enemy_breach.wav", 135.0, 72.0, 0.210, 0.36, 0.25);

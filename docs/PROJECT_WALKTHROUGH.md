@@ -1,152 +1,136 @@
 # Project Walkthrough
 
-This file is for explaining the project quickly during a demo or defense. It focuses on what each major folder, scene, and script is responsible for.
+This is the short explanation file for a demo or professor defense.
 
 ## Short Explanation
 
-Perk the Star is a Godot 4.6 orbital tower defense game. The player protects the sun by placing towers on rotating orbital rings. Enemies move inward, towers fire automatically, and the player wins by clearing the wave set before the sun's luminosity reaches zero.
+Perk the Star is a Godot 4.6 orbital tower defense game. The player protects the Sun by placing towers on rotating rings. Enemies move inward, towers fire automatically, and the player wins by clearing all waves before luminosity reaches zero.
 
 ## Folder Map
 
-- `scenes/` contains the Godot scenes that appear in the game.
-- `scenes/ui/` contains reusable UI scenes such as the HUD, pause menu, settings, and codex.
-- `scripts/game/` contains gameplay code and game balance data.
-- `scripts/ui/` contains UI behavior, shared theme helpers, and visual frame/background effects.
-- `scripts/autoload/` contains global systems loaded by Godot, mainly `GameState` and `MusicManager`.
-- `data/waves/` contains the JSON wave files. Changing these changes what enemies spawn.
-- `assets/` contains sprites, fonts, audio, icons, backgrounds, licenses, and some old assets kept for backup/reference.
-- `docs/` contains project notes and explanation files.
-
-We are not deleting old assets yet. Some unused or older files are intentionally kept so we can compare versions, recover older sprites, or replace art safely later.
+- `scenes/` contains Godot scenes.
+- `scenes/ui/` contains the HUD, pause menu, settings, and codex scenes.
+- `scripts/game/game.gd` is the main GDScript gameplay coordinator.
+- `gdextension/src/` contains the C++ systems used by Godot through GDExtension.
+- `data/waves/` contains JSON wave files.
+- `assets/` contains active sprites, audio, UI, fonts, backgrounds, licenses, and clearly marked old media.
+- `assets/sprites/old/` contains old sprite references.
+- `assets/audio/old/` contains old BGM and WAV source files.
+- `docs/presentation/` contains presentation files.
+- `docs/archive/` contains old planning notes.
 
 ## Scene Flow
 
 1. `project.godot` starts at `scenes/main_menu.tscn`.
-2. `scripts/ui/main_menu.gd` styles the menu and sends the player to the game.
+2. Native main-menu button classes open the game, codex, settings, or quit.
 3. `scenes/game.tscn` runs `scripts/game/game.gd`.
-4. `game.gd` loads the HUD scene, wave data, textures, music, and gameplay state.
-5. The HUD scene emits signals such as "start wave", "tower selected", and "menu".
-6. `game.gd` receives those signals, updates gameplay, then sends a simple state dictionary back to the HUD for display.
-7. Pause and end-state overlays keep menu, settings, controls, retry, and main-menu actions separate from combat rules.
+4. `game.gd` creates native helpers, loads assets, loads wave data, and builds the HUD.
+5. `GameHudNative` emits signals such as start wave, tower selected, upgrade, sell, retry, and menu.
+6. `game.gd` receives those signals, updates gameplay, then sends one state dictionary back to the HUD.
 
-## Main Scripts
+## Main GDScript
 
 - `scripts/game/game.gd`
-  The main gameplay controller. It handles input routing, wave spawning, tower placement, targeting, enemy movement, combat, drawing calls, end states, and HUD updates.
+  Coordinates runtime gameplay. It handles input, wave spawning, tower placement, enemy updates, drawing, music calls, SFX calls, and HUD updates.
 
-- `scripts/game/game_catalog.gd`
-  Static data for the game: tower stats, enemy stats, ring layout, active sprite paths, and constants like sun radius. This keeps balance numbers away from the runtime logic.
+This file is intentionally still GDScript because it is close to Godot scene flow: input events, drawing calls, scene loading, and signal wiring are simpler to explain and maintain in Godot's own script language.
 
-- `scripts/game/game_view_controller.gd`
-  Camera helper. It owns pan, zoom, edge scroll, WASD movement, viewport size caching, and screen/world coordinate conversion.
+## Main C++ Classes
 
-- `scripts/game/game_orbit_math.gd`
-  Orbital geometry helper. It calculates ring radius, slot angle, tower position, burrower position, nearest build slot, and the ring summary.
+- `GameCatalogNative`
+  Stores constants, enemy stats, tower stats, ring data, and active asset paths.
 
-- `scripts/game/game_effect_store.gd`
-  Effect storage helper. It stores short-lived shot/effect dictionaries and removes them when their timers expire.
+- `GameRuntimeNative`
+  Stores small reusable helpers: easing, screen shake, BGM selection, projectile hit tests, and enemy lookup by UID.
 
-- `GameWaveLibraryNative`
-  Wave JSON helper. It loads wave files, normalizes event data, builds spawn queues, and formats Wave Intel text.
+- `GameOrbitMathNative`
+  Handles orbital geometry: ring radius, slot angle, slot position, tower position, burrower position, and nearest build slot.
 
 - `GameTowerLibraryNative`
-  Tower math helper. It calculates upgrade stats, upgrade costs, sell refunds, tower button text, and management-card readouts.
+  Calculates tower runtime stats, upgrade cost, sell refund, tower button text, and tower management-card data.
 
-- `scripts/game/game_sfx_bus.gd`
-  Temporary sound helper. It creates small procedural feedback sounds once, then plays them from a reusable audio pool.
+- `GameWaveLibraryNative`
+  Loads JSON waves, builds spawn queues, and formats Wave Intel text.
 
-- `scripts/autoload/game_state.gd`
-  Global match state and saved settings. It stores luminosity, Sol credits, score, current wave, music settings, tutorial completion, screen shake, and Auto Start.
+- `GameHudNative`
+  Owns HUD labels, buttons, tower cards, end-state cards, hover signals, and responsive layout.
 
-- `scripts/ui/game_hud.gd`
-  The gameplay HUD controller. It does not decide combat rules; it displays values and emits signals when buttons are clicked.
+- `GameSfxBusNative`
+  Loads WAV sound effects from `assets/audio/sfx/` and generates fallback tones when a file is missing.
 
-- `scripts/ui/space_theme.gd`
-  Shared UI styling. Fonts, colors, button styles, panel styles, scrollbars, sliders, and icon setup live here so menus and gameplay use the same visual style.
+- `GameEffectStoreNative`
+  Stores short-lived shot lines, floating text, and visual effects, then removes them when their timers expire.
 
-- `scripts/ui/tutorial_overlay.gd`
-  Optional first-run tutorial overlay. It asks the HUD and game for target rectangles, then draws highlights and arrows.
+- `GameStateNative`
+  Stores global match state, luminosity, score, credits, phase, tutorial settings, music settings, and auto-start settings.
 
-- `scripts/ui/main_menu_fx.gd` and `scripts/ui/hud_panel_fx.gd`
-  Lightweight drawing scripts for animated sci-fi frame ornaments and screen polish.
+- `MusicManagerNative`
+  Keeps menu music playing across menu, settings, and codex screens.
 
 ## Gameplay Loop
 
 The main loop in `game.gd` is:
 
-1. Read input and camera movement, including drag, edge hover, mouse wheel zoom, and WASD panning.
-2. If a wave is active, spawn enemies from the current wave JSON.
-3. Move towers around their orbital rings.
+1. Read camera and input state.
+2. Spawn enemies from the active wave JSON.
+3. Move towers around their rings.
 4. Let towers find targets and fire.
-5. Move enemies toward the sun.
-6. Apply damage, rewards, health bars, death effects, and special enemy behavior.
-7. Check whether the wave is cleared or whether the game is over.
-8. Play small feedback sounds for important actions such as shots, hits, wave clears, breaches, victory, and failure.
-9. Send updated values to the HUD.
-10. Redraw only when something changed or an animation/effect is active.
+5. Move enemies toward the Sun.
+6. Update physics projectiles.
+7. Apply damage, rewards, effects, and special enemy behavior.
+8. Check wave clear, victory, or game over.
+9. Update the HUD state dictionary.
+10. Redraw only when gameplay, camera, or effects need it.
+
+## Why Some Code Stayed In GDScript
+
+Godot scene orchestration is easiest in GDScript. Input events, `draw_*` calls, scene loading, signal wiring, and dictionaries from the editor are direct and readable there.
+
+C++ is used where it helps most: shared logic, math helpers, catalogs, wave formatting, HUD code, audio helpers, and state systems.
 
 ## How Towers Work
 
-Towers are stored as dictionaries in the `towers` array. Each tower remembers:
-
-- its type, such as `photon_splitter`
-- which ring and slot it occupies
-- its current orbital angle
-- its fire cooldown
-- its level and total Sol spent
-
-The tower's base stats come from native tower config data. Runtime upgrades are calculated in `GameTowerLibraryNative` so we do not need separate copied data for every level.
+Towers are dictionaries in the `towers` array. Each tower stores type, ring, slot, angle, fire timer, level, and Sol spent. Base stats come from `GameCatalogNative`; upgrade math comes from `GameTowerLibraryNative`.
 
 ## How Enemies Work
 
-Enemies are stored as dictionaries in the `enemies` array. Each enemy remembers:
-
-- its type, such as `drifter` or `prime`
-- current position
-- current and max HP
-- speed, damage, reward, radius, sprite size, and color
-- temporary timers such as slow, hit flash, and heal flash
-
-Enemy base stats come from `GameCatalog.ENEMY_CONFIGS`. The wave JSON only needs to say which type spawns, how many, and how fast.
+Enemies are dictionaries in the `enemies` array. Each enemy stores UID, variant, position, HP, speed, damage, reward, radius, sprite data, and temporary timers. The UID lets physics projectiles keep tracking a target even after enemies move.
 
 ## Wave Data
 
-The files in `data/waves/` are JSON so we can tune the campaign without editing gameplay logic. `GameWaveLibraryNative` loads them, normalizes missing/null events, and builds the spawn queue used by `game.gd`.
+The files in `data/waves/` are JSON. Designers can tune waves without recompiling C++. `GameWaveLibraryNative` reads them and gives `game.gd` a normalized spawn queue.
 
 ## UI Pattern
 
-The UI mostly follows this pattern:
-
 1. HUD buttons emit signals.
-2. `game.gd` receives the signal and changes game state.
-3. `game.gd` builds a dictionary of display values.
-4. `game_hud.gd` reads that dictionary and updates labels, buttons, bars, and cards.
+2. `game.gd` changes gameplay state.
+3. `game.gd` builds one display dictionary.
+4. `GameHudNative` updates labels, bars, buttons, and cards.
 
-This keeps game decisions in the gameplay script and UI display work in the HUD script.
+This keeps combat rules out of the HUD.
 
 ## Audio Pattern
 
-The active background music lives in `assets/audio/bgm/final/`. `main_menu.ogg` plays on menu screens, `wave_01.ogg` covers waves 1-4, `wave_02.ogg` covers waves 5-8, `wave_03.ogg` covers waves 9-11, and `BOSS.ogg` plays on wave 12. Short feedback sounds are still routed through `game_sfx_bus.gd`, so they can be replaced later without changing the gameplay functions that call them.
+Active BGM lives in `assets/audio/bgm/final/`:
 
-## Demo Script
+- `main_menu.ogg` for menus.
+- `wave_01.ogg` for waves 1-4.
+- `wave_02.ogg` for waves 5-8.
+- `wave_03.ogg` for waves 9-11.
+- `BOSS.ogg` for wave 12.
+- `assets/audio/bgm/end.ogg` for endings.
 
-1. Start from the main menu and point out the shared sci-fi theme: animated nebula, cyan/gold frames, and compact mission-terminal typography.
-2. Open Settings to show saved music volume, screen shake, and optional tutorial replay.
-3. Start the game and show the tutorial overlay if it is queued; otherwise explain that it only appears once unless replay is requested.
-4. Show camera controls: mouse wheel zoom, WASD pan, edge hover pan, drag pan, and Center Sun.
-5. Build towers during a wave to show that the Tower Bay stays usable while combat is active.
-6. Click a placed tower to show upgrade cost, exact stat gains, final stats, and sell refund.
-7. Point to Wave Intel before the next wave and explain warning tags and counter hints.
-8. Use the pause menu to show Codex, Settings, Controls, Retry Run, Main Menu, and Back.
-9. On victory or failure, show the end card with rank, stats, Retry Run, and Main Menu.
+Active SFX lives in `assets/audio/sfx/`. Old audio is kept in `assets/audio/old/` and should not be used by gameplay.
 
 ## What To Say If Asked About Optimization
 
-- Balance numbers are centralized in `game_catalog.gd`.
-- Camera movement, orbit math, effect storage, wave parsing, tower math, and prototype SFX each live in their own helper files instead of being buried in `game.gd`.
-- The HUD gets one update dictionary instead of directly reading many gameplay variables.
-- Effects are stored in small arrays with a time-to-live, then removed when finished.
-- Short SFX are generated once into a small player pool, so combat does not create audio nodes every frame.
-- The view only redraws when gameplay, camera, or animation state needs it.
-- Shared theme code prevents repeating the same button and panel styling in every menu.
-- Old assets are kept for now so art changes can be compared safely before final cleanup.
+- Most reusable systems were moved to C++ GDExtension.
+- `game.gd` now focuses on scene flow instead of storing every helper function.
+- Balance and active asset paths are centralized in `GameCatalogNative`.
+- Orbit math is centralized in `GameOrbitMathNative`.
+- Tower stat calculations are centralized in `GameTowerLibraryNative`.
+- Wave loading and Wave Intel text are centralized in `GameWaveLibraryNative`.
+- HUD behavior is native and receives one state dictionary.
+- Temporary effects expire automatically through `GameEffectStoreNative`.
+- SFX players are pooled instead of creating audio nodes during combat.
+- Old assets are separated into old folders so active files are easy to find.

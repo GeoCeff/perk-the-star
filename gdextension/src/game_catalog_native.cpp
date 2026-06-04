@@ -91,12 +91,12 @@ void GameCatalogNative::_bind_methods() {
 
 Dictionary GameCatalogNative::enemy_asset_paths() const {
     Dictionary data;
-    data["drifter"] = "res://assets/sprites/enemies/Drifter.png";
-    data["bloom"] = "res://assets/sprites/enemies/Bloom.png";
-    data["burrower"] = "res://assets/sprites/enemies/Coronal Burrower.png";
-    data["mimic"] = "res://assets/sprites/enemies/Photon Mimic.png";
-    data["farmer"] = "res://assets/sprites/enemies/Solar Farmer.png";
-    data["prime"] = "res://assets/sprites/enemies/ASTROPHAGE PRIME.png";
+    data["drifter"] = "res://assets/sprites/clean/enemies_optimized/drifter_idle_1.png";
+    data["bloom"] = "res://assets/sprites/clean/enemies_optimized/bloom_idle_1.png";
+    data["burrower"] = "res://assets/sprites/clean/enemies_optimized/coronal_idle_1.png";
+    data["mimic"] = "res://assets/sprites/clean/enemies/photon_idle_1.png";
+    data["farmer"] = "res://assets/sprites/clean/enemies_optimized/solar_idle_1.png";
+    data["prime"] = "res://assets/sprites/clean/enemies/astrophage-shell_idle_1.png";
     return data;
 }
 
@@ -123,15 +123,16 @@ Dictionary GameCatalogNative::enemy_animation_paths() const {
     data["farmer"] = farmer;
 
     Dictionary mimic;
-    mimic["idle"] = paths({"res://assets/sprites/clean/enemies/photon_idle_1.png", "res://assets/sprites/clean/enemies/photpn_idle_2.png"});
-    mimic["move"] = paths({"res://assets/sprites/clean/enemies/photon_idle_1.png", "res://assets/sprites/clean/enemies/photpn_idle_2.png"});
+    mimic["idle"] = paths({"res://assets/sprites/clean/enemies/photon_idle_1.png", "res://assets/sprites/clean/enemies/photon_idle_2.png"});
+    mimic["move"] = paths({"res://assets/sprites/clean/enemies/photon_idle_1.png", "res://assets/sprites/clean/enemies/photon_idle_2.png"});
     data["mimic"] = mimic;
 
     Dictionary prime;
-    Array shell_move = paths({"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_1.png", "res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_2.png", "res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_3.png", "res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_4.png"});
-    prime["idle"] = paths({"res://assets/sprites/clean/enemies_optimized/astrophage-shell_idle_1.png", "res://assets/sprites/clean/enemies_optimized/astrophage-shell_idle_2.png"});
+    Array shell_move = paths({"res://assets/sprites/clean/enemies/astrophage-shell_move_1.png", "res://assets/sprites/clean/enemies/astrophage-shell_move_2.png", "res://assets/sprites/clean/enemies/astrophage-shell_move_3.png", "res://assets/sprites/clean/enemies/astrophage-shell_move_4.png"});
+    prime["idle"] = paths({"res://assets/sprites/clean/enemies/astrophage-shell_idle_1.png", "res://assets/sprites/clean/enemies/astrophage-shell_idle_2.png"});
     prime["move"] = shell_move;
-    prime["active"] = shell_move;
+    prime["active"] = paths({"res://assets/sprites/clean/enemies/astrophage-active_move_1.png", "res://assets/sprites/clean/enemies/astrophage-active_move_2.png", "res://assets/sprites/clean/enemies/astrophage-active_move_3.png", "res://assets/sprites/clean/enemies/astrophage-active_move_4.png"});
+    prime["frenzy"] = paths({"res://assets/sprites/clean/enemies/astrophage-frenzy_move_1.png", "res://assets/sprites/clean/enemies/astrophage-frenzy_move_2.png", "res://assets/sprites/clean/enemies/astrophage-frenzy_move_3.png"});
     data["prime"] = prime;
     return data;
 }

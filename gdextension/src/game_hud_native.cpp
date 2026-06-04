@@ -46,6 +46,16 @@ void set_button_text(Button* button, const Variant& text) {
     if (button != nullptr) button->set_text(String(text));
 }
 
+void connect_hover(Button* button, Object* target) {
+    if (button != nullptr) button->connect("mouse_entered", Callable(target, "_on_ui_hovered"));
+}
+
+void style_label(Label* label, int font_size, const Color& color) {
+    if (label == nullptr) return;
+    label->add_theme_font_size_override("font_size", font_size);
+    label->add_theme_color_override("font_color", color);
+}
+
 Color color_from_variant(const Variant& value, const Color& fallback) {
     return value.get_type() == Variant::COLOR ? Color(value) : fallback;
 }
@@ -69,6 +79,7 @@ void GameHudNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("_on_center_view_button_pressed"), &GameHudNative::on_center_view_button_pressed);
     ClassDB::bind_method(D_METHOD("_on_end_retry_pressed"), &GameHudNative::on_end_retry_pressed);
     ClassDB::bind_method(D_METHOD("_on_end_main_menu_pressed"), &GameHudNative::on_end_main_menu_pressed);
+    ClassDB::bind_method(D_METHOD("_on_ui_hovered"), &GameHudNative::on_ui_hovered);
 
     ADD_SIGNAL(MethodInfo("start_wave_requested"));
     ADD_SIGNAL(MethodInfo("auto_start_toggled", PropertyInfo(Variant::BOOL, "enabled")));
@@ -80,6 +91,7 @@ void GameHudNative::_bind_methods() {
     ADD_SIGNAL(MethodInfo("recenter_requested"));
     ADD_SIGNAL(MethodInfo("retry_requested"));
     ADD_SIGNAL(MethodInfo("main_menu_requested"));
+    ADD_SIGNAL(MethodInfo("ui_hovered"));
 }
 
 void GameHudNative::_ready() {
@@ -133,6 +145,10 @@ void GameHudNative::bind_buttons() {
     if (auto_start_button) auto_start_button->connect("toggled", Callable(this, "_on_auto_start_button_toggled"));
     if (menu_button) menu_button->connect("pressed", Callable(this, "_on_menu_button_pressed"));
     if (center_view_button) center_view_button->connect("pressed", Callable(this, "_on_center_view_button_pressed"));
+    Button* hover_buttons[] = {start_button, auto_start_button, menu_button, center_view_button};
+    for (Button* button : hover_buttons) {
+        connect_hover(button, this);
+    }
 
     Dictionary paths = tower_button_paths();
     Array keys = paths.keys();
@@ -146,6 +162,7 @@ void GameHudNative::bind_buttons() {
         tower_buttons[tower_type] = button;
         button->connect("pressed", Callable(this, "_on_tower_button_pressed").bind(tower_type));
         button->connect("mouse_entered", Callable(this, "_show_tower_info").bind(tower_type));
+        connect_hover(button, this);
         button->connect("mouse_exited", Callable(this, "_hide_tower_info").bind(tower_type));
         button->connect("focus_entered", Callable(this, "_show_tower_info").bind(tower_type));
         button->connect("focus_exited", Callable(this, "_hide_tower_info").bind(tower_type));
@@ -256,11 +273,35 @@ void GameHudNative::build_tower_info_card() {
     content->set_mouse_filter(Control::MOUSE_FILTER_IGNORE);
     content->add_theme_constant_override("separation", 5);
     row->add_child(content);
-    tower_info_title_label = memnew(Label); tower_info_title_label->set_name("TowerInfoTitle"); tower_info_title_label->set_text("TOWER"); tower_info_title_label->set_clip_text(true); content->add_child(tower_info_title_label);
-    tower_info_role_label = memnew(Label); tower_info_role_label->set_name("TowerInfoRole"); tower_info_role_label->set_text("ROLE"); content->add_child(tower_info_role_label);
-    tower_info_stats_label = memnew(Label); tower_info_stats_label->set_name("TowerInfoStats"); tower_info_stats_label->set_text("DAMAGE 0  |  RATE 0/S  |  RANGE 0"); tower_info_stats_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART); content->add_child(tower_info_stats_label);
-    tower_info_body_label = memnew(Label); tower_info_body_label->set_name("TowerInfoBody"); tower_info_body_label->set_custom_minimum_size(Vector2(320, 42)); tower_info_body_label->set_text("Tower description."); tower_info_body_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART); content->add_child(tower_info_body_label);
-    tower_info_note_label = memnew(Label); tower_info_note_label->set_name("TowerInfoNote"); tower_info_note_label->set_text("NOTE"); tower_info_note_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART); content->add_child(tower_info_note_label);
+    tower_info_title_label = memnew(Label);
+    tower_info_title_label->set_name("TowerInfoTitle");
+    tower_info_title_label->set_text("TOWER");
+    tower_info_title_label->set_clip_text(true);
+    content->add_child(tower_info_title_label);
+
+    tower_info_role_label = memnew(Label);
+    tower_info_role_label->set_name("TowerInfoRole");
+    tower_info_role_label->set_text("ROLE");
+    content->add_child(tower_info_role_label);
+
+    tower_info_stats_label = memnew(Label);
+    tower_info_stats_label->set_name("TowerInfoStats");
+    tower_info_stats_label->set_text("DAMAGE 0  |  RATE 0/S  |  RANGE 0");
+    tower_info_stats_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART);
+    content->add_child(tower_info_stats_label);
+
+    tower_info_body_label = memnew(Label);
+    tower_info_body_label->set_name("TowerInfoBody");
+    tower_info_body_label->set_custom_minimum_size(Vector2(320, 42));
+    tower_info_body_label->set_text("Tower description.");
+    tower_info_body_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART);
+    content->add_child(tower_info_body_label);
+
+    tower_info_note_label = memnew(Label);
+    tower_info_note_label->set_name("TowerInfoNote");
+    tower_info_note_label->set_text("NOTE");
+    tower_info_note_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART);
+    content->add_child(tower_info_note_label);
 }
 
 void GameHudNative::build_tower_manage_card() {
@@ -280,17 +321,71 @@ void GameHudNative::build_tower_manage_card() {
     margin->add_theme_constant_override("margin_right", 14);
     margin->add_theme_constant_override("margin_bottom", 12);
     tower_manage_card->add_child(margin);
-    VBoxContainer* root = memnew(VBoxContainer); root->set_name("TowerManageRoot"); root->add_theme_constant_override("separation", 7); margin->add_child(root);
-    HBoxContainer* header = memnew(HBoxContainer); header->set_name("TowerManageHeader"); header->add_theme_constant_override("separation", 8); root->add_child(header);
-    VBoxContainer* title_box = memnew(VBoxContainer); title_box->set_name("TowerManageTitleBox"); title_box->set_h_size_flags(Control::SIZE_EXPAND_FILL); title_box->add_theme_constant_override("separation", 1); header->add_child(title_box);
-    tower_manage_title_label = memnew(Label); tower_manage_title_label->set_name("TowerManageTitle"); tower_manage_title_label->set_clip_text(true); title_box->add_child(tower_manage_title_label);
-    tower_manage_meta_label = memnew(Label); tower_manage_meta_label->set_name("TowerManageMeta"); tower_manage_meta_label->set_clip_text(true); title_box->add_child(tower_manage_meta_label);
-    tower_manage_close_button = memnew(Button); tower_manage_close_button->set_name("TowerManageCloseButton"); tower_manage_close_button->set_custom_minimum_size(Vector2(40, 34)); tower_manage_close_button->set_text("X"); tower_manage_close_button->connect("pressed", Callable(this, "_on_tower_manage_close_pressed")); header->add_child(tower_manage_close_button);
-    tower_manage_stats_label = memnew(Label); tower_manage_stats_label->set_name("TowerManageStats"); tower_manage_stats_label->set_custom_minimum_size(Vector2(0, 34)); tower_manage_stats_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART); root->add_child(tower_manage_stats_label);
-    tower_manage_economy_label = memnew(Label); tower_manage_economy_label->set_name("TowerManageEconomy"); tower_manage_economy_label->set_clip_text(true); root->add_child(tower_manage_economy_label);
-    HBoxContainer* actions = memnew(HBoxContainer); actions->set_name("TowerManageActions"); actions->add_theme_constant_override("separation", 8); root->add_child(actions);
-    tower_manage_upgrade_button = memnew(Button); tower_manage_upgrade_button->set_name("TowerManageUpgradeButton"); tower_manage_upgrade_button->set_custom_minimum_size(Vector2(148, 40)); tower_manage_upgrade_button->set_text("UPGRADE"); tower_manage_upgrade_button->connect("pressed", Callable(this, "_on_tower_manage_upgrade_pressed")); actions->add_child(tower_manage_upgrade_button);
-    tower_manage_sell_button = memnew(Button); tower_manage_sell_button->set_name("TowerManageSellButton"); tower_manage_sell_button->set_custom_minimum_size(Vector2(120, 40)); tower_manage_sell_button->set_text("SELL"); tower_manage_sell_button->connect("pressed", Callable(this, "_on_tower_manage_sell_pressed")); actions->add_child(tower_manage_sell_button);
+    VBoxContainer* root = memnew(VBoxContainer);
+    root->set_name("TowerManageRoot");
+    root->add_theme_constant_override("separation", 7);
+    margin->add_child(root);
+
+    HBoxContainer* header = memnew(HBoxContainer);
+    header->set_name("TowerManageHeader");
+    header->add_theme_constant_override("separation", 8);
+    root->add_child(header);
+
+    VBoxContainer* title_box = memnew(VBoxContainer);
+    title_box->set_name("TowerManageTitleBox");
+    title_box->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+    title_box->add_theme_constant_override("separation", 1);
+    header->add_child(title_box);
+
+    tower_manage_title_label = memnew(Label);
+    tower_manage_title_label->set_name("TowerManageTitle");
+    tower_manage_title_label->set_clip_text(true);
+    title_box->add_child(tower_manage_title_label);
+
+    tower_manage_meta_label = memnew(Label);
+    tower_manage_meta_label->set_name("TowerManageMeta");
+    tower_manage_meta_label->set_clip_text(true);
+    title_box->add_child(tower_manage_meta_label);
+
+    tower_manage_close_button = memnew(Button);
+    tower_manage_close_button->set_name("TowerManageCloseButton");
+    tower_manage_close_button->set_custom_minimum_size(Vector2(40, 34));
+    tower_manage_close_button->set_text("X");
+    tower_manage_close_button->connect("pressed", Callable(this, "_on_tower_manage_close_pressed"));
+    connect_hover(tower_manage_close_button, this);
+    header->add_child(tower_manage_close_button);
+
+    tower_manage_stats_label = memnew(Label);
+    tower_manage_stats_label->set_name("TowerManageStats");
+    tower_manage_stats_label->set_custom_minimum_size(Vector2(0, 34));
+    tower_manage_stats_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART);
+    root->add_child(tower_manage_stats_label);
+
+    tower_manage_economy_label = memnew(Label);
+    tower_manage_economy_label->set_name("TowerManageEconomy");
+    tower_manage_economy_label->set_clip_text(true);
+    root->add_child(tower_manage_economy_label);
+
+    HBoxContainer* actions = memnew(HBoxContainer);
+    actions->set_name("TowerManageActions");
+    actions->add_theme_constant_override("separation", 8);
+    root->add_child(actions);
+
+    tower_manage_upgrade_button = memnew(Button);
+    tower_manage_upgrade_button->set_name("TowerManageUpgradeButton");
+    tower_manage_upgrade_button->set_custom_minimum_size(Vector2(148, 40));
+    tower_manage_upgrade_button->set_text("UPGRADE");
+    tower_manage_upgrade_button->connect("pressed", Callable(this, "_on_tower_manage_upgrade_pressed"));
+    connect_hover(tower_manage_upgrade_button, this);
+    actions->add_child(tower_manage_upgrade_button);
+
+    tower_manage_sell_button = memnew(Button);
+    tower_manage_sell_button->set_name("TowerManageSellButton");
+    tower_manage_sell_button->set_custom_minimum_size(Vector2(120, 40));
+    tower_manage_sell_button->set_text("SELL");
+    tower_manage_sell_button->connect("pressed", Callable(this, "_on_tower_manage_sell_pressed"));
+    connect_hover(tower_manage_sell_button, this);
+    actions->add_child(tower_manage_sell_button);
 }
 
 void GameHudNative::build_end_state_card() {
@@ -311,14 +406,55 @@ void GameHudNative::build_end_state_card() {
     margin->add_theme_constant_override("margin_bottom", 18);
     end_state_panel->add_child(margin);
     VBoxContainer* root = memnew(VBoxContainer); root->set_name("EndStateRoot"); root->add_theme_constant_override("separation", 10); margin->add_child(root);
-    end_state_title_label = memnew(Label); end_state_title_label->set_name("EndStateTitle"); end_state_title_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER); root->add_child(end_state_title_label);
-    end_state_subtitle_label = memnew(Label); end_state_subtitle_label->set_name("EndStateSubtitle"); end_state_subtitle_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER); end_state_subtitle_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART); root->add_child(end_state_subtitle_label);
-    end_state_rank_label = memnew(Label); end_state_rank_label->set_name("EndStateRank"); end_state_rank_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER); root->add_child(end_state_rank_label);
-    end_state_stats_label = memnew(Label); end_state_stats_label->set_name("EndStateStats"); end_state_stats_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER); end_state_stats_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART); root->add_child(end_state_stats_label);
-    end_state_tip_label = memnew(Label); end_state_tip_label->set_name("EndStateTip"); end_state_tip_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER); end_state_tip_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART); root->add_child(end_state_tip_label);
-    HBoxContainer* buttons = memnew(HBoxContainer); buttons->set_name("EndStateButtons"); buttons->set_alignment(BoxContainer::ALIGNMENT_CENTER); buttons->add_theme_constant_override("separation", 12); root->add_child(buttons);
-    end_state_retry_button = memnew(Button); end_state_retry_button->set_name("EndStateRetryButton"); end_state_retry_button->set_custom_minimum_size(Vector2(156, 44)); end_state_retry_button->set_text("RETRY RUN"); end_state_retry_button->connect("pressed", Callable(this, "_on_end_retry_pressed")); buttons->add_child(end_state_retry_button);
-    end_state_main_menu_button = memnew(Button); end_state_main_menu_button->set_name("EndStateMainMenuButton"); end_state_main_menu_button->set_custom_minimum_size(Vector2(156, 44)); end_state_main_menu_button->set_text("MAIN MENU"); end_state_main_menu_button->connect("pressed", Callable(this, "_on_end_main_menu_pressed")); buttons->add_child(end_state_main_menu_button);
+    end_state_title_label = memnew(Label);
+    end_state_title_label->set_name("EndStateTitle");
+    end_state_title_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
+    root->add_child(end_state_title_label);
+
+    end_state_subtitle_label = memnew(Label);
+    end_state_subtitle_label->set_name("EndStateSubtitle");
+    end_state_subtitle_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
+    end_state_subtitle_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART);
+    root->add_child(end_state_subtitle_label);
+
+    end_state_rank_label = memnew(Label);
+    end_state_rank_label->set_name("EndStateRank");
+    end_state_rank_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
+    root->add_child(end_state_rank_label);
+
+    end_state_stats_label = memnew(Label);
+    end_state_stats_label->set_name("EndStateStats");
+    end_state_stats_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
+    end_state_stats_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART);
+    root->add_child(end_state_stats_label);
+
+    end_state_tip_label = memnew(Label);
+    end_state_tip_label->set_name("EndStateTip");
+    end_state_tip_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
+    end_state_tip_label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART);
+    root->add_child(end_state_tip_label);
+
+    HBoxContainer* buttons = memnew(HBoxContainer);
+    buttons->set_name("EndStateButtons");
+    buttons->set_alignment(BoxContainer::ALIGNMENT_CENTER);
+    buttons->add_theme_constant_override("separation", 12);
+    root->add_child(buttons);
+
+    end_state_retry_button = memnew(Button);
+    end_state_retry_button->set_name("EndStateRetryButton");
+    end_state_retry_button->set_custom_minimum_size(Vector2(156, 44));
+    end_state_retry_button->set_text("RETRY RUN");
+    end_state_retry_button->connect("pressed", Callable(this, "_on_end_retry_pressed"));
+    connect_hover(end_state_retry_button, this);
+    buttons->add_child(end_state_retry_button);
+
+    end_state_main_menu_button = memnew(Button);
+    end_state_main_menu_button->set_name("EndStateMainMenuButton");
+    end_state_main_menu_button->set_custom_minimum_size(Vector2(156, 44));
+    end_state_main_menu_button->set_text("MAIN MENU");
+    end_state_main_menu_button->connect("pressed", Callable(this, "_on_end_main_menu_pressed"));
+    connect_hover(end_state_main_menu_button, this);
+    buttons->add_child(end_state_main_menu_button);
 }
 
 void GameHudNative::update_tower_buttons(const Variant& button_states) {
@@ -426,20 +562,34 @@ void GameHudNative::apply_styles() {
 }
 
 void GameHudNative::apply_readability_overrides() {
-    if (wave_kicker) { wave_kicker->add_theme_font_size_override("font_size", 10); wave_kicker->add_theme_color_override("font_color", Color(0.34, 0.90, 1.0, 0.85)); }
-    if (wave_label) { wave_label->add_theme_font_size_override("font_size", 21); wave_label->add_theme_color_override("font_color", Color(1.0, 0.82, 0.28, 1.0)); }
-    if (brief_label) { brief_label->add_theme_font_size_override("font_size", 11); brief_label->add_theme_color_override("font_color", Color(0.78, 0.90, 0.98, 0.96)); }
-    if (selected_tower_label) { selected_tower_label->add_theme_font_size_override("font_size", 10); selected_tower_label->add_theme_color_override("font_color", Color(1.0, 0.84, 0.38, 0.95)); }
-    const char* stat_titles[] = {"Hud/StatusPanel/StatusRow/StatsGrid/SolStat/SolTitle", "Hud/StatusPanel/StatusRow/StatsGrid/ScoreStat/ScoreTitle", "Hud/StatusPanel/StatusRow/StatsGrid/KillsStat/KillsTitle", "Hud/StatusPanel/StatusRow/StatsGrid/FlareStat/FlareTitle"};
-    for (const char* path : stat_titles) if (Label* title = node<Label>(path)) { title->add_theme_font_size_override("font_size", 10); title->add_theme_color_override("font_color", Color(0.52, 0.78, 0.90, 0.92)); }
+    style_label(wave_kicker, 10, Color(0.34, 0.90, 1.0, 0.85));
+    style_label(wave_label, 21, Color(1.0, 0.82, 0.28, 1.0));
+    style_label(brief_label, 11, Color(0.78, 0.90, 0.98, 0.96));
+    style_label(selected_tower_label, 10, Color(1.0, 0.84, 0.38, 0.95));
+
+    const char* stat_titles[] = {
+        "Hud/StatusPanel/StatusRow/StatsGrid/SolStat/SolTitle",
+        "Hud/StatusPanel/StatusRow/StatsGrid/ScoreStat/ScoreTitle",
+        "Hud/StatusPanel/StatusRow/StatsGrid/KillsStat/KillsTitle",
+        "Hud/StatusPanel/StatusRow/StatsGrid/FlareStat/FlareTitle",
+    };
+    for (const char* path : stat_titles) {
+        style_label(node<Label>(path), 10, Color(0.52, 0.78, 0.90, 0.92));
+    }
+
     Label* values[] = {credits_label, score_label, kills_label, flare_label};
-    for (Label* value : values) if (value) { value->add_theme_font_size_override("font_size", 18); value->add_theme_color_override("font_color", Color(0.96, 0.99, 1.0, 1.0)); }
+    for (Label* value : values) {
+        style_label(value, 18, Color(0.96, 0.99, 1.0, 1.0));
+    }
     if (flare_label) flare_label->add_theme_font_size_override("font_size", 15);
-    if (enemy_label) { enemy_label->add_theme_font_size_override("font_size", 13); enemy_label->add_theme_color_override("font_color", Color(0.96, 0.99, 1.0, 0.98)); enemy_label->add_theme_constant_override("line_spacing", 1); }
-    if (intel_status_label) { intel_status_label->add_theme_font_size_override("font_size", 10); intel_status_label->add_theme_color_override("font_color", Color(1.0, 0.84, 0.38, 0.95)); }
-    if (threat_label) { threat_label->add_theme_font_size_override("font_size", 10); threat_label->add_theme_color_override("font_color", Color(0.82, 0.90, 0.98, 0.94)); threat_label->add_theme_constant_override("line_spacing", 2); }
-    if (ring_label) { ring_label->add_theme_font_size_override("font_size", 10); ring_label->add_theme_color_override("font_color", Color(0.58, 0.78, 0.92, 0.90)); ring_label->add_theme_constant_override("line_spacing", 1); }
-    if (message_label) { message_label->add_theme_font_size_override("font_size", 13); message_label->add_theme_color_override("font_color", Color(0.98, 0.95, 0.84, 0.96)); }
+    style_label(enemy_label, 13, Color(0.96, 0.99, 1.0, 0.98));
+    style_label(intel_status_label, 10, Color(1.0, 0.84, 0.38, 0.95));
+    style_label(threat_label, 10, Color(0.82, 0.90, 0.98, 0.94));
+    style_label(ring_label, 10, Color(0.58, 0.78, 0.92, 0.90));
+    style_label(message_label, 13, Color(0.98, 0.95, 0.84, 0.96));
+    if (enemy_label) enemy_label->add_theme_constant_override("line_spacing", 1);
+    if (threat_label) threat_label->add_theme_constant_override("line_spacing", 2);
+    if (ring_label) ring_label->add_theme_constant_override("line_spacing", 1);
     if (tower_info_card) {
         tower_info_card->add_theme_stylebox_override("panel", hud_panel_style(cyan(), 14, 12));
         tower_info_title_label->add_theme_font_size_override("font_size", 15);
@@ -539,7 +689,9 @@ void GameHudNative::position_tower_info_card(const String& tower_type) {
     double x = tower_rect.position.x - hud_origin.x;
     double y = tower_rect.position.y - hud_origin.y - card_size.y - 14.0;
     if (y < 18.0) y = tower_rect.position.y - hud_origin.y + 14.0;
-    tower_info_card->set_position(Vector2(Math::clamp(x, 22.0, std::max(22.0, double(viewport_size.x - card_size.x - 22.0))), Math::clamp(y, 18.0, std::max(18.0, double(viewport_size.y - card_size.y - 18.0)))));
+    const double clamped_x = Math::clamp(x, 22.0, std::max(22.0, double(viewport_size.x - card_size.x - 22.0)));
+    const double clamped_y = Math::clamp(y, 18.0, std::max(18.0, double(viewport_size.y - card_size.y - 18.0)));
+    tower_info_card->set_position(Vector2(clamped_x, clamped_y));
 }
 
 void GameHudNative::position_tower_manage_card() {
@@ -553,7 +705,9 @@ void GameHudNative::position_tower_manage_card() {
     double x = tower_rect.position.x - hud_origin.x;
     double y = tower_rect.position.y - hud_origin.y - card_size.y - 14.0;
     if (y < 18.0) y = tower_rect.position.y - hud_origin.y + 14.0;
-    tower_manage_card->set_position(Vector2(Math::clamp(x, 22.0, std::max(22.0, double(viewport_size.x - card_size.x - 22.0))), Math::clamp(y, 18.0, std::max(18.0, double(viewport_size.y - card_size.y - 18.0)))));
+    const double clamped_x = Math::clamp(x, 22.0, std::max(22.0, double(viewport_size.x - card_size.x - 22.0)));
+    const double clamped_y = Math::clamp(y, 18.0, std::max(18.0, double(viewport_size.y - card_size.y - 18.0)));
+    tower_manage_card->set_position(Vector2(clamped_x, clamped_y));
 }
 
 void GameHudNative::position_end_state_card() {
@@ -626,7 +780,12 @@ Ref<StyleBoxFlat> GameHudNative::hud_panel_style(const Color& accent, double hor
     return style;
 }
 
-Ref<StyleBoxFlat> GameHudNative::hud_button_style(const Color& bg_color, const Color& border_color, int border_width, double horizontal_margin, double vertical_margin) const {
+Ref<StyleBoxFlat> GameHudNative::hud_button_style(
+    const Color& bg_color,
+    const Color& border_color,
+    int border_width,
+    double horizontal_margin,
+    double vertical_margin) const {
     Ref<StyleBoxFlat> style = hud_panel_style(border_color, horizontal_margin, vertical_margin);
     style->set_bg_color(bg_color);
     style->set_border_color(border_color);
@@ -659,9 +818,19 @@ void GameHudNative::on_start_button_pressed() { emit_signal("start_wave_requeste
 void GameHudNative::on_auto_start_button_toggled(bool enabled) { emit_signal("auto_start_toggled", enabled); }
 void GameHudNative::on_menu_button_pressed() { emit_signal("menu_requested"); }
 void GameHudNative::on_tower_button_pressed(const String& tower_type) { emit_signal("tower_selected", tower_type); }
-void GameHudNative::on_tower_manage_upgrade_pressed() { if (managed_tower_ring >= 0 && managed_tower_slot >= 0) emit_signal("tower_upgrade_requested", managed_tower_ring, managed_tower_slot); }
-void GameHudNative::on_tower_manage_sell_pressed() { if (managed_tower_ring >= 0 && managed_tower_slot >= 0) emit_signal("tower_sell_requested", managed_tower_ring, managed_tower_slot); }
+void GameHudNative::on_tower_manage_upgrade_pressed() {
+    if (managed_tower_ring >= 0 && managed_tower_slot >= 0) {
+        emit_signal("tower_upgrade_requested", managed_tower_ring, managed_tower_slot);
+    }
+}
+
+void GameHudNative::on_tower_manage_sell_pressed() {
+    if (managed_tower_ring >= 0 && managed_tower_slot >= 0) {
+        emit_signal("tower_sell_requested", managed_tower_ring, managed_tower_slot);
+    }
+}
 void GameHudNative::on_tower_manage_close_pressed() { emit_signal("tower_manage_closed"); }
 void GameHudNative::on_center_view_button_pressed() { emit_signal("recenter_requested"); }
 void GameHudNative::on_end_retry_pressed() { emit_signal("retry_requested"); }
 void GameHudNative::on_end_main_menu_pressed() { emit_signal("main_menu_requested"); }
+void GameHudNative::on_ui_hovered() { emit_signal("ui_hovered"); }

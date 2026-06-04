@@ -15,8 +15,8 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
 
-ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs" / "Perk_The_Star_Defense_Deck.pdf"
+ROOT = Path(__file__).resolve().parents[2]
+OUT = Path(__file__).resolve().parent / "Perk_The_Star_Defense_Deck.pdf"
 
 PAGE_W, PAGE_H = landscape((13.333 * inch, 7.5 * inch))
 MARGIN_X = 0.55 * inch

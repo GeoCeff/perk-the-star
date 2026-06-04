@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b6cgui2ckl76j"
-path="res://.godot/imported/Solar Farmer.png-81accde484e3900b6c7a13a73459fcb8.ctex"
+uid="uid://co2wtjbwsyx0f"
+path="res://.godot/imported/Coronal Burrower.png-86f9f91d9f1d678818ae17c51525de8d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/enemies/Solar Farmer.png"
-dest_files=["res://.godot/imported/Solar Farmer.png-81accde484e3900b6c7a13a73459fcb8.ctex"]
+source_file="res://assets/sprites/old/enemy_reference/Coronal Burrower.png"
+dest_files=["res://.godot/imported/Coronal Burrower.png-86f9f91d9f1d678818ae17c51525de8d.ctex"]
 
 [params]
 

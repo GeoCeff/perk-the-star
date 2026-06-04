@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d3v4i81qjc5dw"
-path="res://.godot/imported/Bloom.png-5d9da764b84517030990075d9a2ed3a8.ctex"
+uid="uid://lwnsqj0w0rly"
+path="res://.godot/imported/Photon Mimic.png-c59b187dea020aad16299f6b32d1e503.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/enemies/Bloom.png"
-dest_files=["res://.godot/imported/Bloom.png-5d9da764b84517030990075d9a2ed3a8.ctex"]
+source_file="res://assets/sprites/old/enemy_reference/Photon Mimic.png"
+dest_files=["res://.godot/imported/Photon Mimic.png-c59b187dea020aad16299f6b32d1e503.ctex"]
 
 [params]
 

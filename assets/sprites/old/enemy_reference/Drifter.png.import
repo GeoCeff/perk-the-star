@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://k2ed0huichxj"
-path="res://.godot/imported/Coronal Burrower.png-d18563fc11d8f3f1856618743eecf4bf.ctex"
+uid="uid://dn5e7ct0d21bh"
+path="res://.godot/imported/Drifter.png-5cb877a15c41c209eee38e11be5ad453.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/enemies/Coronal Burrower.png"
-dest_files=["res://.godot/imported/Coronal Burrower.png-d18563fc11d8f3f1856618743eecf4bf.ctex"]
+source_file="res://assets/sprites/old/enemy_reference/Drifter.png"
+dest_files=["res://.godot/imported/Drifter.png-5cb877a15c41c209eee38e11be5ad453.ctex"]
 
 [params]
 

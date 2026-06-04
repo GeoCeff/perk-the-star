@@ -5,7 +5,7 @@
 
 > Concise slide copy + speaker notes + Q&A reference.  
 > Reflects the **current Godot 4.6 build**, not the original SFML proposal alone.  
-> See `docs/NewFeature-Guide.md` for planned v2 upgrades.
+> See `docs/archive/old_feature_guide.md` only as historical planning notes.
 
 ---
 
@@ -185,7 +185,7 @@
 
 **Say**
 - We split helpers so `game.gd` stays readable: catalog, orbit math, view/camera, wave parsing, tower math, effects, SFX.
-- Balance numbers live in `game_catalog.gd` — one place to tune towers, enemies, and rings.
+- Balance numbers live in `GameCatalogNative` — one place to tune towers, enemies, rings, and active asset paths.
 
 ---
 
@@ -200,15 +200,15 @@
 | **C++** | `SunNode` | Luminosity, burrower drain, expression |
 | **C++** | `WaveData` | Load/parse wave JSON |
 | **GDScript** | `game.gd` | Main loop: input, spawn, combat, draw, end states |
-| **GDScript** | `game_catalog.gd` | Towers, enemies, rings, sprite paths |
+| **C++** | `GameCatalogNative` | Towers, enemies, rings, sprite paths |
 | **GDScript** | `game_wave_library.gd` | Spawn queue, Wave Intel text |
 | **GDScript** | `game_tower_library.gd` | Upgrade cost, stats, refunds |
-| **GDScript** | `game_orbit_math.gd` | Slot angles, tower positions |
-| **GDScript** | `game_view_controller.gd` | Pan, zoom, coordinates |
-| **GDScript** | `game_effect_store.gd` | TTL shots/effects |
-| **GDScript** | `game_sfx_bus.gd` | Procedural SFX pool |
+| **C++** | `GameOrbitMathNative` | Slot angles, tower positions |
+| **C++** | `GameViewControllerNative` | Pan, zoom, coordinates |
+| **C++** | `GameEffectStoreNative` | TTL shots/effects |
+| **C++** | `GameSfxBusNative` | WAV SFX plus fallback tones |
 | **Autoload** | `GameState` | Luminosity, credits, phase, saved settings |
-| **UI** | `game_hud.gd`, `space_theme.gd`, `tutorial_overlay.gd` | HUD, theme, first-run tutorial |
+| **UI/C++** | `GameHudNative`, `SpaceThemeNative`, `TutorialOverlayNative` | HUD, theme, first-run tutorial |
 
 **Runtime structures (GDScript)**
 - `towers[]` — dicts: type, ring, slot, angle, cooldown, level, Sol spent
@@ -221,9 +221,9 @@
 
 **On slide**
 - **Visual style:** Dark sci-fi operations UI — nebula backgrounds, cyan/gold frames, organic Astrophage sprites, clean tower modules
-- **Sprites:** `assets/sprites/enemies/`, `assets/sprites/clean/towers/`, `assets/sprites/backgrounds/`
+- **Sprites:** `assets/sprites/clean/enemies/`, `assets/sprites/clean/enemies_optimized/`, `assets/sprites/clean/towers/`, `assets/sprites/backgrounds/`
 - **UI/fonts:** Kenney Sci-fi UI, Electrolize, Kenney Future
-- **Audio:** `assets/audio/bgm/final/` — menu, wave tracks, BOSS; procedural gameplay SFX
+- **Audio:** `assets/audio/bgm/final/` and `assets/audio/sfx/`; old media is marked in `assets/audio/old/`
 - **Credits:** `assets/licenses/THIRD_PARTY_ASSETS.md`
 - **Style guide:** `docs/ASSET_STYLE.md`
 
@@ -317,7 +317,7 @@ A: Faster scene/UI workflow, built-in signals, JSON tooling, and easier demo pol
 A: `scripts/game/game.gd` — input, spawning, orbit update, targeting, damage, events, HUD sync, draw.
 
 **Q: Where is balance data?**  
-A: `scripts/game/game_catalog.gd` (towers, enemies, rings) + `data/waves/*.json` (campaign).
+A: `GameCatalogNative` (towers, enemies, rings) + `data/waves/*.json` (campaign).
 
 **Q: How do waves load?**  
 A: `game_wave_library.gd` reads JSON, normalizes spawns/events, builds spawn queue and Wave Intel strings.
@@ -326,7 +326,7 @@ A: `game_wave_library.gd` reads JSON, normalizes spawns/events, builds spawn que
 A: `Astrophage`, `OrbitalTower`, `SunNode`, `WaveData` in `gdextension/src/` — registered via `register_types.cpp`, built to `game/bin/perk_the_star.dll`.
 
 **Q: How does UI stay separate from logic?**  
-A: HUD buttons emit signals → `game.gd` decides → returns a display dictionary → `game_hud.gd` renders. No combat rules in HUD scripts.
+A: HUD buttons emit signals -> `game.gd` decides -> returns a display dictionary -> `GameHudNative` renders. No combat rules live in the HUD.
 
 **Q: What optimizations did you apply?**  
 A: Helper module split; TTL effect arrays; SFX player pool (no per-frame audio node creation); conditional redraw; centralized theme/catalog; JSON-driven waves avoid recompilation for balance.
@@ -348,7 +348,7 @@ A: Kenney Sci-fi UI (CC0), Electrolize (OFL), Kenney Future fonts (CC0), Screami
 
 ## Planned features (v2 roadmap — not all in current build)
 
-From `docs/NewFeature-Guide.md`. Mention as **future work** if asked:
+From `docs/archive/old_feature_guide.md`. Mention as **future work** if asked:
 
 | Feature | Status |
 |---------|--------|
@@ -391,12 +391,12 @@ A: No — the feature guide is our **v2 upgrade spec**. The current playable bui
 |------|-------|
 | Run entry | `project.godot` → `scenes/main_menu.tscn` |
 | Gameplay scene | `scenes/game.tscn` + `scripts/game/game.gd` |
-| Balance | `scripts/game/game_catalog.gd` |
+| Balance | `GameCatalogNative` |
 | Waves | `data/waves/wave_01.json` … `wave_12.json` |
 | Mission lore | `scenes/ui/codex.gd` |
 | C++ extension | `gdextension/src/`, `game/bin/perk_the_star.gdextension` |
 | Walkthrough | `docs/PROJECT_WALKTHROUGH.md` |
-| v2 roadmap | `docs/NewFeature-Guide.md` |
+| old roadmap | `docs/archive/old_feature_guide.md` |
 
 ---
 

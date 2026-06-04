@@ -1,4 +1,6 @@
 # PERK THE STAR — V2 FEATURE UPGRADE GUIDE
+> Archive note: this file is historical planning/reference material. It does not describe the current file system or active C++/GDScript split. Use `docs/PROJECT_WALKTHROUGH.md` and `docs/FILE_SYSTEM.md` for current explanations.
+
 ### New Mechanics, Physics, Waves & Systems
 **Group H | CMSC 21 | Geo Ceff Gabaisen & Dexter Juevesano**
 

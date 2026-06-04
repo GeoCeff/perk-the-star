@@ -69,6 +69,7 @@ var ring_flash_timers: Dictionary = {}
 var spawn_timer: float = 0.0
 var spawned_wave_count: int = 0
 var total_wave_spawn_count: int = 0
+var next_enemy_uid: int = 1
 var wave_active: bool = false
 var wave_start_time: float = 0.0
 var escalation_checked: bool = false
@@ -299,6 +300,7 @@ func _place_tower_from_screen_position(screen_position: Vector2) -> void:
 	var slot: Dictionary = _nearest_ring_slot(click_pos)
 	if slot.is_empty():
 		_clear_managed_tower()
+		_play_sfx("ui_intel_update", 0.12)
 		_set_message("Select one of the visible orbital slots to build.", 2.0)
 		return
 	if bool(slot.get("occupied", false)):
@@ -307,6 +309,7 @@ func _place_tower_from_screen_position(screen_position: Vector2) -> void:
 
 	var cost: int = GameState.get_tower_cost(selected_tower)
 	if not GameState.spend_credits(cost):
+		_play_sfx("ui_insufficient_sol", 0.18)
 		_set_message("Need %d Sol Credits for %s." % [cost, _tower_config(selected_tower)["label"]], 2.0)
 		return
 
@@ -338,6 +341,7 @@ func _try_slingshot_from_screen_position(screen_position: Vector2) -> bool:
 	if str(tower.get("type", "")) != "helios_cannon" or _tower_level(tower) < 2:
 		return false
 	if not GameState.spend_credits(SLINGSHOT_COST):
+		_play_sfx("ui_insufficient_sol", 0.18)
 		_set_message("Need %d Sol Credits for Helios Slingshot Shot." % SLINGSHOT_COST, 2.0)
 		_update_ui()
 		return true
@@ -399,6 +403,7 @@ func _select_tower_by_hotkey(index: int) -> bool:
 	if not _can_build_towers():
 		return true
 	if not GameState.can_afford(cost):
+		_play_sfx("ui_insufficient_sol", 0.18)
 		_set_message("Need %d Sol Credits for %s." % [cost, _tower_config(tower_type)["label"]], 1.6)
 		return true
 	_select_tower(tower_type)
@@ -450,11 +455,9 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_draw_wave_banner(viewport_size)
 	if GameState.game_phase == GameState.GAME_OVER:
-		draw_rect(Rect2(Vector2.ZERO, viewport_size), Color(0.0, 0.0, 0.0, 0.58), true)
-		_draw_end_state_overlay(viewport_size)
+		draw_rect(Rect2(Vector2.ZERO, viewport_size), Color(0.0, 0.0, 0.0, 0.34), true)
 	elif GameState.game_phase == GameState.VICTORY:
 		draw_rect(Rect2(Vector2.ZERO, viewport_size), Color(1.0, 0.78, 0.18, 0.12), true)
-		_draw_end_state_overlay(viewport_size)
 
 
 func _draw_battle_background(viewport_size: Vector2) -> void:
@@ -617,7 +620,12 @@ func _draw_wave_banner(viewport_size: Vector2) -> void:
 	draw_rect(rect.grow(4.0), Color(0.0, 0.0, 0.0, 0.38 * alpha), true)
 	draw_rect(rect, Color(0.004, 0.012, 0.022, 0.88 * alpha), true)
 	draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.78 * alpha), false, 2.0)
-	draw_line(rect.position + Vector2(18.0, rect.size.y - 8.0), rect.position + Vector2(rect.size.x - 18.0, rect.size.y - 8.0), Color(accent.r, accent.g, accent.b, 0.34 * alpha), 1.4)
+	draw_line(
+		rect.position + Vector2(18.0, rect.size.y - 8.0),
+		rect.position + Vector2(rect.size.x - 18.0, rect.size.y - 8.0),
+		Color(accent.r, accent.g, accent.b, 0.34 * alpha),
+		1.4
+	)
 
 	if end_title_font != null:
 		draw_string(
@@ -794,19 +802,6 @@ func _on_music_settings_changed(_enabled: bool, _volume: float) -> void:
 	_apply_music_settings()
 
 
-func _set_audio_stream_loop(stream, loop_enabled: bool) -> void:
-	if stream == null:
-		return
-	for property in stream.get_property_list():
-		var property_name: String = str(property.get("name", ""))
-		if property_name == "loop":
-			stream.set("loop", loop_enabled)
-			return
-		if property_name == "loop_mode":
-			stream.set("loop_mode", AudioStreamWAV.LOOP_FORWARD if loop_enabled else AudioStreamWAV.LOOP_DISABLED)
-			return
-
-
 func _generate_starfield() -> void:
 	stars.clear()
 	var viewport_size: Vector2 = get_viewport_rect().size
@@ -893,10 +888,11 @@ func _build_ui() -> void:
 		"recenter_requested": Callable(self, "_reset_view"),
 		"retry_requested": Callable(self, "_on_retry_requested"),
 		"main_menu_requested": Callable(self, "_on_end_main_menu_requested"),
+		"ui_hovered": Callable(self, "_on_ui_hovered"),
 	}
 	for signal_name in hud_connections:
 		var callback: Callable = hud_connections[signal_name]
-		if not game_hud.is_connected(signal_name, callback):
+		if game_hud.has_signal(signal_name) and not game_hud.is_connected(signal_name, callback):
 			game_hud.connect(signal_name, callback)
 
 
@@ -927,18 +923,21 @@ func _show_tutorial() -> void:
 	tutorial_overlay.connect("tutorial_skipped", Callable(self, "_on_tutorial_skipped"))
 	tutorial_layer.add_child(tutorial_overlay)
 	_set_message("Mission training overlay opened. Skip or finish to save it as complete.", 3.0)
+	_play_sfx("ui_mission_text", 0.4)
 
 
 func _on_tutorial_finished() -> void:
 	GameState.set_tutorial_completed(true)
 	_clear_tutorial_overlay()
 	_set_message("Mission training complete. It will not replay automatically.", 3.0)
+	_play_sfx("ui_mission_text", 0.4)
 
 
 func _on_tutorial_skipped() -> void:
 	GameState.set_tutorial_completed(true)
 	_clear_tutorial_overlay()
 	_set_message("Mission training skipped. It will not replay automatically.", 3.0)
+	_play_sfx("ui_mission_text", 0.4)
 
 
 func _clear_tutorial_overlay() -> void:
@@ -988,6 +987,7 @@ func _on_start_wave_pressed() -> void:
 
 	current_wave_data = _wave_load(wave_number)
 	if current_wave_data.is_empty():
+		_play_sfx("ui_insufficient_sol", 0.18)
 		_set_message("Could not load wave_%02d.json." % wave_number, 3.0)
 		return
 
@@ -1015,6 +1015,10 @@ func _on_auto_start_toggled(enabled: bool) -> void:
 	else:
 		_set_message("Auto Start disabled.", 1.5)
 	_update_ui()
+
+
+func _on_ui_hovered() -> void:
+	_play_sfx("ui_hover", 0.05)
 
 
 func _on_menu_pressed() -> void:
@@ -1067,6 +1071,7 @@ func _on_tower_upgrade_requested(ring_index: int, slot_index: int) -> void:
 
 	var upgrade_cost: int = _tower_upgrade_cost(tower)
 	if not GameState.spend_credits(upgrade_cost):
+		_play_sfx("ui_insufficient_sol", 0.18)
 		_set_message("Need %d Sol Credits to upgrade %s." % [upgrade_cost, _tower_config(str(tower["type"]))["label"]], 2.0)
 		_update_ui()
 		return
@@ -1532,6 +1537,7 @@ func _process_physics_projectiles(delta: float) -> void:
 			continue
 
 		var pos: Vector2 = p.get("pos", Vector2.ZERO)
+		var previous_pos: Vector2 = pos
 		var velocity: Vector2 = p.get("velocity", Vector2.ZERO)
 		var damage: float = float(p.get("damage", 0.0))
 		var last_dist: float = float(p.get("last_dist", pos.distance_to(_sun_pos())))
@@ -1564,7 +1570,16 @@ func _process_physics_projectiles(delta: float) -> void:
 			_add_visual_effect("shield", pos, p.get("color", Color(1.0, 0.58, 0.24)), 0.24, 18.0)
 			continue
 
-		var hit_index: int = _physics_projectile_hit_index(pos)
+		var hit_index: int = int(runtime_native.call("physics_projectile_hit_index", enemies, pos, previous_pos, PHYSICS_PROJECTILE_HIT_RADIUS))
+		if hit_index == -1:
+			var target_uid: int = int(p.get("target_uid", -1))
+			var target_index: int = int(runtime_native.call("enemy_index_by_uid", enemies, target_uid))
+			if target_index != -1:
+				var target_enemy: Dictionary = enemies[target_index]
+				var target_pos: Vector2 = target_enemy.get("pos", p.get("target_pos", pos))
+				var target_radius: float = maxf(PHYSICS_PROJECTILE_HIT_RADIUS, float(target_enemy.get("radius", PHYSICS_PROJECTILE_HIT_RADIUS)) * 1.25)
+				if bool(runtime_native.call("projectile_segment_hits_point", previous_pos, pos, target_pos, target_radius)):
+					hit_index = target_index
 		if hit_index != -1:
 			_add_visual_effect("hit", pos, p.get("color", Color(1.0, 0.58, 0.24)), 0.22, 22.0)
 			_damage_enemy(hit_index, damage, str(p.get("tower_type", "helios_cannon")))
@@ -1582,20 +1597,6 @@ func _process_physics_projectiles(delta: float) -> void:
 		active_projectiles.append(p)
 
 	physics_projectiles = active_projectiles
-
-
-func _physics_projectile_hit_index(pos: Vector2) -> int:
-	var best_index: int = -1
-	var best_dist_squared: float = PHYSICS_PROJECTILE_HIT_RADIUS * PHYSICS_PROJECTILE_HIT_RADIUS
-	for i in range(enemies.size()):
-		var enemy: Dictionary = enemies[i]
-		var radius: float = float(enemy.get("radius", PHYSICS_PROJECTILE_HIT_RADIUS))
-		var hit_radius: float = maxf(PHYSICS_PROJECTILE_HIT_RADIUS, radius * 0.72)
-		var dist_squared: float = pos.distance_squared_to(enemy.get("pos", Vector2.ZERO))
-		if dist_squared <= hit_radius * hit_radius and dist_squared < best_dist_squared:
-			best_index = i
-			best_dist_squared = dist_squared
-	return best_index
 
 
 func _process_visual_feedback(delta: float) -> void:
@@ -1790,7 +1791,10 @@ func _spawn_enemy(variant: String, spawn_pos = null) -> void:
 
 	# Runtime enemies are small dictionaries so wave files only need to choose
 	# a variant; all stats still come from the native catalog.
+	var enemy_uid: int = next_enemy_uid
+	next_enemy_uid += 1
 	enemies.append({
+		"uid": enemy_uid,
 		"variant": key,
 		"variant_id": cfg["variant_id"],
 		"label": cfg["label"],
@@ -1848,7 +1852,7 @@ func _fire_tower(tower: Dictionary, enemy_index: int) -> void:
 	var tower_pos: Vector2 = _tower_position(tower)
 	var enemy_pos: Vector2 = enemies[enemy_index]["pos"]
 	if _should_use_physics_projectile(tower):
-		_spawn_physics_projectile(tower, enemy_pos, float(stats["damage"]), str(tower["type"]))
+		_spawn_physics_projectile(tower, enemy_pos, float(stats["damage"]), str(tower["type"]), false, int(enemies[enemy_index].get("uid", -1)))
 		_add_visual_effect("muzzle", tower_pos, cfg["color"], 0.20, 16.0)
 		_play_sfx("physics_fire", 0.06)
 		return
@@ -1866,7 +1870,14 @@ func _should_use_physics_projectile(tower: Dictionary) -> bool:
 	return _tower_level(tower) >= 2
 
 
-func _spawn_physics_projectile(tower: Dictionary, target_pos: Vector2, damage: float, tower_type: String, slingshot: bool = false) -> void:
+func _spawn_physics_projectile(
+	tower: Dictionary,
+	target_pos: Vector2,
+	damage: float,
+	tower_type: String,
+	slingshot: bool = false,
+	target_uid: int = -1
+) -> void:
 	var tower_pos: Vector2 = _tower_position(tower)
 	var velocity: Vector2 = _compute_physics_launch_velocity(tower, target_pos, 300.0)
 	if slingshot:
@@ -1880,6 +1891,8 @@ func _spawn_physics_projectile(tower: Dictionary, target_pos: Vector2, damage: f
 		"velocity": velocity,
 		"damage": damage,
 		"tower_type": tower_type,
+		"target_uid": target_uid,
+		"target_pos": target_pos,
 		"lifetime": 0.0,
 		"last_dist": tower_pos.distance_to(_sun_pos()),
 		"color": color,
@@ -2100,14 +2113,6 @@ func _nearest_ring_slot(pos: Vector2) -> Dictionary:
 	return {}
 
 
-func _nearest_slot_index(ring_index: int, angle: float) -> int:
-	return int(orbit_math.call("nearest_slot_index", ring_index, angle))
-
-
-func _ring_slot_angle(ring_index: int, slot_index: int) -> float:
-	return float(orbit_math.call("ring_slot_angle", ring_index, slot_index))
-
-
 func _ring_slot_position(ring_index: int, slot_index: int) -> Vector2:
 	var pos = orbit_math.call("ring_slot_position", _sun_pos(), ring_index, slot_index)
 	if pos is Vector2:
@@ -2166,6 +2171,7 @@ func _select_managed_tower_by_index(tower_index: int) -> void:
 	var tower: Dictionary = towers[tower_index]
 	managed_tower_ring = int(tower["ring"])
 	managed_tower_slot = int(tower["slot"])
+	_play_sfx("ui_intel_update", 0.12)
 	_set_message("Managing %s. Upgrade, sell, or close the panel." % _tower_config(str(tower["type"]))["label"], 1.8)
 	_update_ui()
 	queue_redraw()
@@ -2710,55 +2716,6 @@ func _draw_visual_effects() -> void:
 					var start: Vector2 = pos + direction * (radius * 0.35)
 					var end: Vector2 = pos + direction * (radius + progress * 34.0)
 					draw_line(start, end, Color(color.r, color.g, color.b, 0.50 * alpha), 1.4)
-
-
-func _draw_end_state_overlay(viewport_size: Vector2) -> void:
-	var victory: bool = GameState.game_phase == GameState.VICTORY
-	var accent: Color = SpaceTheme.COLOR_GOLD if victory else Color(1.0, 0.28, 0.18, 0.92)
-	var title: String = "SOL SAVED" if victory else "LUMINOSITY COLLAPSE"
-	var subtitle: String = "Mission complete. The defense grid held." if victory else "The defense grid failed. The sun went dark."
-	var panel_size: Vector2 = Vector2(650.0, 318.0)
-	var panel_rect: Rect2 = Rect2(viewport_size * 0.5 - panel_size * 0.5, panel_size)
-
-	draw_rect(panel_rect, Color(0.004, 0.010, 0.022, 0.90), true)
-	draw_rect(panel_rect, Color(accent.r, accent.g, accent.b, 0.82), false, 1.4)
-	_draw_screen_corner(panel_rect.position, Vector2.RIGHT, Vector2.DOWN, 48.0, accent)
-	_draw_screen_corner(panel_rect.position + Vector2(panel_rect.size.x, 0.0), Vector2.LEFT, Vector2.DOWN, 48.0, accent)
-	_draw_screen_corner(panel_rect.position + Vector2(0.0, panel_rect.size.y), Vector2.RIGHT, Vector2.UP, 48.0, accent)
-	_draw_screen_corner(panel_rect.position + panel_rect.size, Vector2.LEFT, Vector2.UP, 48.0, accent)
-
-	var x: float = panel_rect.position.x
-	var y: float = panel_rect.position.y + 48.0
-	var width: float = panel_rect.size.x
-	_draw_centered_text(end_title_font, title, x, y, width, 28, accent)
-	_draw_centered_text(end_body_font, subtitle, x, y + 45.0, width, 17, SpaceTheme.COLOR_TEXT)
-
-	var luminosity_text: String = "FINAL LUMINOSITY  %d%%" % GameState.get_luminosity_percent()
-	var rank_text: String = "RANK  %s" % GameState.get_rank()
-	var stats_text: String = "WAVES CLEARED  %d/%d     KILLS  %d     SCORE  %d" % [
-		GameState.waves_cleared,
-		MAX_WAVES,
-		GameState.enemies_killed_total,
-		GameState.performance_score,
-	]
-	_draw_centered_text(end_body_font, luminosity_text, x, y + 98.0, width, 18, Color(1.0, 0.88, 0.42, 0.96))
-	_draw_centered_text(end_body_font, rank_text, x, y + 132.0, width, 18, Color(0.42, 0.90, 1.0, 0.96))
-	_draw_centered_text(end_body_font, stats_text, x, y + 178.0, width, 15, Color(0.78, 0.88, 0.96, 0.92))
-	_draw_centered_text(end_body_font, "Open Menu to return or inspect the Mission Codex.", x, y + 228.0, width, 14, Color(0.68, 0.78, 0.88, 0.88))
-
-
-func _draw_screen_corner(origin: Vector2, horizontal: Vector2, vertical: Vector2, length: float, color: Color) -> void:
-	draw_line(origin, origin + horizontal * length, Color(color.r, color.g, color.b, 0.92), 2.0)
-	draw_line(origin, origin + vertical * length, Color(color.r, color.g, color.b, 0.92), 2.0)
-	var notch: float = length * 0.35
-	draw_line(origin + horizontal * 12.0 + vertical * 12.0, origin + horizontal * (12.0 + notch) + vertical * 12.0, SpaceTheme.COLOR_CYAN, 1.4)
-	draw_line(origin + horizontal * 12.0 + vertical * 12.0, origin + horizontal * 12.0 + vertical * (12.0 + notch), SpaceTheme.COLOR_CYAN, 1.4)
-
-
-func _draw_centered_text(font: Font, text: String, x: float, y: float, width: float, font_size: int, color: Color) -> void:
-	if font == null:
-		return
-	draw_string(font, Vector2(x, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, font_size, color)
 
 
 func _ease_out_cubic(value: float) -> float:

@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://d4hsppsnl2o5u"
-path="res://.godot/imported/wave_02.wav-58a8ae703a5b1e2368d1ef9537a34bae.sample"
+uid="uid://b1va2yj43lr4m"
+path="res://.godot/imported/ui_hover.wav-eacb3655c6edd16c309106c266f283e3.sample"
 
 [deps]
 
-source_file="res://assets/audio/bgm/final/wave_02.wav"
-dest_files=["res://.godot/imported/wave_02.wav-58a8ae703a5b1e2368d1ef9537a34bae.sample"]
+source_file="res://assets/audio/sfx/ui_hover.wav"
+dest_files=["res://.godot/imported/ui_hover.wav-eacb3655c6edd16c309106c266f283e3.sample"]
 
 [params]
 

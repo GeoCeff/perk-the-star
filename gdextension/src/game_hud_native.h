@@ -107,7 +107,12 @@ private:
     void apply_action_button(Button* button, const Color& accent, const String& icon_path = "");
     void apply_tower_button_state(Button* button, const String& tower_type, bool selected, bool disabled);
     Ref<StyleBoxFlat> hud_panel_style(const Color& accent, double horizontal_margin, double vertical_margin) const;
-    Ref<StyleBoxFlat> hud_button_style(const Color& bg_color, const Color& border_color, int border_width, double horizontal_margin = 12.0, double vertical_margin = 7.0) const;
+    Ref<StyleBoxFlat> hud_button_style(
+        const Color& bg_color,
+        const Color& border_color,
+        int border_width,
+        double horizontal_margin = 12.0,
+        double vertical_margin = 7.0) const;
     Dictionary control_target(Control* control) const;
     Color tower_accent(const String& tower_type) const;
     Object* space_theme() const;
@@ -122,6 +127,7 @@ private:
     void on_center_view_button_pressed();
     void on_end_retry_pressed();
     void on_end_main_menu_pressed();
+    void on_ui_hovered();
 };
 
 }
