@@ -1,4 +1,4 @@
-#include "game_effect_store_native.h"
+﻿#include "game_effect_store_native.h"
 
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/object.hpp>

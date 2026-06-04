@@ -1,4 +1,4 @@
-#include "game_view_controller_native.h"
+﻿#include "game_view_controller_native.h"
 
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/classes/input.hpp>

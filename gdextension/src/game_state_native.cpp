@@ -1,4 +1,4 @@
-#include "game_state_native.h"
+﻿#include "game_state_native.h"
 
 #include <godot_cpp/classes/config_file.hpp>
 #include <godot_cpp/core/class_db.hpp>

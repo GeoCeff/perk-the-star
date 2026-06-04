@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/classes/style_box_flat.hpp>

@@ -1,4 +1,4 @@
-#include "codex_native.h"
+﻿#include "codex_native.h"
 
 #include <godot_cpp/classes/button.hpp>
 #include <godot_cpp/classes/label.hpp>
@@ -26,7 +26,7 @@ Dictionary section(const String& title, const String& body) {
     return data;
 }
 
-} // namespace
+}
 
 void CodexNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_return_scene_path", "path"), &CodexNative::set_return_scene_path);

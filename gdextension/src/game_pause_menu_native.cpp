@@ -1,4 +1,4 @@
-#include "game_pause_menu_native.h"
+﻿#include "game_pause_menu_native.h"
 
 #include <godot_cpp/classes/button.hpp>
 #include <godot_cpp/classes/label.hpp>
@@ -49,7 +49,7 @@ void add_margin_constants(MarginContainer* margin, int left, int top, int right,
     margin->add_theme_constant_override("margin_bottom", bottom);
 }
 
-} // namespace
+}
 
 void GamePauseMenuNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("_open_codex"), &GamePauseMenuNative::open_codex);

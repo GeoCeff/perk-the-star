@@ -1,4 +1,4 @@
-#include "animated_space_background_native.h"
+﻿#include "animated_space_background_native.h"
 
 #include <godot_cpp/classes/canvas_item.hpp>
 #include <godot_cpp/classes/shader.hpp>

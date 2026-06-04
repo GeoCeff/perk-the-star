@@ -1,4 +1,4 @@
-#include "game_wave_library_native.h"
+﻿#include "game_wave_library_native.h"
 
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/classes/json.hpp>
@@ -49,7 +49,7 @@ String enemy_label(const String& variant) {
     return "Drifter";
 }
 
-} // namespace
+}
 
 void GameWaveLibraryNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("load_wave", "wave_number"), &GameWaveLibraryNative::load_wave);

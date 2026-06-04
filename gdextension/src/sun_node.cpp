@@ -1,4 +1,4 @@
-#include "sun_node.h"
+﻿#include "sun_node.h"
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/object.hpp>
 #include <godot_cpp/core/property_info.hpp>
@@ -32,7 +32,6 @@ SunNode::~SunNode() {}
 
 void SunNode::_process(double delta) {
     if (m_burrower_count <= 0) return;
-    // Burrower drain: 2% per second per burrower
     m_drain_accumulator += 0.02 * m_burrower_count * delta;
     if (m_drain_accumulator >= 0.001) {
         take_damage(m_drain_accumulator);
@@ -46,7 +45,6 @@ void SunNode::take_damage(double amount) {
     m_luminosity -= amount;
     if (m_luminosity < 0.0) m_luminosity = 0.0;
     emit_signal("luminosity_changed", m_luminosity);
-    // Fire expression change signal only when crossing thresholds
     String new_expr = get_expression_state();
     if (new_expr != old_expr) emit_signal("expression_changed", new_expr);
     if (m_luminosity <= 0.0) emit_signal("sun_extinguished");

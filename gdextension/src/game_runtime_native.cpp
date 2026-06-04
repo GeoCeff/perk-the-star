@@ -1,4 +1,4 @@
-#include "game_runtime_native.h"
+﻿#include "game_runtime_native.h"
 
 #include <godot_cpp/classes/time.hpp>
 #include <godot_cpp/core/class_db.hpp>

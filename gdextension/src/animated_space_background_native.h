@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <godot_cpp/classes/texture_rect.hpp>
 

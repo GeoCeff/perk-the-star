@@ -1,4 +1,4 @@
-#include "music_manager_native.h"
+﻿#include "music_manager_native.h"
 
 #include <godot_cpp/classes/audio_stream_ogg_vorbis.hpp>
 #include <godot_cpp/classes/audio_stream_wav.hpp>

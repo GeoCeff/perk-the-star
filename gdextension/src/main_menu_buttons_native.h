@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <godot_cpp/classes/button.hpp>
 #include <godot_cpp/variant/string.hpp>

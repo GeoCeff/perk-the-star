@@ -1,4 +1,4 @@
-#include "game_sfx_bus_native.h"
+﻿#include "game_sfx_bus_native.h"
 
 #include <godot_cpp/classes/audio_stream_player.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>

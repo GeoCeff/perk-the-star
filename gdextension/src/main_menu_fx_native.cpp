@@ -1,4 +1,4 @@
-#include "main_menu_fx_native.h"
+﻿#include "main_menu_fx_native.h"
 
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/texture2d.hpp>
@@ -56,7 +56,7 @@ Dictionary drifter(const Vector2& uv, const Vector2& speed, double scale, double
     return data;
 }
 
-} // namespace
+}
 
 void MainMenuFxNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_draw_drift", "value"), &MainMenuFxNative::set_draw_drift);

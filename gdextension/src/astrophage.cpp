@@ -1,4 +1,4 @@
-#include "astrophage.h"
+﻿#include "astrophage.h"
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/object.hpp>
 #include <godot_cpp/core/property_info.hpp>
@@ -61,7 +61,6 @@ void Astrophage::setup(int variant, const Vector2& spawn_pos, const Vector2& sun
     set_global_position(spawn_pos);
     add_to_group("astrophage");
 
-    // Random wiggle offset so enemies don't all move identically
     m_wiggle_offset = UtilityFunctions::randf() * 6.28318;
 
     struct Stats { float hp; float speed; float damage; int reward; };
@@ -117,7 +116,6 @@ void Astrophage::_process(double delta) {
         set_global_position(pos + dir * static_cast<float>(m_speed * m_speed_modifier * delta));
     }
 
-    // Check corona arrival (40px from sun center)
     if (dist < 40.0f) {
         emit_signal("reached_corona");
         queue_free();
@@ -170,7 +168,6 @@ void Astrophage::_on_defeated() {
 }
 
 void Astrophage::_share_cluster_damage(double damage) {
-    // Emit signal; GDScript handles finding nearby clustered nodes
     emit_signal("cluster_damage_request", damage);
     m_hp -= damage;
     if (m_hp <= 0.0) _on_defeated();

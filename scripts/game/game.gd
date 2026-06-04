@@ -1,10 +1,5 @@
-extends Node2D
+﻿extends Node2D
 
-# Main gameplay controller.
-# This scene keeps the runtime loop in one place: input, waves, towers, enemies,
-# camera, effects, music, and HUD updates. Static balance, tower math, wave
-# parsing, and temporary SFX live in small helper files so this file can focus
-# on what happens during play.
 
 var SpaceTheme: RefCounted = ClassDB.instantiate("SpaceThemeNative") as RefCounted
 
@@ -58,7 +53,6 @@ const VIEW_ZOOM_STEP: float = 1.12
 @export_range(1, 12, 1) var playable_wave_limit: int = 12
 @export var briefing_title: String = "SOL DEFENSE CORPS"
 
-# Wave state
 var current_wave_data: Dictionary = {}
 var next_wave_preview: Dictionary = {}
 var spawn_queue: Array = []
@@ -83,7 +77,6 @@ var wave_banner_subtitle: String = ""
 var wave_banner_timer: float = 0.0
 var wave_banner_accent: Color = Color(1.0, 0.82, 0.24)
 
-# Wave modifier state
 var wave_event: Dictionary = {}
 var wave_event_triggered: bool = false
 var cryo_disruption_timer: float = 0.0
@@ -94,7 +87,6 @@ var prime_frenzy_timer: float = 0.0
 var prime_frenzy_interval: float = 0.0
 var prime_frenzy_max_active: int = 18
 
-# Board state
 var enemies: Array = []
 var burrowers: Array = []
 var towers: Array = []
@@ -106,7 +98,6 @@ var selected_tower: String = "photon_splitter"
 var managed_tower_ring: int = -1
 var managed_tower_slot: int = -1
 
-# UI and asset state
 var game_hud: CanvasLayer
 var tutorial_layer: CanvasLayer
 var tutorial_overlay: Control
@@ -118,7 +109,6 @@ var textures: Dictionary = {
 var end_title_font: Font
 var end_body_font: Font
 
-# Music state
 var bgm_player: AudioStreamPlayer
 var battle_background_texture: Texture2D
 var current_bgm_path: String = ""
@@ -128,7 +118,6 @@ var gameplay_math: RefCounted
 var orbit_math: RefCounted
 var runtime_native: RefCounted
 
-# Camera/effect state
 var view_controller: RefCounted
 var sun_hit_timer: float = 0.0
 var screen_shake_timer: float = 0.0
@@ -198,8 +187,6 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	# Core loop: spawn enemies, update towers, move enemies, clean up effects,
-	# then refresh the HUD/redraw if something changed.
 	var viewport_changed: bool = _refresh_viewport_cache()
 	var view_changed: bool = _process_edge_pan(delta)
 	view_changed = _process_keyboard_pan(delta) or view_changed
@@ -231,8 +218,6 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# The tutorial owns input while it is open so clicks do not place towers
-	# behind the training overlay.
 	if tutorial_overlay != null:
 		return
 
@@ -289,8 +274,6 @@ func _place_tower_from_screen_position(screen_position: Vector2) -> void:
 	if not _can_build_towers():
 		return
 
-	# Board clicks are converted back into world space because the player can
-	# pan and zoom around the star.
 	var click_pos: Vector2 = _screen_to_world(screen_position)
 	var tower_index: int = _tower_index_at_world_position(click_pos)
 	if tower_index != -1:
@@ -428,7 +411,6 @@ func _draw() -> void:
 		star_color.a = clamp(star_color.a * (0.80 + sin(time_seconds * 1.15 + phase) * 0.22), 0.04, 0.78)
 		draw_circle(star_pos, float(star["radius"]), star_color)
 
-	# Everything below this transform is part of the zoomable board.
 	board_draw_translation = _view_translation(viewport_size) + _screen_shake_offset()
 	board_draw_zoom = view_controller.zoom
 	draw_set_transform(board_draw_translation, 0.0, Vector2(board_draw_zoom, board_draw_zoom))
@@ -876,7 +858,6 @@ func _build_ui() -> void:
 		return
 
 	game_hud = layer
-	# The HUD emits intent; game.gd decides whether an action is allowed.
 	var hud_connections: Dictionary = {
 		"start_wave_requested": Callable(self, "_on_start_wave_pressed"),
 		"auto_start_toggled": Callable(self, "_on_auto_start_toggled"),
@@ -1789,8 +1770,6 @@ func _spawn_enemy(variant: String, spawn_pos = null) -> void:
 		mass = float(gameplay_math.call("get_enemy_mass", key))
 	var base_speed: float = float(cfg["speed"])
 
-	# Runtime enemies are small dictionaries so wave files only need to choose
-	# a variant; all stats still come from the native catalog.
 	var enemy_uid: int = next_enemy_uid
 	next_enemy_uid += 1
 	enemies.append({
@@ -1830,8 +1809,6 @@ func _find_target_for_tower(tower: Dictionary) -> int:
 	var best_index: int = -1
 	var best_sun_dist_squared: float = INF
 
-	# Towers prefer the enemy closest to the sun. It is simple to explain and
-	# keeps targeting focused on the immediate threat.
 	for i in range(enemies.size()):
 		var enemy: Dictionary = enemies[i]
 		var tower_dist_squared: float = tower_pos.distance_squared_to(enemy["pos"])
@@ -1997,7 +1974,6 @@ func _damage_enemy(enemy_index: int, amount: float, source: String) -> void:
 	var variant: String = str(enemy["variant"])
 	var enemy_pos: Vector2 = enemy["pos"]
 
-	# These special cases are the enemy rules players learn in the codex.
 	if variant == "mimic" and source == "photon_splitter":
 		_add_visual_effect("shield", enemy_pos, Color(0.70, 0.62, 0.98), 0.32, float(enemy["radius"]) + 16.0)
 		_play_sfx("hit", 0.080)
@@ -2075,8 +2051,6 @@ func _defeat_enemy(enemy_index: int) -> void:
 
 	enemies.remove_at(enemy_index)
 
-	# Bloom splitting and Prime collapse happen after removal so spawned enemies
-	# do not interfere with the index that was just defeated.
 	if variant == "bloom":
 		for i in range(3):
 			var offset: Vector2 = Vector2.RIGHT.rotated(TAU * float(i) / 3.0) * 24.0
@@ -2417,7 +2391,6 @@ func _draw_enemy_circle_border(enemy: Dictionary, hit_flash: float, heal_flash: 
 
 
 func _draw_health_bar(pos: Vector2, width: float, height: float, ratio: float, accent: Color, hit_flash: float = 0.0, heal_flash: float = 0.0) -> void:
-	# A tiny segmented bar reads better over the starfield than a plain line.
 	var clamped_ratio: float = clampf(ratio, 0.0, 1.0)
 	var rect: Rect2 = Rect2(pos, Vector2(width, height))
 	var fill_width: float = maxf(0.0, (width - 4.0) * clamped_ratio)
@@ -2562,8 +2535,6 @@ func _draw_visual_effects() -> void:
 		var color: Color = effect.get("color", SpaceTheme.COLOR_GOLD)
 		var radius: float = float(effect.get("radius", 24.0))
 
-		# Visual effects are data-driven: each effect stores a kind, position,
-		# color, radius, and time left. When ttl reaches zero it is removed.
 		match str(effect.get("kind", "hit")):
 			"text":
 				var text: String = str(effect.get("text", ""))
@@ -3072,8 +3043,6 @@ func _update_ui() -> void:
 	if game_hud == null:
 		return
 
-	# The HUD receives one dictionary instead of reading gameplay variables
-	# directly. That keeps display code separate from gameplay rules.
 	var wave_data: Dictionary = current_wave_data if GameState.game_phase == GameState.WAVE_ACTIVE else next_wave_preview
 	var wave_index: int = int(wave_data.get("index", min(GameState.current_wave + 1, MAX_WAVES)))
 	var wave_name: String = str(wave_data.get("name", "First Contact"))

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <godot_cpp/classes/node2d.hpp>
 #include <godot_cpp/core/binder_common.hpp>

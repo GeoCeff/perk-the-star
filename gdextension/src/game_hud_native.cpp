@@ -1,4 +1,4 @@
-#include "game_hud_native.h"
+﻿#include "game_hud_native.h"
 
 #include <godot_cpp/classes/box_container.hpp>
 #include <godot_cpp/classes/color_rect.hpp>
@@ -60,7 +60,7 @@ Color color_from_variant(const Variant& value, const Color& fallback) {
     return value.get_type() == Variant::COLOR ? Color(value) : fallback;
 }
 
-} // namespace
+}
 
 void GameHudNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("update_view", "state"), &GameHudNative::update_view);

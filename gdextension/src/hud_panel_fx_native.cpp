@@ -1,4 +1,4 @@
-#include "hud_panel_fx_native.h"
+﻿#include "hud_panel_fx_native.h"
 
 #include <godot_cpp/classes/time.hpp>
 #include <godot_cpp/core/class_db.hpp>
@@ -23,7 +23,7 @@ double posmod(double value, double mod) {
     return std::fmod(std::fmod(value, mod) + mod, mod);
 }
 
-} // namespace
+}
 
 void HudPanelFxNative::_bind_methods() {}
 

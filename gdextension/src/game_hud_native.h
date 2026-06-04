@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <godot_cpp/classes/canvas_layer.hpp>
 #include <godot_cpp/classes/label.hpp>

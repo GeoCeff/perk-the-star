@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/variant/dictionary.hpp>

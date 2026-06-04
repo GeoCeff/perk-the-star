@@ -1,4 +1,4 @@
-#include "settings_overlay_native.h"
+﻿#include "settings_overlay_native.h"
 
 #include <godot_cpp/classes/button.hpp>
 #include <godot_cpp/classes/check_button.hpp>
@@ -70,7 +70,7 @@ void add_margin(MarginContainer* margin, int left, int top, int right, int botto
     margin->add_theme_constant_override("margin_bottom", bottom);
 }
 
-} // namespace
+}
 
 void SettingsOverlayNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_return_scene_path", "path"), &SettingsOverlayNative::set_return_scene_path);

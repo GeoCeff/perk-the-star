@@ -1,4 +1,4 @@
-#include "main_menu_native.h"
+﻿#include "main_menu_native.h"
 
 #include <godot_cpp/classes/button.hpp>
 #include <godot_cpp/classes/input_event.hpp>
@@ -33,7 +33,7 @@ void set_label_text(Label* label, const String& text) {
     }
 }
 
-} // namespace
+}
 
 void MainMenuNative::_bind_methods() {}
 

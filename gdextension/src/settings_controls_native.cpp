@@ -1,4 +1,4 @@
-#include "settings_controls_native.h"
+﻿#include "settings_controls_native.h"
 
 #include <godot_cpp/classes/label.hpp>
 #include <godot_cpp/classes/node.hpp>
@@ -17,7 +17,7 @@ Node* game_state(Node* owner) {
     return owner->get_node_or_null(NodePath("/root/GameState"));
 }
 
-} // namespace
+}
 
 void MainMenuMusicToggleNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("_on_toggled", "enabled"), &MainMenuMusicToggleNative::on_toggled);

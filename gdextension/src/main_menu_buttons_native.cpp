@@ -1,4 +1,4 @@
-#include "main_menu_buttons_native.h"
+﻿#include "main_menu_buttons_native.h"
 
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
@@ -24,7 +24,7 @@ void play_menu_music(Node* owner) {
     }
 }
 
-} // namespace
+}
 
 void MainMenuPlayButtonNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_game_scene_path", "path"), &MainMenuPlayButtonNative::set_game_scene_path);

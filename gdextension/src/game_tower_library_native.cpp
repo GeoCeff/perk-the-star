@@ -1,4 +1,4 @@
-#include "game_tower_library_native.h"
+﻿#include "game_tower_library_native.h"
 
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/color.hpp>

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/config_file.hpp>

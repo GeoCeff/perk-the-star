@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/variant/array.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
@@ -42,7 +42,6 @@ public:
     int         get_total_enemy_count() const;
     Dictionary  to_dict() const;
 
-    // GDScript-accessible getters
     int    get_wave_number()     const { return wave_number; }
     String get_wave_name()       const { return wave_name; }
     float  get_spawn_interval()  const { return spawn_interval; }

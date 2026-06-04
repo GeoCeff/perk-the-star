@@ -1,4 +1,4 @@
-#include "space_theme_native.h"
+﻿#include "space_theme_native.h"
 
 #include <godot_cpp/classes/check_button.hpp>
 #include <godot_cpp/classes/h_scroll_bar.hpp>
@@ -38,7 +38,7 @@ Color button_disabled() { return Color(0.018, 0.026, 0.038, 0.78); }
 Color button_text() { return Color(0.96, 0.99, 1.0, 1.0); }
 Color button_text_disabled() { return Color(0.44, 0.52, 0.60, 1.0); }
 
-} // namespace
+}
 
 void SpaceThemeNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_FONT_BODY_PATH"), &SpaceThemeNative::get_font_body_path);

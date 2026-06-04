@@ -1,4 +1,4 @@
-#include "orbital_tower.h"
+﻿#include "orbital_tower.h"
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/object.hpp>
 #include <godot_cpp/core/property_info.hpp>
@@ -52,7 +52,7 @@ OrbitalTower::OrbitalTower()
 
 OrbitalTower::~OrbitalTower() {}
 
-void OrbitalTower::setup(const String& tower_type, int /*ring_idx*/,
+void OrbitalTower::setup(const String& tower_type, int ring_idx,
                           double start_angle, double radius, double period)
 {
     m_tower_type       = tower_type;
@@ -60,7 +60,6 @@ void OrbitalTower::setup(const String& tower_type, int /*ring_idx*/,
     m_ring_radius      = radius;
     m_angular_velocity = (2.0 * ORBITAL_TOWER_PI) / period;
 
-    // Per-type stats
     if      (tower_type == "photon_splitter") { m_damage=10; m_fire_rate=0.3; m_slow_amount=0.0; m_chain_count=0; }
     else if (tower_type == "cryo_probe")      { m_damage=0;  m_fire_rate=1.0; m_slow_amount=0.4; m_chain_count=0; }
     else if (tower_type == "bio_lab")         { m_damage=5;  m_fire_rate=0.5; m_slow_amount=0.0; m_chain_count=0; m_bio_multiplier=1.0; }
@@ -70,17 +69,14 @@ void OrbitalTower::setup(const String& tower_type, int /*ring_idx*/,
 }
 
 void OrbitalTower::_process(double delta) {
-    // ── Orbital motion ──
     m_angle = std::fmod(m_angle + m_angular_velocity * delta, 2.0 * ORBITAL_TOWER_PI);
     double px = m_sun_pos.x + m_ring_radius * std::cos(m_angle);
     double py = m_sun_pos.y + m_ring_radius * std::sin(m_angle);
     set_position(Vector2(static_cast<float>(px), static_cast<float>(py)));
     set_rotation(static_cast<float>(m_angle + ORBITAL_TOWER_PI / 2.0));
 
-    // ── Cooldown ──
     if (m_cooldown_timer > 0) m_cooldown_timer -= delta;
 
-    // ── Fire ──
     if (m_fire_rate > 0.0) {
         m_fire_timer -= delta;
         if (m_fire_timer <= 0.0) {
@@ -99,8 +95,6 @@ bool OrbitalTower::is_in_arc(const Vector2& enemy_pos) const {
 }
 
 void OrbitalTower::try_fire() {
-    // Emit signal — GDScript handles finding the actual target node
-    // This keeps C++ clean and lets GDScript manage the node tree
     emit_signal("try_fire");
 }
 
