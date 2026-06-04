@@ -13,11 +13,8 @@ Perk the Star is a Godot 4.6 orbital tower defense game. The player protects the
 - `scripts/game/game.gd` is the main GDScript gameplay coordinator.
 - `gdextension/src/` contains the C++ systems used by Godot through GDExtension.
 - `data/waves/` contains JSON wave files.
-- `assets/` contains active sprites, audio, UI, fonts, backgrounds, licenses, and clearly marked old media.
-- `assets/sprites/old/` contains old sprite references.
-- `assets/audio/old/` contains old BGM and WAV source files.
+- `assets/` contains active sprites, audio, UI, fonts, backgrounds, and licenses.
 - `docs/presentation/` contains presentation files.
-- `docs/archive/` contains old planning notes.
 
 ## Scene Flow
 
@@ -120,7 +117,7 @@ Active BGM lives in `assets/audio/bgm/final/`:
 - `BOSS.ogg` for wave 12.
 - `assets/audio/bgm/end.ogg` for endings.
 
-Active SFX lives in `assets/audio/sfx/`. Old audio is kept in `assets/audio/old/` and should not be used by gameplay.
+Active SFX lives in `assets/audio/sfx/`. Old backup audio is not kept in git.
 
 ## What To Say If Asked About Optimization
 

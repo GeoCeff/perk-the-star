@@ -5,6 +5,11 @@ godot-cpp/
 
 # Godot/Windows can leave a temporary DLL beside the active extension.
 game/bin/~*.dll
+game/bin/*.dll
+docs/presentation/*.pdf
+assets/audio/old/
+assets/sprites/old/
+docs/archive/
 
 *.tmp
 *.obj

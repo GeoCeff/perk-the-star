@@ -20,13 +20,13 @@ Dark sci-fi orbital defense around a living star. The presentation should feel l
 - Sun/ring visuals should feel luminous and astronomical rather than cartoonish: layered glow, subtle atmosphere, clean orbital guides, and restrained outlines.
 - New sprites should keep enough contrast to read over a dark blue/purple nebula background.
 - Active sprites belong in `assets/sprites/clean/` or `assets/sprites/backgrounds/`.
-- Old sprite references belong in `assets/sprites/old/` and should not be used by gameplay without intentionally restoring them.
+- Backup-only old sprites should not be committed to git.
 
 ## Audio Direction
 
 - Active BGM belongs in `assets/audio/bgm/final/` plus `assets/audio/bgm/end.ogg`.
 - Active SFX belongs in `assets/audio/sfx/`.
-- Old BGM and WAV source files belong in `assets/audio/old/`.
+- Backup-only old BGM and WAV source files should not be committed to git.
 
 ## Prompt Template
 

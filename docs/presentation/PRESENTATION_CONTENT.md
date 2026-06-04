@@ -5,7 +5,7 @@
 
 > Concise slide copy + speaker notes + Q&A reference.  
 > Reflects the **current Godot 4.6 build**, not the original SFML proposal alone.  
-> See `docs/archive/old_feature_guide.md` only as historical planning notes.
+> Generated PDFs are not committed; regenerate them from `docs/presentation/generate_presentation.py` when needed.
 
 ---
 
@@ -201,8 +201,8 @@
 | **C++** | `WaveData` | Load/parse wave JSON |
 | **GDScript** | `game.gd` | Main loop: input, spawn, combat, draw, end states |
 | **C++** | `GameCatalogNative` | Towers, enemies, rings, sprite paths |
-| **GDScript** | `game_wave_library.gd` | Spawn queue, Wave Intel text |
-| **GDScript** | `game_tower_library.gd` | Upgrade cost, stats, refunds |
+| **C++** | `GameWaveLibraryNative` | Spawn queue, Wave Intel text |
+| **C++** | `GameTowerLibraryNative` | Upgrade cost, stats, refunds |
 | **C++** | `GameOrbitMathNative` | Slot angles, tower positions |
 | **C++** | `GameViewControllerNative` | Pan, zoom, coordinates |
 | **C++** | `GameEffectStoreNative` | TTL shots/effects |
@@ -223,7 +223,7 @@
 - **Visual style:** Dark sci-fi operations UI — nebula backgrounds, cyan/gold frames, organic Astrophage sprites, clean tower modules
 - **Sprites:** `assets/sprites/clean/enemies/`, `assets/sprites/clean/enemies_optimized/`, `assets/sprites/clean/towers/`, `assets/sprites/backgrounds/`
 - **UI/fonts:** Kenney Sci-fi UI, Electrolize, Kenney Future
-- **Audio:** `assets/audio/bgm/final/` and `assets/audio/sfx/`; old media is marked in `assets/audio/old/`
+- **Audio:** `assets/audio/bgm/final/`, `assets/audio/bgm/end.ogg`, and `assets/audio/sfx/`
 - **Credits:** `assets/licenses/THIRD_PARTY_ASSETS.md`
 - **Style guide:** `docs/ASSET_STYLE.md`
 
@@ -320,7 +320,7 @@ A: `scripts/game/game.gd` — input, spawning, orbit update, targeting, damage, 
 A: `GameCatalogNative` (towers, enemies, rings) + `data/waves/*.json` (campaign).
 
 **Q: How do waves load?**  
-A: `game_wave_library.gd` reads JSON, normalizes spawns/events, builds spawn queue and Wave Intel strings.
+A: `GameWaveLibraryNative` reads JSON, normalizes spawns/events, builds spawn queue and Wave Intel strings.
 
 **Q: What are the C++ classes for?**  
 A: `Astrophage`, `OrbitalTower`, `SunNode`, `WaveData` in `gdextension/src/` — registered via `register_types.cpp`, built to `game/bin/perk_the_star.dll`.
@@ -346,9 +346,9 @@ A: Kenney Sci-fi UI (CC0), Electrolize (OFL), Kenney Future fonts (CC0), Screami
 
 ---
 
-## Planned features (v2 roadmap — not all in current build)
+## Planned features
 
-From `docs/archive/old_feature_guide.md`. Mention as **future work** if asked:
+Mention as **future work** if asked:
 
 | Feature | Status |
 |---------|--------|
@@ -396,7 +396,7 @@ A: No — the feature guide is our **v2 upgrade spec**. The current playable bui
 | Mission lore | `scenes/ui/codex.gd` |
 | C++ extension | `gdextension/src/`, `game/bin/perk_the_star.gdextension` |
 | Walkthrough | `docs/PROJECT_WALKTHROUGH.md` |
-| old roadmap | `docs/archive/old_feature_guide.md` |
+| File map | `docs/FILE_SYSTEM.md` |
 
 ---
 

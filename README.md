@@ -36,17 +36,14 @@ The game targets a 1920x1080 canvas with expand stretching enabled.
 - `assets/sprites/backgrounds/` contains active background art.
 - `assets/sprites/clean/enemies/` and `assets/sprites/clean/enemies_optimized/` contain active enemy sprites.
 - `assets/sprites/clean/towers/` contains active tower sprites.
-- `assets/sprites/old/` contains old sprite references kept only for backup.
 - `assets/audio/bgm/final/` contains active menu, wave, and boss music.
 - `assets/audio/bgm/end.ogg` is the ending track.
 - `assets/audio/sfx/` contains active WAV sound effects.
-- `assets/audio/old/` contains old or source audio kept only for backup.
 - `assets/fonts/` contains UI fonts.
 - `assets/ui/` contains UI icons, bars, and cursor art.
 - `assets/licenses/` contains asset credits and license text.
 - `docs/` contains current explanation docs.
-- `docs/presentation/` contains presentation PDFs and the generator script.
-- `docs/archive/` contains old notes that are not part of the current code explanation.
+- `docs/presentation/` contains presentation notes and the generator script.
 
 ## Native Extension
 
@@ -58,7 +55,7 @@ To rebuild on Windows:
 scons platform=windows target=template_debug arch=x86_64
 ```
 
-`godot-cpp`, `.godot/`, build intermediates, and SCons cache files are ignored because they can be regenerated.
+`godot-cpp`, `.godot/`, build intermediates, generated DLLs, generated PDFs, and SCons cache files are ignored because they can be regenerated.
 
 ## Main Native Classes
 
@@ -73,11 +70,6 @@ scons platform=windows target=template_debug arch=x86_64
 - `GameStateNative` stores global match state and saved settings.
 - `MusicManagerNative` owns menu music playback.
 
-## Active Assets
+## Repo Cleanup
 
-Active gameplay assets stay in direct, clearly named folders. Old audio and old sprite references are not deleted, but they are marked by folder:
-
-- old sprites: `assets/sprites/old/`
-- old audio: `assets/audio/old/`
-
-Do not reference old folders from gameplay unless intentionally restoring an asset.
+Backup-only media, archived roadmap notes, generated PDFs, and built DLLs are not kept in git. If a generated file is needed again, rebuild it from source instead of committing it.
