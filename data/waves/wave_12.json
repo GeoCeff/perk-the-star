@@ -60,5 +60,5 @@
     "event": null,
     "reward_base": 250,
     "escalation_threshold_seconds": null,
-    "tutorial_hint": "Astrophage Prime arrives after its horde. Shell -> Active -> Frenzy. Bio-Lab breaks the shell!"
+    "tutorial_hint": "ASTROPHAGE PRIME IS COMING. Shell blocks normal fire, Active is vulnerable, Frenzy accelerates and spawns Drifters. Bio-Lab cracks the shell!"
 }

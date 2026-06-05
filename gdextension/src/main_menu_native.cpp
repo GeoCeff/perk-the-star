@@ -19,7 +19,7 @@ namespace {
 constexpr const char* GAME_TITLE = "PERK THE STAR";
 constexpr const char* SUBTITLE = "DEFEND THE SUN - SAVE THE SYSTEM";
 constexpr const char* TAGLINE = "Defend me, defend me! - Oa ka Perk!";
-constexpr const char* OVERVIEW = "Command the Sol Defense Corps in a real-time orbital tower defense game built in C++ with Godot Engine 4.x via GDExtension. Protect the Sun from Astrophage, photosynthetic microorganisms feeding on stellar energy.";
+constexpr const char* OVERVIEW = "Command the Sol Defense Corps in a real-time orbital tower defense game. Protect the Sun from Astrophage, photosynthetic microorganisms feeding on stellar energy.";
 constexpr const char* TECH_LABEL = "CMSC 21 | C++ / Godot Engine 4.x / GDExtension";
 constexpr const char* AUTHOR_LABEL = "Geo Ceff Gabaisen & Dexter Juevesano";
 

@@ -8,10 +8,12 @@ namespace godot {
 class Button;
 class CheckButton;
 class Label;
+class LineEdit;
 class PanelContainer;
 class RichTextLabel;
 class ScrollContainer;
 class HSlider;
+class SpinBox;
 class VBoxContainer;
 
 class SettingsOverlayNative : public Control {
@@ -51,12 +53,25 @@ private:
     Button* tutorial_replay_button = nullptr;
     PanelContainer* gameplay_panel = nullptr;
     CheckButton* screen_shake_toggle = nullptr;
+    Button* test_wave_button = nullptr;
+    PanelContainer* test_modal_panel = nullptr;
+    Label* test_modal_title = nullptr;
+    Label* test_modal_body = nullptr;
+    Button* test_modal_confirm_button = nullptr;
+    Button* test_modal_cancel_button = nullptr;
+    LineEdit* test_code_input = nullptr;
+    SpinBox* test_wave_input = nullptr;
+    bool test_modal_wave_mode = false;
 
     void build_gameplay_controls();
     void build_tutorial_controls();
+    void build_test_dialogs();
     void apply_style();
     void replay_tutorial_pressed();
     void screen_shake_toggled(bool enabled);
+    void open_test_code_dialog();
+    void confirm_test_modal();
+    void close_test_modal();
     void update_gameplay_status();
     void update_tutorial_status();
     void apply_check_button(CheckButton* button);

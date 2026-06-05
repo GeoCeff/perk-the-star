@@ -128,11 +128,11 @@ Dictionary GameCatalogNative::enemy_animation_paths() const {
     data["mimic"] = mimic;
 
     Dictionary prime;
-    Array shell_move = paths({"res://assets/sprites/clean/enemies/astrophage-shell_move_1.png", "res://assets/sprites/clean/enemies/astrophage-shell_move_2.png", "res://assets/sprites/clean/enemies/astrophage-shell_move_3.png", "res://assets/sprites/clean/enemies/astrophage-shell_move_4.png"});
-    prime["idle"] = paths({"res://assets/sprites/clean/enemies/astrophage-shell_idle_1.png", "res://assets/sprites/clean/enemies/astrophage-shell_idle_2.png"});
+    Array shell_move = paths({"res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_1.png", "res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_2.png", "res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_3.png", "res://assets/sprites/clean/enemies_optimized/astrophage-shell_move_4.png"});
+    prime["idle"] = paths({"res://assets/sprites/clean/enemies_optimized/astrophage-shell_idle_1.png", "res://assets/sprites/clean/enemies_optimized/astrophage-shell_idle_2.png"});
     prime["move"] = shell_move;
-    prime["active"] = paths({"res://assets/sprites/clean/enemies/astrophage-active_move_1.png", "res://assets/sprites/clean/enemies/astrophage-active_move_2.png", "res://assets/sprites/clean/enemies/astrophage-active_move_3.png", "res://assets/sprites/clean/enemies/astrophage-active_move_4.png"});
-    prime["frenzy"] = paths({"res://assets/sprites/clean/enemies/astrophage-frenzy_move_1.png", "res://assets/sprites/clean/enemies/astrophage-frenzy_move_2.png", "res://assets/sprites/clean/enemies/astrophage-frenzy_move_3.png"});
+    prime["active"] = paths({"res://assets/sprites/clean/enemies_optimized/astrophage-active_move_1.png", "res://assets/sprites/clean/enemies_optimized/astrophage-active_move_2.png", "res://assets/sprites/clean/enemies_optimized/astrophage-active_move_3.png", "res://assets/sprites/clean/enemies_optimized/astrophage-active_move_4.png"});
+    prime["frenzy"] = paths({"res://assets/sprites/clean/enemies_optimized/astrophage-frenzy_move_1.png", "res://assets/sprites/clean/enemies_optimized/astrophage-frenzy_move_2.png", "res://assets/sprites/clean/enemies_optimized/astrophage-frenzy_move_3.png"});
     data["prime"] = prime;
     return data;
 }

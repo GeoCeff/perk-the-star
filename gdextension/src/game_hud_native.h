@@ -8,6 +8,7 @@
 #include <godot_cpp/classes/scroll_container.hpp>
 #include <godot_cpp/classes/texture_rect.hpp>
 #include <godot_cpp/classes/style_box_flat.hpp>
+#include <godot_cpp/classes/tween.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
 
 namespace godot {
@@ -24,6 +25,7 @@ protected:
 public:
     void _ready() override;
     void update_view(const Dictionary& state);
+    void play_insufficient_sol_feedback();
     bool is_screen_position_over_hud(const Vector2& screen_position) const;
     Dictionary get_tutorial_targets() const;
 
@@ -41,6 +43,10 @@ private:
     Label* threat_label = nullptr;
     Label* ring_label = nullptr;
     Label* message_label = nullptr;
+    Ref<Tween> credits_feedback_tween;
+    Vector2 credits_label_base_position;
+    Color credits_label_base_modulate;
+    bool credits_label_feedback_ready = false;
     ProgressBar* luminosity_bar = nullptr;
     Button* start_button = nullptr;
     Button* auto_start_button = nullptr;

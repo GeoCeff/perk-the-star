@@ -5,8 +5,10 @@
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/h_box_container.hpp>
 #include <godot_cpp/classes/margin_container.hpp>
+#include <godot_cpp/classes/property_tweener.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/texture2d.hpp>
+#include <godot_cpp/classes/tween.hpp>
 #include <godot_cpp/classes/v_box_container.hpp>
 #include <godot_cpp/classes/viewport.hpp>
 #include <godot_cpp/core/class_db.hpp>
@@ -64,6 +66,7 @@ Color color_from_variant(const Variant& value, const Color& fallback) {
 
 void GameHudNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("update_view", "state"), &GameHudNative::update_view);
+    ClassDB::bind_method(D_METHOD("play_insufficient_sol_feedback"), &GameHudNative::play_insufficient_sol_feedback);
     ClassDB::bind_method(D_METHOD("is_screen_position_over_hud", "screen_position"), &GameHudNative::is_screen_position_over_hud);
     ClassDB::bind_method(D_METHOD("get_tutorial_targets"), &GameHudNative::get_tutorial_targets);
     ClassDB::bind_method(D_METHOD("_fit_layout_to_viewport"), &GameHudNative::fit_layout_to_viewport);
@@ -190,6 +193,28 @@ void GameHudNative::update_view(const Dictionary& state) {
     update_tower_buttons(state.get("tower_buttons", Dictionary()));
     update_tower_manage_card(state.get("managed_tower", Dictionary()));
     update_end_state_card(state.get("end_state", Dictionary()));
+}
+
+void GameHudNative::play_insufficient_sol_feedback() {
+    if (credits_label == nullptr) return;
+    if (!credits_label_feedback_ready) {
+        credits_label_base_position = credits_label->get_position();
+        credits_label_base_modulate = credits_label->get_modulate();
+        credits_label_feedback_ready = true;
+    }
+    if (credits_feedback_tween.is_valid() && credits_feedback_tween->is_running()) {
+        credits_feedback_tween->kill();
+    }
+
+    credits_label->set_position(credits_label_base_position);
+    credits_label->set_modulate(Color(1.0, 0.22, 0.16, 1.0));
+    credits_feedback_tween = create_tween();
+    credits_feedback_tween->tween_property(credits_label, "position:x", credits_label_base_position.x - 8.0, 0.035);
+    credits_feedback_tween->tween_property(credits_label, "position:x", credits_label_base_position.x + 8.0, 0.055);
+    credits_feedback_tween->tween_property(credits_label, "position:x", credits_label_base_position.x - 5.0, 0.055);
+    credits_feedback_tween->tween_property(credits_label, "position:x", credits_label_base_position.x + 4.0, 0.050);
+    credits_feedback_tween->parallel()->tween_property(credits_label, "modulate", credits_label_base_modulate, 0.28);
+    credits_feedback_tween->tween_property(credits_label, "position:x", credits_label_base_position.x, 0.045);
 }
 
 bool GameHudNative::is_screen_position_over_hud(const Vector2& screen_position) const {

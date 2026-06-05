@@ -17,6 +17,9 @@ void GameStateNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_tutorial_completed", "completed"), &GameStateNative::set_tutorial_completed, DEFVAL(true));
     ClassDB::bind_method(D_METHOD("set_screen_shake_enabled", "enabled"), &GameStateNative::set_screen_shake_enabled);
     ClassDB::bind_method(D_METHOD("set_auto_start_waves_enabled", "enabled"), &GameStateNative::set_auto_start_waves_enabled);
+    ClassDB::bind_method(D_METHOD("enable_test_run", "start_wave"), &GameStateNative::enable_test_run);
+    ClassDB::bind_method(D_METHOD("clear_test_run"), &GameStateNative::clear_test_run);
+    ClassDB::bind_method(D_METHOD("consume_test_start_wave"), &GameStateNative::consume_test_start_wave);
     ClassDB::bind_method(D_METHOD("damage_sun", "amount"), &GameStateNative::damage_sun);
     ClassDB::bind_method(D_METHOD("get_luminosity_percent"), &GameStateNative::get_luminosity_percent);
     ClassDB::bind_method(D_METHOD("add_credits", "amount"), &GameStateNative::add_credits);
@@ -64,6 +67,7 @@ void GameStateNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_tutorial_completed"), &GameStateNative::get_tutorial_completed);
     ClassDB::bind_method(D_METHOD("get_screen_shake_enabled"), &GameStateNative::get_screen_shake_enabled);
     ClassDB::bind_method(D_METHOD("get_auto_start_waves_enabled"), &GameStateNative::get_auto_start_waves_enabled);
+    ClassDB::bind_method(D_METHOD("get_test_unlimited_sol_enabled"), &GameStateNative::get_test_unlimited_sol_enabled);
     ClassDB::bind_method(D_METHOD("get_music_changed_by_user_this_session"), &GameStateNative::get_music_changed_by_user_this_session);
     ClassDB::bind_method(D_METHOD("set_game_phase", "value"), &GameStateNative::set_game_phase);
     ClassDB::bind_method(D_METHOD("get_game_phase"), &GameStateNative::get_game_phase);
@@ -89,6 +93,7 @@ void GameStateNative::_bind_methods() {
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "tutorial_completed"), "", "get_tutorial_completed");
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "screen_shake_enabled"), "", "get_screen_shake_enabled");
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_start_waves_enabled"), "", "get_auto_start_waves_enabled");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "test_unlimited_sol_enabled"), "", "get_test_unlimited_sol_enabled");
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "music_changed_by_user_this_session"), "", "get_music_changed_by_user_this_session");
     ADD_PROPERTY(PropertyInfo(Variant::INT, "game_phase"), "set_game_phase", "get_game_phase");
 
@@ -121,7 +126,7 @@ void GameStateNative::_ready() {
 
 void GameStateNative::reset_state() {
     luminosity = 1.0;
-    sol_credits = 60;
+    sol_credits = test_unlimited_sol_enabled ? 999999 : 60;
     current_wave = 0;
     flare_charge = 0;
     waves_since_last_flare = 0;
@@ -214,6 +219,22 @@ void GameStateNative::set_auto_start_waves_enabled(bool enabled) {
     emit_signal("auto_start_settings_changed", auto_start_waves_enabled);
 }
 
+void GameStateNative::enable_test_run(int start_wave) {
+    test_unlimited_sol_enabled = true;
+    pending_test_start_wave = Math::clamp(start_wave, 1, 12);
+}
+
+void GameStateNative::clear_test_run() {
+    test_unlimited_sol_enabled = false;
+    pending_test_start_wave = 0;
+}
+
+int GameStateNative::consume_test_start_wave() {
+    const int start_wave = pending_test_start_wave;
+    pending_test_start_wave = 0;
+    return start_wave;
+}
+
 void GameStateNative::damage_sun(double amount) {
     if (game_phase == GAME_OVER) {
         return;
@@ -235,6 +256,10 @@ void GameStateNative::add_credits(int amount) {
 }
 
 bool GameStateNative::spend_credits(int amount) {
+    if (test_unlimited_sol_enabled) {
+        emit_signal("credits_changed", sol_credits);
+        return true;
+    }
     if (sol_credits < amount) {
         return false;
     }
@@ -244,6 +269,9 @@ bool GameStateNative::spend_credits(int amount) {
 }
 
 bool GameStateNative::can_afford(int amount) const {
+    if (test_unlimited_sol_enabled) {
+        return true;
+    }
     return sol_credits >= amount;
 }
 
@@ -278,6 +306,10 @@ void GameStateNative::on_wave_cleared() {
 }
 
 bool GameStateNative::try_trigger_flare() {
+    if (test_unlimited_sol_enabled) {
+        emit_signal("flare_used");
+        return true;
+    }
     if (flare_charge <= 0) {
         return false;
     }
@@ -337,7 +369,7 @@ int GameStateNative::get_sol_credits() const { return sol_credits; }
 void GameStateNative::set_sol_credits(int value) { sol_credits = value; }
 int GameStateNative::get_current_wave() const { return current_wave; }
 void GameStateNative::set_current_wave(int value) { current_wave = value; }
-int GameStateNative::get_flare_charge() const { return flare_charge; }
+int GameStateNative::get_flare_charge() const { return test_unlimited_sol_enabled ? 1 : flare_charge; }
 void GameStateNative::set_flare_charge(int value) { flare_charge = value; }
 int GameStateNative::get_waves_since_last_flare() const { return waves_since_last_flare; }
 void GameStateNative::set_waves_since_last_flare(int value) { waves_since_last_flare = value; }
@@ -354,6 +386,7 @@ double GameStateNative::get_music_volume() const { return music_volume; }
 bool GameStateNative::get_tutorial_completed() const { return tutorial_completed; }
 bool GameStateNative::get_screen_shake_enabled() const { return screen_shake_enabled; }
 bool GameStateNative::get_auto_start_waves_enabled() const { return auto_start_waves_enabled; }
+bool GameStateNative::get_test_unlimited_sol_enabled() const { return test_unlimited_sol_enabled; }
 bool GameStateNative::get_music_changed_by_user_this_session() const { return music_changed_by_user_this_session; }
 int GameStateNative::get_game_phase() const { return game_phase; }
 void GameStateNative::set_game_phase(int value) { game_phase = value; }

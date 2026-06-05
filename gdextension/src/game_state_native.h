@@ -34,6 +34,9 @@ public:
     void set_tutorial_completed(bool completed = true);
     void set_screen_shake_enabled(bool enabled);
     void set_auto_start_waves_enabled(bool enabled);
+    void enable_test_run(int start_wave);
+    void clear_test_run();
+    int consume_test_start_wave();
     void damage_sun(double amount);
     int get_luminosity_percent() const;
     void add_credits(int amount);
@@ -82,6 +85,7 @@ public:
     bool get_tutorial_completed() const;
     bool get_screen_shake_enabled() const;
     bool get_auto_start_waves_enabled() const;
+    bool get_test_unlimited_sol_enabled() const;
     bool get_music_changed_by_user_this_session() const;
     int get_game_phase() const;
     void set_game_phase(int value);
@@ -105,6 +109,8 @@ private:
     bool tutorial_completed = false;
     bool screen_shake_enabled = true;
     bool auto_start_waves_enabled = false;
+    bool test_unlimited_sol_enabled = false;
+    int pending_test_start_wave = 0;
     bool music_changed_by_user_this_session = false;
     int game_phase = MENU;
 

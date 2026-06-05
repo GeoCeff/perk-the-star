@@ -97,6 +97,9 @@ var wave_library: RefCounted
 var selected_tower: String = "photon_splitter"
 var managed_tower_ring: int = -1
 var managed_tower_slot: int = -1
+var pending_test_start_wave: int = 0
+var prime_briefing_visible: bool = false
+var prime_briefing_wave_data: Dictionary = {}
 
 var game_hud: CanvasLayer
 var tutorial_layer: CanvasLayer
@@ -171,6 +174,10 @@ func _ready() -> void:
 	GameState.reset_state()
 	GameState.load_audio_settings()
 	GameState.ensure_music_audible()
+	if GameState.has_method("consume_test_start_wave"):
+		pending_test_start_wave = int(GameState.call("consume_test_start_wave"))
+		if pending_test_start_wave > 0:
+			GameState.current_wave = clampi(pending_test_start_wave - 1, 0, MAX_WAVES - 1)
 	MusicManager.stop_music()
 	if not GameState.music_settings_changed.is_connected(_on_music_settings_changed):
 		GameState.music_settings_changed.connect(_on_music_settings_changed)
@@ -181,7 +188,11 @@ func _ready() -> void:
 	_build_ui()
 	_refresh_next_wave_preview()
 	_update_ui()
-	call_deferred("_maybe_show_tutorial")
+	if pending_test_start_wave > 0:
+		_set_message("Test mode armed: unlimited Sol Credits. Click Start Wave when ready.", 4.0)
+		_update_ui()
+	else:
+		call_deferred("_maybe_show_tutorial")
 	set_process(true)
 	queue_redraw()
 
@@ -220,6 +231,19 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if tutorial_overlay != null:
 		return
+	if prime_briefing_visible:
+		if event is InputEventMouseButton:
+			var briefing_mouse: InputEventMouseButton = event as InputEventMouseButton
+			if briefing_mouse.pressed and briefing_mouse.button_index == MOUSE_BUTTON_LEFT:
+				_confirm_prime_briefing()
+				get_viewport().set_input_as_handled()
+			return
+		if event is InputEventKey:
+			var briefing_key: InputEventKey = event as InputEventKey
+			if briefing_key.pressed and not briefing_key.echo and (briefing_key.keycode == KEY_ENTER or briefing_key.keycode == KEY_KP_ENTER or briefing_key.keycode == KEY_SPACE):
+				_confirm_prime_briefing()
+				get_viewport().set_input_as_handled()
+			return
 
 	if event is InputEventMouseMotion and view_controller.panning:
 		var motion: InputEventMouseMotion = event as InputEventMouseMotion
@@ -293,6 +317,7 @@ func _place_tower_from_screen_position(screen_position: Vector2) -> void:
 	var cost: int = GameState.get_tower_cost(selected_tower)
 	if not GameState.spend_credits(cost):
 		_play_sfx("ui_insufficient_sol", 0.18)
+		_show_insufficient_sol_feedback()
 		_set_message("Need %d Sol Credits for %s." % [cost, _tower_config(selected_tower)["label"]], 2.0)
 		return
 
@@ -325,6 +350,7 @@ func _try_slingshot_from_screen_position(screen_position: Vector2) -> bool:
 		return false
 	if not GameState.spend_credits(SLINGSHOT_COST):
 		_play_sfx("ui_insufficient_sol", 0.18)
+		_show_insufficient_sol_feedback()
 		_set_message("Need %d Sol Credits for Helios Slingshot Shot." % SLINGSHOT_COST, 2.0)
 		_update_ui()
 		return true
@@ -387,6 +413,7 @@ func _select_tower_by_hotkey(index: int) -> bool:
 		return true
 	if not GameState.can_afford(cost):
 		_play_sfx("ui_insufficient_sol", 0.18)
+		_show_insufficient_sol_feedback()
 		_set_message("Need %d Sol Credits for %s." % [cost, _tower_config(tower_type)["label"]], 1.6)
 		return true
 	_select_tower(tower_type)
@@ -436,6 +463,7 @@ func _draw() -> void:
 
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_draw_wave_banner(viewport_size)
+	_draw_prime_briefing(viewport_size)
 	if GameState.game_phase == GameState.GAME_OVER:
 		draw_rect(Rect2(Vector2.ZERO, viewport_size), Color(0.0, 0.0, 0.0, 0.34), true)
 	elif GameState.game_phase == GameState.VICTORY:
@@ -629,6 +657,46 @@ func _draw_wave_banner(viewport_size: Vector2) -> void:
 			13,
 			Color(0.90, 0.96, 1.0, 0.90 * alpha)
 		)
+
+
+func _draw_prime_briefing(viewport_size: Vector2) -> void:
+	if not prime_briefing_visible:
+		return
+	draw_rect(Rect2(Vector2.ZERO, viewport_size), Color(0.0, 0.0, 0.0, 0.48), true)
+	var width: float = minf(viewport_size.x - 48.0, 760.0)
+	var height: float = 330.0
+	var rect: Rect2 = Rect2((viewport_size - Vector2(width, height)) * 0.5, Vector2(width, height))
+	var accent: Color = Color(1.0, 0.20, 0.10, 0.96)
+
+	draw_rect(rect.grow(6.0), Color(0.0, 0.0, 0.0, 0.55), true)
+	draw_rect(rect, Color(0.004, 0.012, 0.022, 0.96), true)
+	draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.84), false, 2.0)
+	draw_line(rect.position + Vector2(22.0, 58.0), rect.position + Vector2(rect.size.x - 22.0, 58.0), Color(1.0, 0.78, 0.24, 0.55), 1.5)
+	if end_title_font != null:
+		draw_string(end_title_font, rect.position + Vector2(0.0, 38.0), "ASTROPHAGE PRIME IS COMING", HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, 21, Color(1.0, 0.78, 0.24, 1.0))
+	if end_body_font == null:
+		return
+	var lines: Array[String] = [
+		"SHELL: Armored carapace ignores normal fire. Use Bio-Lab to crack it open.",
+		"ACTIVE: Exposed Prime takes full damage. Stack Helios, Tardigrade, slows, and focused fire.",
+		"FRENZY: At low health it accelerates, changes form, and spawns Drifters until destroyed.",
+		"Build before you press Start. Click, Space, or Enter to begin Wave 12."
+	]
+	var y: float = rect.position.y + 96.0
+	for i in range(lines.size()):
+		var color: Color = Color(0.90, 0.96, 1.0, 0.94)
+		if i == 0:
+			color = Color(1.0, 0.54, 0.36, 0.96)
+		elif i == 1:
+			color = Color(0.56, 1.0, 0.62, 0.96)
+		elif i == 2:
+			color = Color(1.0, 0.22, 0.16, 0.96)
+		draw_string(end_body_font, rect.position + Vector2(42.0, y), lines[i], HORIZONTAL_ALIGNMENT_LEFT, rect.size.x - 84.0, 15, color)
+		y += 48.0
+	var button_rect: Rect2 = Rect2(Vector2(rect.position.x + rect.size.x * 0.5 - 110.0, rect.position.y + rect.size.y - 58.0), Vector2(220.0, 38.0))
+	draw_rect(button_rect, Color(0.020, 0.052, 0.078, 0.96), true)
+	draw_rect(button_rect, Color(1.0, 0.78, 0.24, 0.82), false, 1.5)
+	draw_string(end_title_font, button_rect.position + Vector2(0.0, 25.0), "BEGIN PRIME WAVE", HORIZONTAL_ALIGNMENT_CENTER, button_rect.size.x, 12, Color(0.96, 0.99, 1.0, 1.0))
 
 
 func _load_assets() -> void:
@@ -972,6 +1040,34 @@ func _on_start_wave_pressed() -> void:
 		_set_message("Could not load wave_%02d.json." % wave_number, 3.0)
 		return
 
+	if wave_number == 12 and not prime_briefing_visible and prime_briefing_wave_data.is_empty():
+		prime_briefing_visible = true
+		prime_briefing_wave_data = current_wave_data
+		_show_wave_banner("ASTROPHAGE PRIME IS COMING", "Read the phase briefing before committing.", Color(1.0, 0.14, 0.08), 4.0)
+		_set_message("Prime briefing open. Click, Space, or Enter to begin Wave 12.", 4.0)
+		_play_sfx("clash_incoming", 1.0)
+		_update_ui()
+		queue_redraw()
+		return
+
+	_begin_wave(wave_number, current_wave_data)
+
+
+func _confirm_prime_briefing() -> void:
+	if not prime_briefing_visible:
+		return
+	prime_briefing_visible = false
+	var wave_data: Dictionary = prime_briefing_wave_data
+	prime_briefing_wave_data = {}
+	if wave_data.is_empty():
+		wave_data = _wave_load(12)
+	_begin_wave(12, wave_data)
+
+
+func _begin_wave(wave_number: int, wave_data: Dictionary) -> void:
+	if wave_data.is_empty():
+		return
+	current_wave_data = wave_data
 	GameState.current_wave = wave_number
 	GameState.set_phase(GameState.WAVE_ACTIVE)
 	_clear_wave_preview()
@@ -1000,6 +1096,11 @@ func _on_auto_start_toggled(enabled: bool) -> void:
 
 func _on_ui_hovered() -> void:
 	_play_sfx("ui_hover", 0.05)
+
+
+func _show_insufficient_sol_feedback() -> void:
+	if game_hud != null and game_hud.has_method("play_insufficient_sol_feedback"):
+		game_hud.call("play_insufficient_sol_feedback")
 
 
 func _on_menu_pressed() -> void:
@@ -1053,6 +1154,7 @@ func _on_tower_upgrade_requested(ring_index: int, slot_index: int) -> void:
 	var upgrade_cost: int = _tower_upgrade_cost(tower)
 	if not GameState.spend_credits(upgrade_cost):
 		_play_sfx("ui_insufficient_sol", 0.18)
+		_show_insufficient_sol_feedback()
 		_set_message("Need %d Sol Credits to upgrade %s." % [upgrade_cost, _tower_config(str(tower["type"]))["label"]], 2.0)
 		_update_ui()
 		return
@@ -1798,6 +1900,11 @@ func _spawn_enemy(variant: String, spawn_pos = null) -> void:
 		"frenzy_timer": 1.5,
 		"prime_phase": 0,
 	})
+	if key == "prime":
+		_show_wave_banner("ASTROPHAGE PRIME IS COMING", "Shell locked. Bio-Lab must crack the carapace.", Color(1.0, 0.12, 0.08), 5.0)
+		_set_message("Astrophage Prime has entered the field. Break the shell with Bio-Lab.", 5.0)
+		_play_sfx("clash_incoming", 1.0)
+		_update_ui()
 
 
 func _find_target_for_tower(tower: Dictionary) -> int:
@@ -2922,15 +3029,19 @@ func _enemy_animation_texture(enemy: Dictionary):
 	if frames.is_empty():
 		return null
 
-	var fps: float = 8.0 if state == "move" else 4.0
+	var fps: float = _enemy_animation_fps(variant, state)
 	var anim_time: float = Time.get_ticks_msec() / 1000.0 + float(enemy.get("anim_offset", 0.0))
 	var frame_index: int = int(floor(anim_time * fps)) % frames.size()
 	return frames[frame_index]
 
 
 func _enemy_animation_state(enemy: Dictionary) -> String:
-	if str(enemy.get("variant", "")) == "prime" and int(enemy.get("prime_phase", 0)) >= 2:
-		return "active"
+	if str(enemy.get("variant", "")) == "prime":
+		var phase: int = int(enemy.get("prime_phase", 0))
+		if phase >= 2:
+			return "frenzy"
+		if phase == 1:
+			return "active"
 	if GameState.game_phase == GameState.WAVE_ACTIVE and float(enemy.get("speed", 0.0)) > 0.0:
 		return "move"
 	return "idle"
@@ -2947,9 +3058,24 @@ func _enemy_animation_frames(variant: String, state: String) -> Array:
 	return []
 
 
+func _enemy_animation_fps(variant: String, state: String) -> float:
+	if variant == "prime":
+		if state == "frenzy":
+			return 9.0
+		if state == "active":
+			return 6.5
+		if state == "move":
+			return 5.5
+	return 8.0 if state == "move" else 4.0
+
+
 func _enemy_sprite_draw_angle(enemy: Dictionary, variant: String) -> float:
 	var move_angle: float = float(enemy.get("sprite_angle", enemy.get("move_angle", 0.0)))
 	var base_angle: float = float(ENEMY_ANIMATION_BASE_ANGLES.get(variant, 0.0))
+	if variant == "prime":
+		var state: String = _enemy_animation_state(enemy)
+		if state == "active" or state == "frenzy":
+			base_angle = PI * 0.5
 	return move_angle - base_angle
 
 

@@ -1,9 +1,446 @@
 [gd_scene format=3 uid="uid://cdqloioshs0p2"]
 
 [ext_resource type="Texture2D" uid="uid://c70g8b74fpkwt" path="res://assets/sprites/backgrounds/menu_nebula.png" id="2_ekxnf"]
+[ext_resource type="FontFile" uid="uid://dhtqtbey77vas" path="res://assets/fonts/Kenney Future.ttf" id="2_tbmy8"]
+[ext_resource type="FontFile" uid="uid://bphrpcs3a6fms" path="res://assets/fonts/Electrolize-Regular.ttf" id="3_jk1qb"]
+[ext_resource type="FontFile" uid="uid://duausbxjtbah6" path="res://assets/fonts/Kenney Future Narrow.ttf" id="4_5dd4i"]
+[ext_resource type="Texture2D" uid="uid://8esi8gciwty7" path="res://assets/ui/icons/icon_play.png" id="5_lgwnu"]
+[ext_resource type="Texture2D" uid="uid://c4rvrlktu7b7q" path="res://assets/ui/icons/icon_codex.png" id="6_flqon"]
+[ext_resource type="Texture2D" uid="uid://bc5265q8mnp70" path="res://assets/ui/icons/icon_settings.png" id="7_rcqid"]
+[ext_resource type="Texture2D" uid="uid://bbq21rshirdgk" path="res://assets/ui/icons/icon_back.png" id="8_1ajci"]
+
+[sub_resource type="Shader" id="Shader_7b55j"]
+code = "
+shader_type canvas_item;
+
+uniform float drift_strength = 0.024;
+uniform float glow_strength = 0.46;
+uniform float dim_strength = 0.34;
+
+void fragment() {
+    float t = TIME;
+    vec2 slow_drift = vec2(sin(t * 0.055) * drift_strength + t * 0.0022, cos(t * 0.047) * drift_strength * 0.70);
+    vec2 cross_drift = vec2(cos(t * 0.038) * drift_strength * 0.62, sin(t * 0.052) * drift_strength * 0.82);
+    vec2 uv_a = fract(UV + slow_drift);
+    vec2 uv_b = fract((UV - vec2(0.5)) * 1.045 + vec2(0.5) - cross_drift);
+    vec4 base = texture(TEXTURE, uv_a);
+    vec4 haze = texture(TEXTURE, uv_b);
+    float wave = sin(UV.x * 8.0 + UV.y * 5.0 + t * 0.78) * 0.5 + 0.5;
+    float pulse = sin(t * 0.58) * 0.5 + 0.5;
+    float ember = sin(UV.x * 18.0 - UV.y * 11.0 + t * 0.45) * 0.5 + 0.5;
+    float vignette = 1.0 - smoothstep(0.18, 0.86, distance(UV, vec2(0.5)));
+    vec3 color = mix(base.rgb, haze.rgb, 0.24);
+    color += vec3(0.02, 0.34, 0.42) * wave * glow_strength * vignette;
+    color += vec3(0.24, 0.10, 0.03) * ember * glow_strength * 0.34;
+    color *= 1.0 - dim_strength * (1.0 - wave) * (0.46 + pulse * 0.34);
+    color += vec3(0.02, 0.08, 0.10) * pulse * glow_strength * 0.16;
+    COLOR = vec4(color, base.a);
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5pajh"]
+shader = SubResource("Shader_7b55j")
+shader_parameter/drift_strength = 0.024
+shader_parameter/glow_strength = 0.46
+shader_parameter/dim_strength = 0.34
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j7ex8"]
+content_margin_left = 22.0
+content_margin_top = 18.0
+content_margin_right = 22.0
+content_margin_bottom = 18.0
+bg_color = Color(0.006, 0.012, 0.024, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.22, 0.84, 0.94, 0.82)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a8gd2"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.02, 0.052, 0.078, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.78, 0.26, 0.88)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hstxw"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.052, 0.112, 0.138, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.78, 0.26, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8egab"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.035, 0.085, 0.12, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.78, 0.26, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gw5y6"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.018, 0.026, 0.038, 0.78)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.28, 0.34, 0.7)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_svtp6"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.015, 0.072, 0.092, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.78, 0.26, 0.88)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1dfpl"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.02, 0.052, 0.078, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.22, 0.84, 0.94, 0.82)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qywvv"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.052, 0.112, 0.138, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.84, 0.94, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3wgol"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.035, 0.085, 0.12, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.84, 0.94, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1acrt"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.018, 0.026, 0.038, 0.78)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.28, 0.34, 0.7)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vr8o3"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.015, 0.072, 0.092, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.78, 0.26, 0.88)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1a85y"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.02, 0.052, 0.078, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.22, 0.84, 0.94, 0.82)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hl5e0"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.052, 0.112, 0.138, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.84, 0.94, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_engjn"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.035, 0.085, 0.12, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.84, 0.94, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6h3lr"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.018, 0.026, 0.038, 0.78)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.28, 0.34, 0.7)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dj67d"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.015, 0.072, 0.092, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.78, 0.26, 0.88)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6vcge"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.02, 0.052, 0.078, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.22, 0.84, 0.94, 0.82)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ip0br"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.052, 0.112, 0.138, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.84, 0.94, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xyero"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.035, 0.085, 0.12, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.84, 0.94, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tcusk"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.018, 0.026, 0.038, 0.78)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.28, 0.34, 0.7)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4puye"]
+content_margin_left = 16.0
+content_margin_top = 9.0
+content_margin_right = 16.0
+content_margin_bottom = 9.0
+bg_color = Color(0.015, 0.072, 0.092, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.78, 0.26, 0.88)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.38)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
 
 [node name="MainMenu" type="MainMenuNative" unique_id=1745890239]
-layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -13,6 +450,8 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="background" type="AnimatedSpaceBackgroundNative" parent="." unique_id=1611998608]
+texture_filter = 4
+material = SubResource("ShaderMaterial_5pajh")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -55,6 +494,7 @@ offset_bottom = 330.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_j7ex8")
 
 [node name="CenterContainer" type="CenterContainer" parent="." unique_id=1974992223]
 layout_mode = 1
@@ -73,6 +513,7 @@ alignment = 1
 [node name="title_label" type="Label" parent="CenterContainer/menu_box" unique_id=715245709]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.88, 0.36, 1)
+theme_override_fonts/font = ExtResource("2_tbmy8")
 theme_override_font_sizes/font_size = 76
 text = "PERK THE STAR"
 horizontal_alignment = 1
@@ -80,6 +521,7 @@ horizontal_alignment = 1
 [node name="sub_label" type="Label" parent="CenterContainer/menu_box" unique_id=2090243063]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.94, 1, 1)
+theme_override_fonts/font = ExtResource("2_tbmy8")
 theme_override_font_sizes/font_size = 26
 text = "DEFEND THE SUN - SAVE THE SYSTEM"
 horizontal_alignment = 1
@@ -87,6 +529,7 @@ horizontal_alignment = 1
 [node name="tagline_label" type="Label" parent="CenterContainer/menu_box" unique_id=544735199]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.84, 0.92, 1)
+theme_override_fonts/font = ExtResource("3_jk1qb")
 theme_override_font_sizes/font_size = 18
 text = "Defend me, defend me! - Oa ka Perk!"
 horizontal_alignment = 1
@@ -95,8 +538,9 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(760, 136)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.94, 1, 1)
+theme_override_fonts/font = ExtResource("3_jk1qb")
 theme_override_font_sizes/font_size = 18
-text = "Command the Sol Defense Corps in a real-time orbital tower defense game built in C++ with Godot Engine 4.x via GDExtension. Protect the Sun from Astrophage, photosynthetic microorganisms feeding on stellar energy."
+text = "Command the Sol Defense Corps in a real-time orbital tower defense game. Protect the Sun from Astrophage, photosynthetic microorganisms feeding on stellar energy."
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -113,28 +557,91 @@ theme_override_constants/separation = 12
 [node name="btn_play" type="MainMenuPlayButtonNative" parent="CenterContainer/menu_box/button_box" unique_id=470282513]
 custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_focus_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_hover_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.44, 0.52, 0.6, 1)
+theme_override_constants/outline_size = 1
+theme_override_constants/h_separation = 10
+theme_override_fonts/font = ExtResource("4_5dd4i")
 theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_a8gd2")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_hstxw")
+theme_override_styles/hover = SubResource("StyleBoxFlat_8egab")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_gw5y6")
+theme_override_styles/focus = SubResource("StyleBoxFlat_svtp6")
 text = "Start Defense"
+icon = ExtResource("5_lgwnu")
+expand_icon = true
 
 [node name="btn_codex" type="MainMenuCodexButtonNative" parent="CenterContainer/menu_box/button_box" unique_id=915298908]
 custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_focus_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_hover_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.44, 0.52, 0.6, 1)
+theme_override_constants/outline_size = 1
+theme_override_constants/h_separation = 10
+theme_override_fonts/font = ExtResource("4_5dd4i")
 theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_1dfpl")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_qywvv")
+theme_override_styles/hover = SubResource("StyleBoxFlat_3wgol")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_1acrt")
+theme_override_styles/focus = SubResource("StyleBoxFlat_vr8o3")
 text = "Mission Codex"
+icon = ExtResource("6_flqon")
+expand_icon = true
 
 [node name="btn_settings" type="MainMenuSettingsButtonNative" parent="CenterContainer/menu_box/button_box" unique_id=2021492708]
 custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_focus_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_hover_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.44, 0.52, 0.6, 1)
+theme_override_constants/outline_size = 1
+theme_override_constants/h_separation = 10
+theme_override_fonts/font = ExtResource("4_5dd4i")
 theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_1a85y")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_hl5e0")
+theme_override_styles/hover = SubResource("StyleBoxFlat_engjn")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_6h3lr")
+theme_override_styles/focus = SubResource("StyleBoxFlat_dj67d")
 text = "Settings"
+icon = ExtResource("7_rcqid")
+expand_icon = true
 
 [node name="btn_exit" type="MainMenuExitButtonNative" parent="CenterContainer/menu_box/button_box" unique_id=1448773002]
 custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_focus_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_hover_color = Color(0.96, 0.99, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.44, 0.52, 0.6, 1)
+theme_override_constants/outline_size = 1
+theme_override_constants/h_separation = 10
+theme_override_fonts/font = ExtResource("4_5dd4i")
 theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_6vcge")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ip0br")
+theme_override_styles/hover = SubResource("StyleBoxFlat_xyero")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_tcusk")
+theme_override_styles/focus = SubResource("StyleBoxFlat_4puye")
 text = "Exit"
+icon = ExtResource("8_1ajci")
+expand_icon = true
 
 [node name="FrameOrnaments" type="MainMenuFxNative" parent="." unique_id=2030709623]
+draw_drift = false
+draw_frame = true
+frame_target_path = NodePath("../menu_frame")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -144,9 +651,6 @@ offset_right = -2.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-draw_drift = false
-draw_frame = true
-frame_target_path = NodePath("../menu_frame")
 
 [node name="version_label" type="Label" parent="." unique_id=228617138]
 layout_mode = 1
@@ -158,12 +662,13 @@ offset_top = -116.0
 offset_right = 760.0
 offset_bottom = -88.0
 grow_vertical = 0
-theme_override_colors/font_color = Color(0.82, 0.94, 1, 1)
+theme_override_colors/font_color = Color(0.78, 0.9, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
 theme_override_colors/font_outline_color = Color(0.02, 0.12, 0.18, 0.95)
 theme_override_constants/shadow_offset_x = 0
 theme_override_constants/shadow_offset_y = 2
 theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("3_jk1qb")
 theme_override_font_sizes/font_size = 16
 text = "CMSC 21 | C++ / Godot Engine 4.x / GDExtension"
 
@@ -186,6 +691,7 @@ theme_override_colors/font_outline_color = Color(0.02, 0.12, 0.18, 0.95)
 theme_override_constants/shadow_offset_x = 0
 theme_override_constants/shadow_offset_y = 2
 theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("3_jk1qb")
 theme_override_font_sizes/font_size = 16
 text = "Geo Ceff Gabaisen & Dexter Juevesano"
 horizontal_alignment = 2

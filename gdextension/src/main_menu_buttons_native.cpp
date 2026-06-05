@@ -53,6 +53,9 @@ void MainMenuPlayButtonNative::on_pressed() {
 }
 
 void MainMenuPlayButtonNative::start_game() {
+    if (Node* state = get_node_or_null(NodePath("/root/GameState"))) {
+        state->call("clear_test_run");
+    }
     stop_menu_music(this);
     const Error error = get_tree()->change_scene_to_file(game_scene_path);
     if (error != OK) {
