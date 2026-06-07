@@ -51,6 +51,7 @@ private:
     PanelContainer* tutorial_panel = nullptr;
     Label* tutorial_status_label = nullptr;
     Button* tutorial_replay_button = nullptr;
+    Button* credits_button = nullptr;
     PanelContainer* gameplay_panel = nullptr;
     CheckButton* screen_shake_toggle = nullptr;
     Button* test_wave_button = nullptr;

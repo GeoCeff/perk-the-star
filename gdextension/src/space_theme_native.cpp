@@ -23,6 +23,7 @@ constexpr const char* BAR_YELLOW_PATH = "res://assets/ui/kenney/bar_yellow_gloss
 constexpr const char* CURSOR_PATH = "res://assets/ui/kenney/crosshair_blue_a.png";
 constexpr const char* ICON_BACK_PATH = "res://assets/ui/icons/icon_back.png";
 constexpr const char* ICON_CODEX_PATH = "res://assets/ui/icons/icon_codex.png";
+constexpr const char* ICON_CREDITS_PATH = "res://assets/ui/icons/icon_credits.svg";
 constexpr const char* ICON_PLAY_PATH = "res://assets/ui/icons/icon_play.png";
 constexpr const char* ICON_SETTINGS_PATH = "res://assets/ui/icons/icon_settings.png";
 
@@ -46,6 +47,7 @@ void SpaceThemeNative::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_FONT_BUTTON_PATH"), &SpaceThemeNative::get_font_button_path);
     ClassDB::bind_method(D_METHOD("get_ICON_BACK_PATH"), &SpaceThemeNative::get_icon_back_path);
     ClassDB::bind_method(D_METHOD("get_ICON_CODEX_PATH"), &SpaceThemeNative::get_icon_codex_path);
+    ClassDB::bind_method(D_METHOD("get_ICON_CREDITS_PATH"), &SpaceThemeNative::get_icon_credits_path);
     ClassDB::bind_method(D_METHOD("get_ICON_PLAY_PATH"), &SpaceThemeNative::get_icon_play_path);
     ClassDB::bind_method(D_METHOD("get_ICON_SETTINGS_PATH"), &SpaceThemeNative::get_icon_settings_path);
     ClassDB::bind_method(D_METHOD("get_COLOR_PANEL"), &SpaceThemeNative::get_color_panel);
@@ -82,6 +84,7 @@ void SpaceThemeNative::_bind_methods() {
     ADD_PROPERTY(PropertyInfo(Variant::STRING, "FONT_BUTTON_PATH"), "", "get_FONT_BUTTON_PATH");
     ADD_PROPERTY(PropertyInfo(Variant::STRING, "ICON_BACK_PATH"), "", "get_ICON_BACK_PATH");
     ADD_PROPERTY(PropertyInfo(Variant::STRING, "ICON_CODEX_PATH"), "", "get_ICON_CODEX_PATH");
+    ADD_PROPERTY(PropertyInfo(Variant::STRING, "ICON_CREDITS_PATH"), "", "get_ICON_CREDITS_PATH");
     ADD_PROPERTY(PropertyInfo(Variant::STRING, "ICON_PLAY_PATH"), "", "get_ICON_PLAY_PATH");
     ADD_PROPERTY(PropertyInfo(Variant::STRING, "ICON_SETTINGS_PATH"), "", "get_ICON_SETTINGS_PATH");
     ADD_PROPERTY(PropertyInfo(Variant::COLOR, "COLOR_PANEL"), "", "get_COLOR_PANEL");
@@ -103,6 +106,7 @@ String SpaceThemeNative::get_font_display_path() const { return FONT_DISPLAY_PAT
 String SpaceThemeNative::get_font_button_path() const { return FONT_BUTTON_PATH; }
 String SpaceThemeNative::get_icon_back_path() const { return ICON_BACK_PATH; }
 String SpaceThemeNative::get_icon_codex_path() const { return ICON_CODEX_PATH; }
+String SpaceThemeNative::get_icon_credits_path() const { return ICON_CREDITS_PATH; }
 String SpaceThemeNative::get_icon_play_path() const { return ICON_PLAY_PATH; }
 String SpaceThemeNative::get_icon_settings_path() const { return ICON_SETTINGS_PATH; }
 Color SpaceThemeNative::get_color_panel() const { return panel_color(); }

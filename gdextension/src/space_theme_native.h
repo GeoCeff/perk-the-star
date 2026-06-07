@@ -29,6 +29,7 @@ public:
     String get_font_button_path() const;
     String get_icon_back_path() const;
     String get_icon_codex_path() const;
+    String get_icon_credits_path() const;
     String get_icon_play_path() const;
     String get_icon_settings_path() const;
     Color get_color_panel() const;

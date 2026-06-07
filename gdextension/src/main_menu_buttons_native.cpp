@@ -1,7 +1,10 @@
 ﻿#include "main_menu_buttons_native.h"
 
 #include <godot_cpp/classes/node.hpp>
+#include <godot_cpp/classes/packed_scene.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
+#include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/callable.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
@@ -130,6 +133,68 @@ void MainMenuSettingsButtonNative::open_settings_scene() {
     if (error != OK) {
         set_disabled(false);
         UtilityFunctions::push_error(vformat("MainMenuSettingsButton: could not open settings scene at %s. Error code: %s", settings_scene_path, static_cast<int>(error)));
+    }
+}
+
+void MainMenuCreditsButtonNative::_bind_methods() {
+    ClassDB::bind_method(D_METHOD("set_credits_scene_path", "path"), &MainMenuCreditsButtonNative::set_credits_scene_path);
+    ClassDB::bind_method(D_METHOD("get_credits_scene_path"), &MainMenuCreditsButtonNative::get_credits_scene_path);
+    ClassDB::bind_method(D_METHOD("set_credits_return_scene_path", "path"), &MainMenuCreditsButtonNative::set_credits_return_scene_path);
+    ClassDB::bind_method(D_METHOD("get_credits_return_scene_path"), &MainMenuCreditsButtonNative::get_credits_return_scene_path);
+    ClassDB::bind_method(D_METHOD("_on_pressed"), &MainMenuCreditsButtonNative::on_pressed);
+    ClassDB::bind_method(D_METHOD("_open_credits_scene"), &MainMenuCreditsButtonNative::open_credits_scene);
+    ADD_PROPERTY(PropertyInfo(Variant::STRING, "credits_scene_path", PROPERTY_HINT_FILE, "*.tscn"), "set_credits_scene_path", "get_credits_scene_path");
+    ADD_PROPERTY(PropertyInfo(Variant::STRING, "credits_return_scene_path", PROPERTY_HINT_FILE, "*.tscn"), "set_credits_return_scene_path", "get_credits_return_scene_path");
+}
+
+void MainMenuCreditsButtonNative::_ready() {
+    add_to_group("main_menu_buttons");
+    connect("pressed", Callable(this, "_on_pressed"));
+}
+
+void MainMenuCreditsButtonNative::set_credits_scene_path(const String& path) {
+    credits_scene_path = path;
+}
+
+String MainMenuCreditsButtonNative::get_credits_scene_path() const {
+    return credits_scene_path;
+}
+
+void MainMenuCreditsButtonNative::set_credits_return_scene_path(const String& path) {
+    credits_return_scene_path = path;
+}
+
+String MainMenuCreditsButtonNative::get_credits_return_scene_path() const {
+    return credits_return_scene_path;
+}
+
+void MainMenuCreditsButtonNative::on_pressed() {
+    set_disabled(true);
+    call_deferred("_open_credits_scene");
+}
+
+void MainMenuCreditsButtonNative::open_credits_scene() {
+    Ref<PackedScene> packed_scene = ResourceLoader::get_singleton()->load(credits_scene_path);
+    if (packed_scene.is_null()) {
+        set_disabled(false);
+        UtilityFunctions::push_error(vformat("MainMenuCreditsButton: could not load credits scene at %s.", credits_scene_path));
+        return;
+    }
+    Node* credits_scene = packed_scene->instantiate();
+    if (credits_scene == nullptr) {
+        set_disabled(false);
+        UtilityFunctions::push_error(vformat("MainMenuCreditsButton: could not instantiate credits scene at %s.", credits_scene_path));
+        return;
+    }
+    if (credits_scene->has_method("set_return_scene_path")) {
+        credits_scene->call("set_return_scene_path", credits_return_scene_path);
+    }
+    Window* root = get_tree()->get_root();
+    Node* current_scene = get_tree()->get_current_scene();
+    root->add_child(credits_scene);
+    get_tree()->set_current_scene(credits_scene);
+    if (current_scene != nullptr) {
+        current_scene->queue_free();
     }
 }
 

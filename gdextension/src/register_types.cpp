@@ -21,6 +21,7 @@
 #include "tutorial_overlay_native.h"
 #include "music_manager_native.h"
 #include "codex_native.h"
+#include "credits_overlay_native.h"
 #include "game_state_native.h"
 #include "game_catalog_native.h"
 #include "space_theme_native.h"
@@ -50,6 +51,7 @@ void initialize_perk_module(ModuleInitializationLevel p_level) {
     ClassDB::register_class<MainMenuPlayButtonNative>();
     ClassDB::register_class<MainMenuCodexButtonNative>();
     ClassDB::register_class<MainMenuSettingsButtonNative>();
+    ClassDB::register_class<MainMenuCreditsButtonNative>();
     ClassDB::register_class<MainMenuExitButtonNative>();
     ClassDB::register_class<MainMenuMusicToggleNative>();
     ClassDB::register_class<MainMenuMusicVolumeSliderNative>();
@@ -63,6 +65,7 @@ void initialize_perk_module(ModuleInitializationLevel p_level) {
     ClassDB::register_class<TutorialOverlayNative>();
     ClassDB::register_class<MusicManagerNative>();
     ClassDB::register_class<CodexNative>();
+    ClassDB::register_class<CreditsOverlayNative>();
     ClassDB::register_class<GameStateNative>();
     ClassDB::register_class<GameCatalogNative>();
     ClassDB::register_class<SpaceThemeNative>();

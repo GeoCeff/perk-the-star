@@ -41,6 +41,7 @@ void MainMenuNative::_ready() {
     btn_play = Object::cast_to<Button>(get_node_or_null(NodePath("CenterContainer/menu_box/button_box/btn_play")));
     btn_codex = Object::cast_to<Button>(get_node_or_null(NodePath("CenterContainer/menu_box/button_box/btn_codex")));
     btn_settings = Object::cast_to<Button>(get_node_or_null(NodePath("CenterContainer/menu_box/button_box/btn_settings")));
+    btn_credits = Object::cast_to<Button>(get_node_or_null(NodePath("CenterContainer/menu_box/button_box/btn_credits")));
     btn_exit = Object::cast_to<Button>(get_node_or_null(NodePath("CenterContainer/menu_box/button_box/btn_exit")));
     menu_frame = Object::cast_to<PanelContainer>(get_node_or_null(NodePath("menu_frame")));
     title_label = Object::cast_to<Label>(get_node_or_null(NodePath("CenterContainer/menu_box/title_label")));
@@ -109,6 +110,7 @@ void MainMenuNative::apply_menu_style() {
     theme->call("apply_primary_button", btn_play, theme->get("ICON_PLAY_PATH"));
     theme->call("apply_secondary_button", btn_codex, theme->get("ICON_CODEX_PATH"));
     theme->call("apply_secondary_button", btn_settings, theme->get("ICON_SETTINGS_PATH"));
+    theme->call("apply_secondary_button", btn_credits, theme->get("ICON_CREDITS_PATH"));
     theme->call("apply_danger_button", btn_exit, theme->get("ICON_BACK_PATH"));
 
     Array buttons = get_tree()->get_nodes_in_group("main_menu_buttons");

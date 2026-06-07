@@ -56,6 +56,26 @@ private:
     void open_settings_scene();
 };
 
+class MainMenuCreditsButtonNative : public Button {
+    GDCLASS(MainMenuCreditsButtonNative, Button)
+
+protected:
+    static void _bind_methods();
+
+public:
+    void _ready() override;
+    void set_credits_scene_path(const String& path);
+    String get_credits_scene_path() const;
+    void set_credits_return_scene_path(const String& path);
+    String get_credits_return_scene_path() const;
+
+private:
+    String credits_scene_path = "res://scenes/ui/credits.tscn";
+    String credits_return_scene_path = "res://scenes/main_menu.tscn";
+    void on_pressed();
+    void open_credits_scene();
+};
+
 class MainMenuExitButtonNative : public Button {
     GDCLASS(MainMenuExitButtonNative, Button)
 

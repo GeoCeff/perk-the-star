@@ -102,6 +102,7 @@ void SettingsOverlayNative::_ready() {
     settings_scroll = node_as<ScrollContainer>(this, "settings_panel/settings_margin/settings_box/settings_scroll");
     settings_body = node_as<RichTextLabel>(this, "settings_panel/settings_margin/settings_box/settings_scroll/settings_body");
     music_volume_slider = node_as<HSlider>(this, "settings_panel/settings_margin/settings_box/audio_panel/audio_margin/audio_box/volume_row/music_volume_slider");
+    credits_button = node_as<Button>(this, "settings_panel/settings_margin/settings_box/credits_button");
 
     set_visible(true);
     if (play_menu_music_on_ready) {
@@ -349,6 +350,7 @@ void SettingsOverlayNative::apply_style() {
     apply_check_button(screen_shake_toggle);
     theme->call("apply_secondary_button", test_wave_button);
     theme->call("apply_secondary_button", tutorial_replay_button);
+    theme->call("apply_secondary_button", credits_button, theme->get("ICON_CREDITS_PATH"));
     theme->call("apply_secondary_button", test_modal_cancel_button);
     theme->call("apply_primary_button", test_modal_confirm_button);
     theme->call("apply_secondary_button", close_button, theme->get("ICON_BACK_PATH"));
@@ -364,6 +366,9 @@ void SettingsOverlayNative::apply_style() {
     }
     if (test_wave_button != nullptr) {
         test_wave_button->add_theme_font_size_override("font_size", 13);
+    }
+    if (credits_button != nullptr) {
+        credits_button->add_theme_font_size_override("font_size", 13);
     }
     if (test_modal_title != nullptr) {
         test_modal_title->add_theme_color_override("font_color", theme->get("COLOR_GOLD"));

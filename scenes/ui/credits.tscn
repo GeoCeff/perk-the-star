@@ -1,0 +1,111 @@
+[gd_scene load_steps=2 format=3 uid="uid://byvk5kc13wcr7"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/backgrounds/menu_nebula.png" id="1_bg"]
+
+[node name="CreditsOverlay" type="CreditsOverlayNative"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="background" type="AnimatedSpaceBackgroundNative" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.005, 0.008, 0.016, 0.72)
+
+[node name="SpaceLifeLayer" type="MainMenuFxNative" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="credits_panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -760.0
+offset_top = -470.0
+offset_right = 760.0
+offset_bottom = 470.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="credits_margin" type="MarginContainer" parent="credits_panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 38
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 38
+
+[node name="credits_box" type="VBoxContainer" parent="credits_panel/credits_margin"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="credits_title" type="Label" parent="credits_panel/credits_margin/credits_box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.36, 1)
+theme_override_font_sizes/font_size = 52
+text = "Credits"
+horizontal_alignment = 1
+
+[node name="credits_subtitle" type="Label" parent="credits_panel/credits_margin/credits_box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.84, 0.92, 1)
+theme_override_font_sizes/font_size = 24
+text = "Project creators, class dedication, and asset attributions."
+horizontal_alignment = 1
+
+[node name="credits_scroll" type="ScrollContainer" parent="credits_panel/credits_margin/credits_box"]
+custom_minimum_size = Vector2(1400, 660)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="credits_body" type="RichTextLabel" parent="credits_panel/credits_margin/credits_box/credits_scroll"]
+custom_minimum_size = Vector2(1340, 0)
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+autowrap_mode = 3
+
+[node name="credits_close" type="SettingsOverlayCloseButtonNative" parent="credits_panel/credits_margin/credits_box"]
+custom_minimum_size = Vector2(280, 52)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 18
+text = "Close"
+
+[node name="FrameOrnaments" type="MainMenuFxNative" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+draw_drift = false
+draw_frame = true
+frame_target_path = NodePath("../credits_panel")

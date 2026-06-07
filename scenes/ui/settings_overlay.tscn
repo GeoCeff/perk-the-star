@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://cicrgf64sxa6b"]
+[gd_scene load_steps=3 format=3 uid="uid://cicrgf64sxa6b"]
 
 [ext_resource type="Texture2D" path="res://assets/sprites/backgrounds/menu_nebula.png" id="5_bg"]
+[ext_resource type="Texture2D" uid="uid://dkwmyvmnmwvcr" path="res://assets/ui/icons/icon_credits.svg" id="6_credits"]
 
 [node name="SettingsOverlay" type="SettingsOverlayNative"]
 layout_mode = 3
@@ -132,6 +133,16 @@ theme_override_colors/font_color = Color(0.9, 0.94, 1, 1)
 theme_override_font_sizes/font_size = 16
 text = "72%"
 vertical_alignment = 1
+
+[node name="credits_button" type="MainMenuCreditsButtonNative" parent="settings_panel/settings_margin/settings_box"]
+custom_minimum_size = Vector2(220, 38)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 13
+text = "Credits"
+icon = ExtResource("6_credits")
+expand_icon = true
+credits_return_scene_path = "res://scenes/ui/settings_overlay.tscn"
 
 [node name="settings_scroll" type="ScrollContainer" parent="settings_panel/settings_margin/settings_box"]
 custom_minimum_size = Vector2(860, 340)

@@ -31,7 +31,10 @@ env.Append(LIBS=[
     f"libgodot-cpp.{platform}.{target}.{arch}"
 ])
 
-sources = Glob("gdextension/src/*.cpp")
+variant_src_dir = "build/gdextension/src"
+VariantDir(variant_src_dir, "gdextension/src", duplicate=0)
+
+sources = Glob(f"{variant_src_dir}/*.cpp")
 
 env.SharedLibrary(
     target="game/bin/perk_the_star",

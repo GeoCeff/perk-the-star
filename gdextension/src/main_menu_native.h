@@ -23,6 +23,7 @@ private:
     Button* btn_play = nullptr;
     Button* btn_codex = nullptr;
     Button* btn_settings = nullptr;
+    Button* btn_credits = nullptr;
     Button* btn_exit = nullptr;
     PanelContainer* menu_frame = nullptr;
     Label* title_label = nullptr;
