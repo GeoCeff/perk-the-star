@@ -6,6 +6,8 @@ The project now keeps most reusable systems in C++ GDExtension and leaves `scrip
 
 ## Run
 
+**Fresh clone:** build the native extension before running the project. The local `godot-cpp/` dependency and generated `game/bin/perk_the_star.dll` are not included in Git. See [Native Extension](#native-extension).
+
 1. Open this repository root in Godot, not the nested `game/` folder.
 2. Run `project.godot`.
 3. Click Start Defense, then pick Campaign, Boss Rush, Daily Seed, Draft Defense, Endless, or No-Flare Challenge.
@@ -70,6 +72,8 @@ Use the Windows Desktop preset in Godot. Generated `.exe`, `.pck`, video, PDF, a
 ## Native Extension
 
 The GDExtension source lives in `gdextension/src`. Godot loads it from `game/bin/perk_the_star.gdextension`, which points to `game/bin/perk_the_star.dll`.
+
+The rebuild command expects the `godot-cpp` headers, generated headers, and matching Windows debug x86_64 binding library to exist already. `SConstruct` builds the game DLL; it does not build `godot-cpp`.
 
 To rebuild on Windows:
 
